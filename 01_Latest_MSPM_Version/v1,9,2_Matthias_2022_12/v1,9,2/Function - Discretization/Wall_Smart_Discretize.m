@@ -10,6 +10,7 @@ function [x] = Wall_Smart_Discretize(Body,Mesher,Orient)
     minimum_thickness = Mesher.Gas_Minimum_Size;
     % Derived Values
     shifti = [];
+    % check orientation of Body and read the correct dimensions
     switch Orient
       case enumOrient.Vertical
         [~,~,inside_dim, outside_dim] = Body.limits(Orient);
@@ -25,52 +26,50 @@ function [x] = Wall_Smart_Discretize(Body,Mesher,Orient)
         end
     end
     Distance = outside_dim - inside_dim;
-    Transition_Distance = Distance * 0.15;
+    Transition_Distance = Distance * 0.15; % the edges of the Body are further subdivided (transition region)
     x = inside_dim;
-    thickness = Transition_Distance / double(N_entrance);
+    thickness = Transition_Distance / double(N_entrance); % thickness of edge subdivisions
+    % if even (thinner) edge subdivisions are too thick, cap all subdivisions to the max thickness
     if thickness > maximum_thickness
       N = ceil(Distance/maximum_thickness);
       x = linspace(inside_dim,outside_dim,N+1);
     else
+      % if edge subdivisions are too thin, and there is more than one subdivision,
+      % decrement number of subdivisions until subdivisions are not too thin, or there is only one subdivision        
       while thickness < minimum_thickness && N_entrance > 1
         N_entrance = N_entrance - 1;
         thickness = Transition_Distance / double(N_entrance);
       end
+      % if there is only one subdivision
       if N_entrance == 1
           thickness = min(minimum_thickness, Distance/2);
-          if Distance/2 - thickness < thickness
-              x = [inside_dim (inside_dim + outside_dim)/2 outside_dim];
+          if Distance < 4*thickness
+              x = [inside_dim, (inside_dim + outside_dim)/2, outside_dim];
+              run_adjust = false;
           else
-              x = [inside_dim inside_dim + thickness];
+              x = [inside_dim, inside_dim + thickness];
               marker = 2;
-              while (x(end) < Distance/2 + inside_dim)
-                thickness = min(maximum_thickness, maximum_growth * thickness);
-                x(end+1) = x(end) + thickness;
-              end
-              % Adjust it at the end
-              Current_Distance = x(end) - x(marker);
-              Expected_Distance = Distance/2 + inside_dim - x(marker);
-              x((marker+1):end) = (x((marker+1):end) - x(marker))*...
-                (Expected_Distance/Current_Distance) + x(marker);
-              % Flip it
-              x = [x outside_dim-(flip(x(1:end-1))-inside_dim)];
+              run_adjust = true;
           end
       else
           for i = 1:N_entrance
             x(end+1) = x(end) + thickness;
           end
           marker = length(x);
-          while (x(end) < Distance/2 + inside_dim)
+          run_adjust = true;
+      end
+      if run_adjust
+        while (x(end) < Distance/2 + inside_dim)
             thickness = min(maximum_thickness, maximum_growth * thickness);
             x(end+1) = x(end) + thickness;
-          end
-          % Adjust it at the end
-          Current_Distance = x(end) - x(marker);
-          Expected_Distance = Distance/2 + inside_dim - x(marker);
-          x((marker+1):end) = (x((marker+1):end) - x(marker))*...
-            (Expected_Distance/Current_Distance) + x(marker);
-          % Flip it
-          x = [x outside_dim-(flip(x(1:end-1))-inside_dim)];
+        end
+        % Adjust it at the end
+        Current_Distance = x(end) - x(marker);
+        Expected_Distance = Distance/2 + inside_dim - x(marker);
+        x((marker+1):end) = (x((marker+1):end) - x(marker))*...
+        (Expected_Distance/Current_Distance) + x(marker);
+        % Flip it
+        x = [x outside_dim-(flip(x(1:end-1))-inside_dim)];
       end
     end
   else
