@@ -7,9 +7,9 @@ classdef Model < handle
         NTheta = 400;       % Number of divisions  400 intervals
         dOmega2 = pi^2/2;   % (Radians/second)^2   32 intervals between 0->2 Hz
         dAppliedForce = 1;  % Newtons              ???
-%%%%%%%%%%%%%%%%%%%%%%% Changed %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%% Changed %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         AnimationLength_s = 12;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         AnimationSpeed_rads = pi;
         MaxFourierNumber = 0.25;
     end
@@ -79,7 +79,7 @@ classdef Model < handle
         showEnvironmentConnections = false;
         showRelations = false;
         
-% Matthias: Advanced Node Display Options        
+        % Matthias: Advanced Node Display Options        
         showInterConnections = false;
         showFacesGas = true;
         showFacesSolid = true;
@@ -95,7 +95,7 @@ classdef Model < handle
         showNodesSAGN = true;
         showNodesSN = true;
         showNodesEN = false;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         % Simulation Options
         showLivePV = true;
@@ -111,7 +111,7 @@ classdef Model < handle
         recordConductionFlux = true;
         showPressureDropAnimation = true;
         recordPressureDrop = true;
-%new
+        %new
         showReynoldsAnimation = true;
         recordReynolds = true;
 
@@ -620,8 +620,8 @@ classdef Model < handle
             % Test and Discretize Groups
             for iGroup = this.Groups
                 if ~iGroup.isDiscretized
-            % Matthias: Fixed below so that 'run' does not need to contain NodeFactor
-            %                     if nargin > 1
+                    % Matthias: Fixed below so that 'run' does not need to contain NodeFactor
+                    %                     if nargin > 1
                     if nargin > 1 
                         if isfield(run,'NodeFactor') && run.NodeFactor ~= 1                        
                             iGroup.discretize(run.NodeFactor);
@@ -1426,7 +1426,7 @@ classdef Model < handle
                     case enumFType.Environment
                         Fc.index = E_count;
                         E_count = E_count - 1;
-            %                     case enumFType.Leak
+                        %                     case enumFType.Leak
                         
                     otherwise % Gas
                         Fc.index = G_count;
@@ -2073,59 +2073,59 @@ classdef Model < handle
                         % Look at the mixed face and determine if it can be
                         % ... approximated
                         %{
-            if isfield(N2.data,'matl')
-              if N2.data.matl.Phase ~= enumMaterial.Solid
-                matl = Material(N2.data.matl.name);
-              else
-                matl = N2.data.matl;
-              end
-            else
-              if N2.Body.matl.Phase ~= enumMaterial.Solid
-                matl = Material(N2.Body.matl.name);
-              else
-                matl = N2.Body.matl;
-              end
-            end
-            if matl.dT_du < 0; matl.dT_du = 1e-8; end
-            if length(N2.Faces) == 1
-              % True for most regenerators and heat exchangers
-              if any((Fc.data.Area./Fc.data.R)./(N2.vol().*matl.Density./matl.dT_du)*1.e-4 > 0.25)
-                IsApprox(Fc.index) = true;
-                Sim.FcApprox(ApproxCount) = Fc.index;
-                ApproxCount = ApproxCount + 1;
-              end
-            else
-              CU = 0;
-              Cother = 0;
-              for fc = N2.Faces
-                if fc == Fc
-                  CU = fc.data.Area./fc.data.R;
-                  if double(sum(CU < Cother))/...
-                      double(max(length(CU),length(Cother))) > 0.5
-                    CU = 0;
-                    break;
-                  end
-                else
-                  if fc.Type == enumFType.Mix
-                    Cother = Cother + fc.data.Area./fc.data.R;
-                    if any(CU ~= 0) && ...
-                        double(sum(CU < Cother))/...
-                        double(max(length(CU),length(Cother))) > 0.5
-                      CU = 0;
-                      break;
-                    end
-                  end
-                end
-              end
-              if CU ~= 0
-                if any((Fc.data.Area./Fc.data.R)./(N2.vol().*matl.Density./matl.dT_du)*1.e-4 > 0.25)
-                  IsApprox(Fc.index) = true;
-                  Sim.FcApprox(ApproxCount) = Fc.index;
-                  ApproxCount = ApproxCount + 1;
-                end
-              end
-            end
-            
+                        if isfield(N2.data,'matl')
+                        if N2.data.matl.Phase ~= enumMaterial.Solid
+                            matl = Material(N2.data.matl.name);
+                        else
+                            matl = N2.data.matl;
+                        end
+                        else
+                        if N2.Body.matl.Phase ~= enumMaterial.Solid
+                            matl = Material(N2.Body.matl.name);
+                        else
+                            matl = N2.Body.matl;
+                        end
+                        end
+                        if matl.dT_du < 0; matl.dT_du = 1e-8; end
+                        if length(N2.Faces) == 1
+                        % True for most regenerators and heat exchangers
+                        if any((Fc.data.Area./Fc.data.R)./(N2.vol().*matl.Density./matl.dT_du)*1.e-4 > 0.25)
+                            IsApprox(Fc.index) = true;
+                            Sim.FcApprox(ApproxCount) = Fc.index;
+                            ApproxCount = ApproxCount + 1;
+                        end
+                        else
+                        CU = 0;
+                        Cother = 0;
+                        for fc = N2.Faces
+                            if fc == Fc
+                            CU = fc.data.Area./fc.data.R;
+                            if double(sum(CU < Cother))/...
+                                double(max(length(CU),length(Cother))) > 0.5
+                                CU = 0;
+                                break;
+                            end
+                            else
+                            if fc.Type == enumFType.Mix
+                                Cother = Cother + fc.data.Area./fc.data.R;
+                                if any(CU ~= 0) && ...
+                                    double(sum(CU < Cother))/...
+                                    double(max(length(CU),length(Cother))) > 0.5
+                                CU = 0;
+                                break;
+                                end
+                            end
+                            end
+                        end
+                        if CU ~= 0
+                            if any((Fc.data.Area./Fc.data.R)./(N2.vol().*matl.Density./matl.dT_du)*1.e-4 > 0.25)
+                            IsApprox(Fc.index) = true;
+                            Sim.FcApprox(ApproxCount) = Fc.index;
+                            ApproxCount = ApproxCount + 1;
+                            end
+                        end
+                        end
+                        
                         %}
                         MF_n = MF_n + 1;
                     case {enumFType.Gas, enumFType.MatrixTransition} % Gas-Gas, Gas-Environment Faces
@@ -2265,7 +2265,7 @@ classdef Model < handle
                             Fc_DynVel_Factor_n = Fc_DynVel_Factor_n + 1;
                             Sim.Dyn = Sim.Dyn + 1;
                         end
-                %                     case enumFType.Leak % Gas-Gas Leaks
+                        %                     case enumFType.Leak % Gas-Gas Leaks
                         % Do nothing, this is handled elsewhere
                 end
             end
@@ -3372,7 +3372,7 @@ classdef Model < handle
                 ME.recordConductionFlux = true;
                 ME.showPressureDropAnimation = true;
                 ME.recordPressureDrop = true;
-%new                
+                %new                
                 ME.recordReynolds = true;
                 ME.showReynoldsAnimation = true;
     
@@ -3395,7 +3395,7 @@ classdef Model < handle
                 if nargin > 1
                     % crun = current run
                     crun = runs(Nt);                   
-%                     TestSetStatistics(Nt).Name = crun.title; % Matthias 
+                    %                     TestSetStatistics(Nt).Name = crun.title; % Matthias 
                 end
                 % If it has a steady state end condition and only the last cycle is
                 % ... important then use the Multi-Grid Formulation.
@@ -3467,8 +3467,8 @@ classdef Model < handle
                                     iBridge.x = iBridge.x*crun.X_Scale;
                                 end
                             end
-                            
-%                             % Don't Scale the mechanisms so strokes remain same
+                                
+                            %                             % Don't Scale the mechanisms so strokes remain same
 
                             % For 'Tube Bank' heat exchangers: Scale the
                             % number of tubes with the square of the
@@ -3483,13 +3483,13 @@ classdef Model < handle
 
 
                                 % Scale the view window
-%                             XL = get(ME.AxisReference, 'XLim');
-%                             set(ME.AxisReference,'XLim', XL*crun.X_Scale);
+                                %                             XL = get(ME.AxisReference, 'XLim');
+                                %                             set(ME.AxisReference,'XLim', XL*crun.X_Scale);
                         end
                         
                     end
                     
-%% Modify Working Gas (Matthias)
+                    %% Modify Working Gas (Matthias)
                     if nargin > 1
                         if isfield(crun,'Gas')
                             for iGroup = ME.Groups
@@ -3503,7 +3503,7 @@ classdef Model < handle
                         end
                     end
                     
-%% Matthias: Modify Regenerator (Woven Screen or Random Fiber) 
+                    %% Matthias: Modify Regenerator (Woven Screen or Random Fiber) 
                     if nargin > 1
                         run_dw_por = isfield(crun,{'Reg_dw','Reg_Porosity'});
                         if any(run_dw_por)
@@ -3567,7 +3567,7 @@ classdef Model < handle
                         ss_tolerance = sst1;
                     end
                     
-%Matthias: added MeshCounts
+                    %Matthias: added MeshCounts
                     MeshCounts = ME.discretize(crun);
                     
                     % If discretization was successful
@@ -3609,20 +3609,20 @@ classdef Model < handle
                             % Apply the snapshot if it is selected
                             if selectionMade && answer ~= length(names)
                                 %% Comment out below to disable Snapshots %
-%                                 SS = ME.SnapShots{answer};
-%                                 ME.assignSnapShot(SS);
-%                                 disp("Applied Snapshot no. "+answer+"/"+length(ME.SnapShots) +", named '" +SS.Name +"'")
+                                %                                 SS = ME.SnapShots{answer};
+                                %                                 ME.assignSnapShot(SS);
+                                %                                 disp("Applied Snapshot no. "+answer+"/"+length(ME.SnapShots) +", named '" +SS.Name +"'")
                                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                             end
                         end
                         
-% Comment Matthias: If set to variable speed and SS-convergence is enabled,
-% this is a 'dynamic' case. The code below sets speed to constant for a
-% first run that is used to calculate a load and a snapshot. Then a second
-% run (further below) with variable speed uses the calculated load &
-% snapshot to produce a 'cyclic steady state' result with in-cycle speed
-% variations.
-% Only works when running from a Test Set!
+                        % Comment Matthias: If set to variable speed and SS-convergence is enabled,
+                        % this is a 'dynamic' case. The code below sets speed to constant for a
+                        % first run that is used to calculate a load and a snapshot. Then a second
+                        % run (further below) with variable speed uses the calculated load &
+                        % snapshot to produce a 'cyclic steady state' result with in-cycle speed
+                        % variations.
+                        % Only works when running from a Test Set!
                         if nargin > 1 && ...
                                 crun.movement_option == 'V' && ...
                                 crun.SS && ...
@@ -3644,7 +3644,7 @@ classdef Model < handle
                         tic; % starts simulation timer
                         % 'crun' contains run options from test set
                         % 'RunConditions' structure
-% Matthias: Added cycle_count and final_speed output                        
+                        % Matthias: Added cycle_count and final_speed output                        
                         [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
                             islast, do_warmup, ss_tolerance, crun);
                         if isempty(ME.Results)
@@ -3654,7 +3654,7 @@ classdef Model < handle
                             return;
                         end
                         
-% 2nd run (final transient cycle) for 'dynamic' cases                        
+                        % 2nd run (final transient cycle) for 'dynamic' cases                        
                         if dynamic
                             % Reset Settings
                             crun.movement_option = 'V';
@@ -4043,7 +4043,7 @@ classdef Model < handle
                             if isfield(ME.Results.Data,'dP') && ME.showPressureDropAnimation
                                 ME.Results.animateNode('dP',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
                             end
-%new                            
+                            %new                            
                             if isfield(ME.Results.Data,'RE') && ME.showReynoldsAnimation
                                 ME.Results.animateNode('RE',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
                             end
@@ -4137,8 +4137,8 @@ classdef Model < handle
                             end
 
                             % Scale the view window
-%                             XL = get(ME.AxisReference, 'XLim');
-%                             set(ME.AxisReference,'XLim', XL/crun.X_Scale);                      
+                            %                             XL = get(ME.AxisReference, 'XLim');
+                            %                             set(ME.AxisReference,'XLim', XL/crun.X_Scale);                      
                         end
                         
                         % Undo Gas modification
@@ -4697,7 +4697,7 @@ classdef Model < handle
             end
         end
         
-       %% For showing elements in GUI. Edited by Matthias. 
+        %% For showing elements in GUI. Edited by Matthias. 
         function show(this,showOptions)
             if this.isChanged; this.update(); end
             this.removeStaticFromFigure();
@@ -4718,7 +4718,7 @@ classdef Model < handle
             end
             
             if this.showInterConnections || this.showNodes || this.showNodeBounds
-% if condition below added by Matthias to prevent wait for discretization each time view is changed.                
+                % if condition below added by Matthias to prevent wait for discretization each time view is changed.                
                 if ~this.isDiscretized()
                     crun = struct('Model',this.name,...
                         'title',[this.name ' test: ' date],...
@@ -4732,9 +4732,9 @@ classdef Model < handle
                 n = length(this.Nodes);
                 if n ~= 0
                     nodeCenter(n) = Pnt2D(0,0);
-%Matthias: Added node bounds to plot nodes as boxes
-% Size = 6 for: 4 points of rectangle, ending with 1st point to close it,
-% and a NaN
+                    %Matthias: Added node bounds to plot nodes as boxes
+                    % Size = 6 for: 4 points of rectangle, ending with 1st point to close it,
+                    % and a NaN
                     nodeBoundsX = NaN(6,n);
                     nodeBoundsY = NaN(6,n);
                     for iNode = this.Nodes
@@ -4773,7 +4773,7 @@ classdef Model < handle
                                 % Matthias: Added 'if' below to allow plotting faces of specific type only.
                                 % Types: Solid Gas Mix Leak
                                 %                                 if iFace.Type == enumFType.MatrixTransition
-% Matthias: Added conditions to show only faces selected in GUI
+                                % Matthias: Added conditions to show only faces selected in GUI
                                 facetypes = {};
                                 if this.showFacesGas; facetypes{end+1} = enumFType.Gas; end
                                 if this.showFacesSolid; facetypes{end+1} = enumFType.Solid; end
@@ -5180,143 +5180,143 @@ classdef Model < handle
 end
 
 function [Closed_Edge] = TrimFaces(this, region, Closed_Edge)
-LEN = length(Closed_Edge);
-for Nd = this.Nodes
-    if Nd.index <= length(region)
-        from = Nd;
-        c = 1;
-        while c == 1
-            c = 0;
-            % Determine the number of access points for the node
-            for Fc = from.Faces
-                if Fc.index <= LEN && ~Closed_Edge(Fc.index) && ...
-                        region(Fc.Nodes(1).index) == region(Fc.Nodes(2).index)
-                    c = c + 1; if c > 1; break; end; edge = Fc;
+    LEN = length(Closed_Edge);
+    for Nd = this.Nodes
+        if Nd.index <= length(region)
+            from = Nd;
+            c = 1;
+            while c == 1
+                c = 0;
+                % Determine the number of access points for the node
+                for Fc = from.Faces
+                    if Fc.index <= LEN && ~Closed_Edge(Fc.index) && ...
+                            region(Fc.Nodes(1).index) == region(Fc.Nodes(2).index)
+                        c = c + 1; if c > 1; break; end; edge = Fc;
+                    end
                 end
-            end
-            if c == 1
-                % This Node has only one access point (withing a region),
-                % ... therefore it cannot be a part of a loop.
-                % Any nodes that are chain to this node with only two total
-                % ... access points must also not be part of a loop.
-                Closed_Edge(edge.index) = true;
-                if from == edge.Nodes(1)
-                    from = edge.Nodes(2);
-                else
-                    from = edge.Nodes(1);
+                if c == 1
+                    % This Node has only one access point (withing a region),
+                    % ... therefore it cannot be a part of a loop.
+                    % Any nodes that are chain to this node with only two total
+                    % ... access points must also not be part of a loop.
+                    Closed_Edge(edge.index) = true;
+                    if from == edge.Nodes(1)
+                        from = edge.Nodes(2);
+                    else
+                        from = edge.Nodes(1);
+                    end
                 end
             end
         end
     end
-end
 end
 
 function [A,B,C,D] = populate_Fc_ABCD(Sim, Fc)
-fcb = Face.empty;
-fcf = Face.empty;
-count = 0;
-for fc = Fc.Nodes(1).Faces
-    if fc.Type == enumFType.Gas && fc ~= Fc
-        if count == 0
-            fcb = fc;
-            count = 1;
-        else
-            % pick the larger face
-            if mean(fcb.data.Area) < mean(fc.data.Area)
+    fcb = Face.empty;
+    fcf = Face.empty;
+    count = 0;
+    for fc = Fc.Nodes(1).Faces
+        if fc.Type == enumFType.Gas && fc ~= Fc
+            if count == 0
                 fcb = fc;
+                count = 1;
+            else
+                % pick the larger face
+                if mean(fcb.data.Area) < mean(fc.data.Area)
+                    fcb = fc;
+                end
             end
         end
     end
-end
-if count == 1
-    % Reference that backwards face
-    if fcb.Nodes(2) == Fc.Nodes(1)
-        Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(1).index;
-    else
-        Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(2).index;
-    end
-else
-    % Reference itself
-    Sim.Fc_Nd03(Fc.index,1) = Fc.Nodes(1).index;
-    fcb = Fc;
-end
-count = 0;
-for fc = Fc.Nodes(2).Faces
-    if fc.Type == enumFType.Gas && ...
-            fc ~= Fc
-        if count == 0
-            fcf = fc;
-            count = 1;
+    if count == 1
+        % Reference that backwards face
+        if fcb.Nodes(2) == Fc.Nodes(1)
+            Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(1).index;
         else
-            % pick the larger face
-            if mean(fcf.data.Area) < mean(fc.data.Area)
+            Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(2).index;
+        end
+    else
+        % Reference itself
+        Sim.Fc_Nd03(Fc.index,1) = Fc.Nodes(1).index;
+        fcb = Fc;
+    end
+    count = 0;
+    for fc = Fc.Nodes(2).Faces
+        if fc.Type == enumFType.Gas && ...
+                fc ~= Fc
+            if count == 0
                 fcf = fc;
+                count = 1;
+            else
+                % pick the larger face
+                if mean(fcf.data.Area) < mean(fc.data.Area)
+                    fcf = fc;
+                end
             end
         end
     end
-end
-if count == 1
-    % Reference that backwards face
-    if fcb.Nodes(1) == Fc.Nodes(2)
-        Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(2).index;
+    if count == 1
+        % Reference that backwards face
+        if fcb.Nodes(1) == Fc.Nodes(2)
+            Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(2).index;
+        else
+            Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(1).index;
+        end
     else
-        Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(1).index;
+        % Reference itself
+        Sim.Fc_Nd03(Fc.index,2) = Fc.Nodes(2).index;
+        fcf = Fc;
     end
-else
-    % Reference itself
-    Sim.Fc_Nd03(Fc.index,2) = Fc.Nodes(2).index;
-    fcf = Fc;
-end
 
-x1 = -0.5*Fc.data.Dist;
-x0 = x1 - fcb.data.Dist;
-x2 = -x1;
-x3 = x2 + fcf.data.Dist;
-if fcb ~= Fc && all(fcb.data.Area > 0) % Fc i - 1 exists
-    if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
-        % can fill xi, xi-1, xi+1 and xi+2, as well as A, B, C and D
-        A = -((x1.*x2.*x3)./(x0-x1)./(x0-x2)./(x0-x3));
-        B = -((x0.*x2.*x3)./(x1-x0)./(x1-x2)./(x1-x3));
-        C = -((x0.*x1.*x3)./(x2-x0)./(x2-x1)./(x2-x3));
-        D = -((x0.*x1.*x2)./(x3-x0)./(x3-x1)./(x3-x2));
+    x1 = -0.5*Fc.data.Dist;
+    x0 = x1 - fcb.data.Dist;
+    x2 = -x1;
+    x3 = x2 + fcf.data.Dist;
+    if fcb ~= Fc && all(fcb.data.Area > 0) % Fc i - 1 exists
+        if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
+            % can fill xi, xi-1, xi+1 and xi+2, as well as A, B, C and D
+            A = -((x1.*x2.*x3)./(x0-x1)./(x0-x2)./(x0-x3));
+            B = -((x0.*x2.*x3)./(x1-x0)./(x1-x2)./(x1-x3));
+            C = -((x0.*x1.*x3)./(x2-x0)./(x2-x1)./(x2-x3));
+            D = -((x0.*x1.*x2)./(x3-x0)./(x3-x1)./(x3-x2));
+        else
+            A = -((x1.*x2)./(x0-x1)./(x0-x2));
+            B = -((x0.*x2)./(x1-x0)./(x1-x2));
+            C = -((x0.*x1)./(x2-x0)./(x2-x1));
+            D = 0;
+        end
     else
-        A = -((x1.*x2)./(x0-x1)./(x0-x2));
-        B = -((x0.*x2)./(x1-x0)./(x1-x2));
-        C = -((x0.*x1)./(x2-x0)./(x2-x1));
-        D = 0;
+        if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
+            A = 0;
+            B = -((x2.*x3)./(x1-x2)./(x1-x3));
+            C = -((x1.*x3)./(x2-x1)./(x2-x3));
+            D = -((x1.*x2)./(x3-x1)./(x3-x2));
+        else
+            A = 0.0;
+            B = 0.5;
+            C = 0.5;
+            D = 0.0;
+        end
     end
-else
-    if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
-        A = 0;
-        B = -((x2.*x3)./(x1-x2)./(x1-x3));
-        C = -((x1.*x3)./(x2-x1)./(x2-x3));
-        D = -((x1.*x2)./(x3-x1)./(x3-x2));
-    else
-        A = 0.0;
-        B = 0.5;
-        C = 0.5;
-        D = 0.0;
+    sum = A+B+C+D;
+    for i = 1:length(sum)
+        roundsum = round(sum);
+        if roundsum == 1
+            % No change
+        elseif roundsum == -1
+            A(min(i,length(A))) = -A(min(i,length(A)));
+            B(min(i,length(B))) = -B(min(i,length(B)));
+            C(min(i,length(C))) = -C(min(i,length(C)));
+            D(min(i,length(D))) = -D(min(i,length(D)));
+        else
+            A(min(i,length(A))) = 0;
+            B(min(i,length(B))) = 0.5;
+            C(min(i,length(C))) = 0.5;
+            D(min(i,length(D))) = 0;
+        end
     end
-end
-sum = A+B+C+D;
-for i = 1:length(sum)
-    roundsum = round(sum);
-    if roundsum == 1
-        % No change
-    elseif roundsum == -1
-        A(min(i,length(A))) = -A(min(i,length(A)));
-        B(min(i,length(B))) = -B(min(i,length(B)));
-        C(min(i,length(C))) = -C(min(i,length(C)));
-        D(min(i,length(D))) = -D(min(i,length(D)));
-    else
-        A(min(i,length(A))) = 0;
-        B(min(i,length(B))) = 0.5;
-        C(min(i,length(C))) = 0.5;
-        D(min(i,length(D))) = 0;
-    end
-end
-A = CollapseVector(A);
-B = CollapseVector(B);
-C = CollapseVector(C);
-D = CollapseVector(D);
+    A = CollapseVector(A);
+    B = CollapseVector(B);
+    C = CollapseVector(C);
+    D = CollapseVector(D);
 end
