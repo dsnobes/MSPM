@@ -514,7 +514,7 @@ classdef Model < handle
                 % 'Wall_Smart_Discretize' function to vary depending on
                 % engine speed! (Temperature oscillation depth based on
                 % speed)
-%                 this.engineSpeed = run.rpm;
+                % this.engineSpeed = run.rpm;
             end
             
             if nargin > 1 && isfield(run,'NodeFactor') && run.NodeFactor ~= 1 %FIXED
@@ -529,10 +529,10 @@ classdef Model < handle
                 % by 'NodeFactor'. The settings are then used by the
                 % 'Wall_Smart_Discretize' function on all the bodies that
                 % have the function enabled. By default (Steven), only
-%                 this.Mesher.Gas_Entrance_Exit_N
-%                 this.Mesher.Gas_Maximum_Size
-%                 this.Mesher.Gas_Minimum_Size
-%               % are changed by 'NodeFactor'. 
+                % this.Mesher.Gas_Entrance_Exit_N
+                % this.Mesher.Gas_Maximum_Size
+                % this.Mesher.Gas_Minimum_Size
+                % are changed by 'NodeFactor'. 
                         % Matthias May 31: uncommented
                         this.Mesher.oscillation_depth_N = ...
                             ceil(sqrt(double(run.NodeFactor))*double(backup_ODN));
@@ -548,13 +548,13 @@ classdef Model < handle
                 %%
             end
             
-% Matthias: Added code to apply "h_custom_Source/Sink" from test set here.             
-% Criterium for body being a source/sink is it being 'Constant
-% Temperature' and its temperature being higher/lower than the
-% default engine temperature.
+            % Matthias: Added code to apply "h_custom_Source/Sink" from test set here.             
+            % Criterium for body being a source/sink is it being 'Constant
+            % Temperature' and its temperature being higher/lower than the
+            % default engine temperature.
             run_so_si = isfield(run,{'h_custom_Source','h_custom_Sink'}); %1=source, 2=sink
             if any(run_so_si)
-%             if isfield(run,'h_custom_Source') || isfield(run,'h_custom_Sink')
+                % if isfield(run,'h_custom_Source') || isfield(run,'h_custom_Sink')
                 for iGroup = this.Groups
                     for iBody = iGroup.Bodies
                         if strcmp(iBody.matl.name, 'Constant Temperature') %Sources in form of constant temperature bodies
@@ -564,10 +564,10 @@ classdef Model < handle
                             % source/sink.
                             if iBody.Temperature > this.engineTemperature
                                 if run_so_si(1); iBody.h_custom = run.h_custom_Source; end
-%                                 if isfield(run,'h_custom_Source'); iBody.h_custom = run.h_custom_Source; end
+                                % if isfield(run,'h_custom_Source'); iBody.h_custom = run.h_custom_Source; end
                             elseif iBody.Temperature < this.engineTemperature
                                 if run_so_si(2); iBody.h_custom = run.h_custom_Sink; end
-%                                 if isfield(run,'h_custom_Sink'); iBody.h_custom = run.h_custom_Sink; end
+                                % if isfield(run,'h_custom_Sink'); iBody.h_custom = run.h_custom_Sink; end
                             else
                                 fprintf(['XXX When applying "h_custom_Source/Sink", a body could not be determined as Source or Sink because its temperature is equal to the engine temperature:\n' iBody.name ' XXX\n']);
                             end
@@ -586,9 +586,9 @@ classdef Model < handle
                 end
             end
             
-% Matthias: Calculation of conductances for faces begins in this step of
-% discretization! --> all modifications to conductance (e.g. 'h_custom')
-% must be applied prior.
+            % Matthias: Calculation of conductances for faces begins in this step of
+            % discretization! --> all modifications to conductance (e.g. 'h_custom')
+            % must be applied prior.
            
             progressbar('Discretizing Bridges');
             % Test and Discretize Bridges
@@ -620,8 +620,8 @@ classdef Model < handle
             % Test and Discretize Groups
             for iGroup = this.Groups
                 if ~iGroup.isDiscretized
-% Matthias: Fixed below so that 'run' does not need to contain NodeFactor
-%                     if nargin > 1
+            % Matthias: Fixed below so that 'run' does not need to contain NodeFactor
+            %                     if nargin > 1
                     if nargin > 1 
                         if isfield(run,'NodeFactor') && run.NodeFactor ~= 1                        
                             iGroup.discretize(run.NodeFactor);
@@ -673,9 +673,9 @@ classdef Model < handle
             % Count the Nodes and Faces
             ndequ = 1; % <-- Environment Node
             fcequ = 0;
-%             for iLeak = this.LeakConnections
-%                 fcequ = fcequ + length(iLeak.Faces);
-%             end
+            %             for iLeak = this.LeakConnections
+            %                 fcequ = fcequ + length(iLeak.Faces);
+            %             end
             for iBridge = this.Bridges
                 fcequ = fcequ + length(iBridge.Faces);
             end
@@ -697,11 +697,11 @@ classdef Model < handle
             this.Nodes(ndequ) = this.surroundings.Node;
             ndequ = ndequ - 1;
             % LeakConnections
-%             for iLeak = this.LeakConnections
-%                 len = length(iLeak.Faces);
-%                 this.Faces(fcequ - len + 1:fcequ) = iLeak.Faces;
-%                 fcequ = fcequ - len;
-%             end
+            %             for iLeak = this.LeakConnections
+            %                 len = length(iLeak.Faces);
+            %                 this.Faces(fcequ - len + 1:fcequ) = iLeak.Faces;
+            %                 fcequ = fcequ - len;
+            %             end
             % Bridges
             for iBridge = this.Bridges
                 len = length(iBridge.Faces);
@@ -884,8 +884,8 @@ classdef Model < handle
                 num2str(E_count) ' Environment Nodes, ' ...
                 num2str(S_count) ' Solid Nodes\n']);
             
-% Matthias: Record Node counts to include in TestSetStatictics
-% output
+            % Matthias: Record Node counts to include in TestSetStatictics
+            % output
             MeshCounts.SN = S_count;
             MeshCounts.EN = E_count;
             MeshCounts.GN = G_count;
@@ -1309,76 +1309,76 @@ classdef Model < handle
                 end
             end
             %{
-      for Tri = Triads
-        Tri_Nodes = Node.empty;
-        Scores = {0,0,0};
-        for fc = Tri{1}
-          for nd = fc.Nodes
-            if isempty(Tri_Nodes) || all(Tri_Nodes ~= nd)
-              Tri_Nodes = [Tri_Nodes nd];
-              index = length(Tri_Nodes);
-            else
-              index = find(Tri_Nodes==nd);
-            end
-            Scores{index} = Scores{index} + fc.data.Area;
-          end
-        end
+            for Tri = Triads
+                Tri_Nodes = Node.empty;
+                Scores = {0,0,0};
+                for fc = Tri{1}
+                for nd = fc.Nodes
+                    if isempty(Tri_Nodes) || all(Tri_Nodes ~= nd)
+                    Tri_Nodes = [Tri_Nodes nd];
+                    index = length(Tri_Nodes);
+                    else
+                    index = find(Tri_Nodes==nd);
+                    end
+                    Scores{index} = Scores{index} + fc.data.Area;
+                end
+                end
             %}
             
             % Starting at the node with maximum area, test if the opposite face
             % can be closed
             %{
-        bestrecord = 0;
-        bestindex = 0;
-        for i = 1:3
-          if mean(Scores{i}) > bestrecord
-            for fc = Tri{1}
-              if ~any(fc.Nodes == Tri_Nodes(i))
-                if canClose(fc)
-                  bestindex = i;
-                  bestrecord = mean(Scores{i});
+                bestrecord = 0;
+                bestindex = 0;
+                for i = 1:3
+                if mean(Scores{i}) > bestrecord
+                    for fc = Tri{1}
+                    if ~any(fc.Nodes == Tri_Nodes(i))
+                        if canClose(fc)
+                        bestindex = i;
+                        bestrecord = mean(Scores{i});
+                        end
+                        break;
+                    end
+                    end
                 end
-                break;
-              end
-            end
-          end
-        end
-        
-        % Collapse the triad
-        if bestindex > 0 && bestrecord > 0
-          fprintf('Decimated a Triad\n');
-          % Find closing face
-          for fc = Tri{1}
-            if ~any(fc.Nodes == Tri_Nodes(i))
-              closing_face = fc;
-              break;
-            end
-          end
-          
-          % Adjust the area and minor loss coefficients of the other two faces
-          for fc = Tri{1}
-            if fc ~= closing_face
-              if isfield(fc.data,'K12')
-                if isfield(closing_face.data,'K12')
-                  fc.data.K12 = (fc.data.K12.*fc.data.Area + ...
-                    closing_face.data.K12.*closing_face.data.Area)./ ...
-                    (fc.data.Area + closing_face.data.Area);
-                  fc.data.K21 = (fc.data.K21.*fc.data.Area + ...
-                    closing_face.data.K21.*closing_face.data.Area)./ ...
-                    (fc.data.Area + closing_face.data.Area);
                 end
-              end
-              fc.data.Area = fc.data.Area + closing_face.data.Area;
-            end
-          end
-          
-          % Delete the face from the list
-          closing_face.data.Area = 0;
-          for nd = closing_face.Nodes
-            nd.Faces(nd.Faces == closing_face) = [];
-          end
-          this.Faces(this.Faces == closing_face) = [];
-        end
+                
+                % Collapse the triad
+                if bestindex > 0 && bestrecord > 0
+                fprintf('Decimated a Triad\n');
+                % Find closing face
+                for fc = Tri{1}
+                    if ~any(fc.Nodes == Tri_Nodes(i))
+                    closing_face = fc;
+                    break;
+                    end
+                end
+                
+                % Adjust the area and minor loss coefficients of the other two faces
+                for fc = Tri{1}
+                    if fc ~= closing_face
+                    if isfield(fc.data,'K12')
+                        if isfield(closing_face.data,'K12')
+                        fc.data.K12 = (fc.data.K12.*fc.data.Area + ...
+                            closing_face.data.K12.*closing_face.data.Area)./ ...
+                            (fc.data.Area + closing_face.data.Area);
+                        fc.data.K21 = (fc.data.K21.*fc.data.Area + ...
+                            closing_face.data.K21.*closing_face.data.Area)./ ...
+                            (fc.data.Area + closing_face.data.Area);
+                        end
+                    end
+                    fc.data.Area = fc.data.Area + closing_face.data.Area;
+                    end
+                end
+                
+                % Delete the face from the list
+                closing_face.data.Area = 0;
+                for nd = closing_face.Nodes
+                    nd.Faces(nd.Faces == closing_face) = [];
+                end
+                this.Faces(this.Faces == closing_face) = [];
+                end
             %}
             
             % Faces
@@ -1402,8 +1402,8 @@ classdef Model < handle
                 num2str(M_count) ' Mixed Faces, ' ...
                 num2str(S_count) ' Solid Faces\n']);
             
-% Matthias: Record Face counts to include in TestSetStatictics
-% output
+            % Matthias: Record Face counts to include in TestSetStatictics
+            % output
             MeshCounts.SF = S_count;
             MeshCounts.EF = E_count;
             MeshCounts.GF = G_count;
@@ -1426,7 +1426,7 @@ classdef Model < handle
                     case enumFType.Environment
                         Fc.index = E_count;
                         E_count = E_count - 1;
-%                     case enumFType.Leak
+            %                     case enumFType.Leak
                         
                     otherwise % Gas
                         Fc.index = G_count;
@@ -2265,7 +2265,7 @@ classdef Model < handle
                             Fc_DynVel_Factor_n = Fc_DynVel_Factor_n + 1;
                             Sim.Dyn = Sim.Dyn + 1;
                         end
-%                     case enumFType.Leak % Gas-Gas Leaks
+                %                     case enumFType.Leak % Gas-Gas Leaks
                         % Do nothing, this is handled elsewhere
                 end
             end
@@ -3220,16 +3220,16 @@ classdef Model < handle
             Sim.ToEnvironmentSolid = zeros(2,length(this.surroundings.Node.Faces));
             Sim.ToEnvironmentGas = zeros(2,length(this.surroundings.Node.Faces));
             nS = 1; nG = 1;
-% Matthias: Here, the '1' or '-1' assigned to these faces represents the
-% sign, i.e. '1' means positive heat flow to environment and '-1' negative.
-% Here, in the first and 4th case where the environment node (EN) is node
-% number 2 in the face, sign is negative. This means the positive flow
-% direction of a face is defined from node 2 to 1. Below in the definition
-% of source and sink heat flow (ca. line 3200), it is the opposite way.
-% This may be the reason why the 'statistics.ToEnvironment' output seems to
-% have the opposite sign from what is expected.
-% CHANGED SIGNS --> ToEnvironment sign has changed, magnitude is same. I'd
-% call it success.
+            % Matthias: Here, the '1' or '-1' assigned to these faces represents the
+            % sign, i.e. '1' means positive heat flow to environment and '-1' negative.
+            % Here, in the first and 4th case where the environment node (EN) is node
+            % number 2 in the face, sign is negative. This means the positive flow
+            % direction of a face is defined from node 2 to 1. Below in the definition
+            % of source and sink heat flow (ca. line 3200), it is the opposite way.
+            % This may be the reason why the 'statistics.ToEnvironment' output seems to
+            % have the opposite sign from what is expected.
+            % CHANGED SIGNS --> ToEnvironment sign has changed, magnitude is same. I'd
+            % call it success.
             for Fc = this.surroundings.Node.Faces
                 if Fc.Nodes(1).Type == enumNType.SN
                     % It is a solid -> environment face
