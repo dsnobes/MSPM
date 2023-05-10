@@ -1,0 +1,5 @@
+When we first modeled the Raphael in MSPM, we used the 'Fin Connected Channels' heat exchanger.
+Then Matthias fixed the code of the 'Fin Enhanced Surface" heat exchanger and used this type from there.
+
+At first, the heat transfer between liquid and wall was simulated by an insulating body ('HXinsulated' in this folder).
+Then the custom heat transfer coefficient was implemented into MSPM and used in the runs for Matthias' thesis ('Custom_h').
