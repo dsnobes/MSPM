@@ -1,14 +1,14 @@
 classdef Body < handle
     % body Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties (Constant)
         MaterialUndefinedColor = [1 0.5569 1];
         ActiveColor = [0 1 0];
         NormalColor = [0 0 0];
         InvalidColor = [1 0 0];
     end
-    
+
     properties (Hidden)
         GUIObjects;
         isStateValid logical = false;
@@ -23,7 +23,7 @@ classdef Body < handle
         customTemperature = [];
         customPressure = [];
     end
-    
+
     properties (Dependent)
         name;
         isValid;
@@ -33,7 +33,7 @@ classdef Body < handle
         Pressure;
         isDiscretized;
     end
-    
+
     properties
         customname = '';
         ID;
@@ -50,19 +50,19 @@ classdef Body < handle
         Mesher Mesher;
         DiscretizationFunctionRadial;
         DiscretizationFunctionAxial;
-        
+
         % Boolean Values
         isActive logical = false;
         isChanged logical = true;
-        
+
         % Discretization
         Nodes Node;
         Faces Face;
-        
-% Added by Matthias: Custom Heat Transfer Coefficient
+
+        % Added by Matthias: Custom Heat Transfer Coefficient
         h_custom = NaN;
     end
-    
+
     methods
         %% Constructor
         function this = Body(Group,Connections,matl)
@@ -170,7 +170,7 @@ classdef Body < handle
             this.removeFromFigure(gca);
             this.delete();
         end
-        
+
         %% get/set
         function Item = get(this,PropertyName)
             switch PropertyName
@@ -245,7 +245,7 @@ classdef Body < handle
                     Item = this.DiscretizationFunctionRadial;
                 case 'Axial Discretization Function'
                     Item = this.DiscretizationFunctionAxial;
-% Matthias: Added 'h_custom'
+                    % Matthias: Added 'h_custom'
                 case 'Custom Heat Transfer Coefficient'
                     Item = this.h_custom;
                 otherwise
@@ -295,7 +295,7 @@ classdef Body < handle
                             end
                         end
                     end
-% Matthias: Added 'h_custom'
+                    % Matthias: Added 'h_custom'
                 case 'Custom Heat Transfer Coefficient'
                     this.h_custom = Item;
                 otherwise
@@ -304,7 +304,7 @@ classdef Body < handle
             end
             this.change();
         end
-        
+
         %% Utility
         function sortConnections(this)
             % Sort the connections in an order that is xmin,xmax,ymin,ymax
@@ -379,7 +379,7 @@ classdef Body < handle
                 end
             end
         end
-        
+
         %% Creation Tests
         function isit = overlaps(thisBody,otherBody)
             isit = false;
@@ -396,7 +396,7 @@ classdef Body < handle
                 N = max([1 length(ymin1) length(ymax1)]);
                 if N ~= 1
                     if (~isscalar(ymin2) && N ~= length(ymin2)) || ...
-                           (~isscalar(ymax2) && N ~= length(ymax2))
+                            (~isscalar(ymax2) && N ~= length(ymax2))
                         otherBody.update();
                         [ymin2, ymax2, ~, ~] = otherBody.limits(enumOrient.Horizontal);
                     end
@@ -409,59 +409,59 @@ classdef Body < handle
             end
         end
         function [doesit, orient, xmin, xmax, y] = touches(thisBody,otherBody)
-          if thisBody.Connections(1) == otherBody.Connections(2) || ...
-              thisBody.Connections(2) == otherBody.Connections(1)
-            % Vertical Connections
-            orient = thisBody.Connections(1).Orient;
-            [ ~, ~, xmin1, xmax1] = thisBody.limits(enumOrient.Vertical);
-            [ ~, ~, xmin2, xmax2] = otherBody.limits(enumOrient.Vertical);
-            xmin = xmin1; xmin(xmin<xmin2) = xmin2(xmin<xmin2);
-            xmax = xmax1; xmax(xmax>xmax2) = xmax2(xmax>xmax2);
-            if thisBody.Connections(1) == otherBody.Connections(2)
-              y = thisBody.Connections(1).x;
+            if thisBody.Connections(1) == otherBody.Connections(2) || ...
+                    thisBody.Connections(2) == otherBody.Connections(1)
+                % Vertical Connections
+                orient = thisBody.Connections(1).Orient;
+                [ ~, ~, xmin1, xmax1] = thisBody.limits(enumOrient.Vertical);
+                [ ~, ~, xmin2, xmax2] = otherBody.limits(enumOrient.Vertical);
+                xmin = xmin1; xmin(xmin<xmin2) = xmin2(xmin<xmin2);
+                xmax = xmax1; xmax(xmax>xmax2) = xmax2(xmax>xmax2);
+                if thisBody.Connections(1) == otherBody.Connections(2)
+                    y = thisBody.Connections(1).x;
+                else
+                    y = thisBody.Connections(2).x;
+                end
+                doesit = any(xmin<xmax);
+            elseif thisBody.Connections(3) == otherBody.Connections(4) || ...
+                    thisBody.Connections(4) == otherBody.Connections(3)
+                % Horizontal Connections
+                orient = thisBody.Connections(3).Orient;
+                [ymin1, ymax1, ~, ~] = thisBody.limits(enumOrient.Horizontal);
+                [ymin2, ymax2, ~, ~] = otherBody.limits(enumOrient.Horizontal);
+                xmin = ymin1;
+                if isscalar(ymin2)
+                    xmin(xmin<ymin2) = ymin2;
+                else
+                    if isscalar(ymin1)
+                        xmin = ymin1*ones(size(ymin2));
+                    end
+                    xmin(xmin<ymin2) = ymin2(xmin<ymin2);
+                end
+                xmax = ymax1;
+                if isscalar(ymax2)
+                    xmax(xmax>ymax2) = ymax2;
+                else
+                    if isscalar(ymin1)
+                        xmax = ymax1*ones(size(ymax2));
+                    end
+                    xmax(xmax>ymax2) = ymax2(xmax>ymax2);
+                end
+                if thisBody.Connections(3) == otherBody.Connections(4)
+                    y = thisBody.Connections(3);
+                else
+                    y = thisBody.Connections(4);
+                end
+                doesit = any(xmin<xmax);
             else
-              y = thisBody.Connections(2).x;
+                doesit = false;
+                orient = enumOrient.Vertical;
+                xmin = inf;
+                xmax = inf;
+                y = inf;
             end
-            doesit = any(xmin<xmax);
-          elseif thisBody.Connections(3) == otherBody.Connections(4) || ...
-              thisBody.Connections(4) == otherBody.Connections(3)
-            % Horizontal Connections
-            orient = thisBody.Connections(3).Orient;
-            [ymin1, ymax1, ~, ~] = thisBody.limits(enumOrient.Horizontal);
-            [ymin2, ymax2, ~, ~] = otherBody.limits(enumOrient.Horizontal);
-            xmin = ymin1;
-            if isscalar(ymin2)
-              xmin(xmin<ymin2) = ymin2;
-            else
-              if isscalar(ymin1)
-                xmin = ymin1*ones(size(ymin2));
-              end
-              xmin(xmin<ymin2) = ymin2(xmin<ymin2);
-            end
-            xmax = ymax1;
-            if isscalar(ymax2)
-              xmax(xmax>ymax2) = ymax2;
-            else
-              if isscalar(ymin1)
-                xmax = ymax1*ones(size(ymax2));
-              end
-              xmax(xmax>ymax2) = ymax2(xmax>ymax2);
-            end
-            if thisBody.Connections(3) == otherBody.Connections(4)
-              y = thisBody.Connections(3);
-            else
-              y = thisBody.Connections(4);
-            end  
-            doesit = any(xmin<xmax);
-          else
-            doesit = false;
-            orient = enumOrient.Vertical;
-            xmin = inf;
-            xmax = inf;
-            y = inf;
-          end
         end
-        
+
         %% Update on Demand
         function update(this)
             if isempty(this.ID); this.ID = this.Group.Model.getBodyID(); end
@@ -475,7 +475,7 @@ classdef Body < handle
             if any(~isvalid(this.PVoutputs))
                 this.PVoutputs = this.PVoutputs(isvalid(this.PVoutputs));
             end
-            
+
             if ~isempty(this.Matrix)
                 if isempty(this.Matrix.matl) || isempty(this.Matrix.Dh)
                     delete(this.Matrix);
@@ -484,9 +484,9 @@ classdef Body < handle
                     this.Matrix.Body = this;
                 end
             end
-            
+
             this.isChanged = false;
-            
+
             % Update Connections
             for iCon = this.Connections
                 found = false;
@@ -496,7 +496,7 @@ classdef Body < handle
                 end
                 if ~found; iCon.addBody(this); end
             end
-            
+
             this.sortConnections();
             %% Update Limits
             % Find vertical connections
@@ -544,8 +544,8 @@ classdef Body < handle
                     this.d_ub_Hor = this.s_ub_Hor + arrConH(2).RefFrame.Positions;
                 end
             end
-            
-            
+
+
             %% Update MovingStatus
             found = false;
             frame = [];
@@ -573,7 +573,7 @@ classdef Body < handle
                 end
             end
             this.StateMovingStatus = varenum;
-            
+
             %% Update isValid
             varb = true;
             isSolid = (this.matl.Phase == enumMaterial.Solid);
@@ -613,7 +613,7 @@ classdef Body < handle
                     varb = false;
                 end
             end
-            
+
             % Check with interference from other bodies
             if this.Group.isOverlaping(this)
                 varb = false;
@@ -663,7 +663,7 @@ classdef Body < handle
         end
         function isValid = get.isValid(this)
             this.update();
-%             if this.isChanged; this.update(); end
+            %             if this.isChanged; this.update(); end
             isValid = this.isStateValid;
         end
         function frame = get.RefFrame(this)
@@ -688,7 +688,7 @@ classdef Body < handle
             end
             Discretized = this.isStateDiscretized;
         end
-        
+
         %% Property Parameters
         function Temp = get.Temperature(this)
             if isempty(this.customTemperature)
@@ -704,7 +704,7 @@ classdef Body < handle
                 Press = this.customPressure;
             end
         end
-        
+
         %% Node Generation
         function discretize(this)
             this.update();
@@ -767,7 +767,7 @@ classdef Body < handle
                         NType = enumNType.VVGN;
                 end
             end
-            
+
             %% Y LIMITS
             [ymin,ymax,~,~] = this.limits(enumOrient.Horizontal);
             if ~prod(ymax>=ymin) % Will give false if this is not true everywhere
@@ -842,8 +842,8 @@ classdef Body < handle
                     end
                 end
             end
-            
-            
+
+
             %% Y LIMITS
             LEN = this.divides(2)+1;
             if isempty(this.DiscretizationFunctionAxial)
@@ -929,24 +929,24 @@ classdef Body < handle
                     end
                 end
             end
-            
+
             if strcmp(this.matl.name ,'Perfect Insulator') || ...
-                strcmp(this.matl.name ,'Constant Temperature')
-              x = [x(1,:); x(end,:)];
-              y = [y(1,:); y(end,:)];
+                    strcmp(this.matl.name ,'Constant Temperature')
+                x = [x(1,:); x(end,:)];
+                y = [y(1,:); y(end,:)];
             end
             divx = size(x,1) - 1;
             divy = size(y,1) - 1;
-            
+
             this.Nodes = Node.empty;
             this.Faces = Face.empty;
-            
+
             %% INITIALIZE
             sendtoConnections{4} = NodeContact.empty;
             ncount = divx*divy;
             fcount = (divx-1)*divy + divx*(divy-1);
             %fcount = prod([divx divy]-[1 0])+prod(this.divides-[0 1]);
-            
+
             %% FOR EACH DISTINCT NODE WITHIN BODY
             for iy = size(y,1) - 1:-1:1
                 % loop initialization
@@ -954,62 +954,62 @@ classdef Body < handle
                 endy = y(iy+1,:);
                 starty = CollapseVector(starty);
                 endy = CollapseVector(endy);
-                
+
                 for ix = size(x,1) - 1:-1:1
                     %% Define this.Nodes
                     CurrentNode = Node(NType,x(ix),x(ix+1),starty,endy,Face.empty,Node.empty,this,0);
                     this.Nodes(ncount) = CurrentNode;
-                    
+
                     ncount = ncount - 1;
                 end
             end
-            
+
             for i = 1:length(this.Nodes)
                 nd = this.Nodes(i);
                 if nd.xmin == xmin
-                  sendtoConnections{1}(end+1) = ...
-                    NodeContact(nd,nd.ymin,nd.ymax,FType,this.Connections(1));
+                    sendtoConnections{1}(end+1) = ...
+                        NodeContact(nd,nd.ymin,nd.ymax,FType,this.Connections(1));
                 end
                 if nd.xmax == xmax
-                  sendtoConnections{2}(end+1) = ...
-                    NodeContact(nd,nd.ymin,nd.ymax,FType,this.Connections(2));
+                    sendtoConnections{2}(end+1) = ...
+                        NodeContact(nd,nd.ymin,nd.ymax,FType,this.Connections(2));
                 else
-                  % Make Vertical connection
-                  this.Faces(fcount) = ...
-                      Face([this.Nodes(i+1) nd],FType,enumOrient.Vertical);
-                  fcount = fcount - 1;
+                    % Make Vertical connection
+                    this.Faces(fcount) = ...
+                        Face([this.Nodes(i+1) nd],FType,enumOrient.Vertical);
+                    fcount = fcount - 1;
                 end
                 if nd.ymin(1) == ymin(1)
-                  sendtoConnections{3}(end+1) = ...
-                    NodeContact(nd,nd.xmin,nd.xmax,FType,this.Connections(3));
+                    sendtoConnections{3}(end+1) = ...
+                        NodeContact(nd,nd.xmin,nd.xmax,FType,this.Connections(3));
                 end
                 if nd.ymax(1) == ymax(1)
-                  sendtoConnections{4}(end+1) = ...
-                    NodeContact(nd,nd.xmin,nd.xmax,FType,this.Connections(4));
+                    sendtoConnections{4}(end+1) = ...
+                        NodeContact(nd,nd.xmin,nd.xmax,FType,this.Connections(4));
                 else
-                  % Make Horizontal connection
-                  this.Faces(fcount) = ...
-                      Face([this.Nodes(i+divx) nd],FType,enumOrient.Horizontal);
-                  fcount = fcount - 1;
+                    % Make Horizontal connection
+                    this.Faces(fcount) = ...
+                        Face([this.Nodes(i+divx) nd],FType,enumOrient.Horizontal);
+                    fcount = fcount - 1;
                 end
             end
-            
+
             %% SEND THE COMPILED LIST TO CONNECTIONS FOR PROCESSING
             for i = 1:length(this.Connections)
                 this.Connections(i).addNodeContacts(sendtoConnections{i});
             end
-            
+
             if ~isempty(this.Matrix) && ~isempty(this.Matrix.Geometry)
                 % Pass Nodes to Matrix for generation
                 [nodes, faces] = this.Matrix.discretize(this.Nodes);
                 this.Nodes = [this.Nodes nodes];
                 this.Faces = [this.Faces faces];
             end
-            
+
             this.isStateDiscretized = true;
             % fprintf(['Body ' this.name ' is discretized, but this.Nodes still need to reference their this.Faces.\n']);
         end
-        
+
         %% GRAPHICS FUNCTIONS
         function color = getColor(this)
             if this.isActive
@@ -1046,7 +1046,7 @@ classdef Body < handle
             % fprintf(['Plotted Body ' this.name '.\n']);
             % Remove object from plot
             % this.removeFromFigure(AxisReference);
-            
+
             if this.isValid
                 if ~isempty(this.matl) && ~isempty(this.matl.Color)
                     fillcolor = this.matl.Color;
@@ -1059,14 +1059,14 @@ classdef Body < handle
             edgecolor = this.getColor();
             % Find the extents of the body and position the rectangle(s)
             % accordingly
-            
+
             %% Case 1: If it has 6 connections it is a cuboid
             if length(this.Connections) == 6
                 % Render as cuboid
-                
+
                 return;
             end
-            
+
             %% Case 2: It is a cylinder
             % If one connection is vertical and x = 0
             for iConnection = this.Connections
@@ -1090,7 +1090,7 @@ classdef Body < handle
                                 R*[gmaxy;maxx]+RootPosition ...
                                 R*[gmaxy;-maxx]+RootPosition ...
                                 R*[gminy;-maxx]+RootPosition];
-                            
+
                             this.Group.Model.GhostGUIObjects(end+1) = fill(p(1,:),p(2,:),...
                                 fillcolor,...
                                 'EdgeColor',edgecolor,...
@@ -1102,7 +1102,7 @@ classdef Body < handle
                             [~,~,miny,maxy] = this.limits(enumOrient.Horizontal);
                         end
                     end
-                    
+
                     OffsetRot = this.Group.Position.Rot;
                     R = RotMatrix(OffsetRot);
                     RootPosition = [this.Group.Position.x; this.Group.Position.y];
@@ -1110,7 +1110,7 @@ classdef Body < handle
                         R*[maxy;maxx]+RootPosition ...
                         R*[maxy;-maxx]+RootPosition ...
                         R*[miny;-maxx]+RootPosition];
-                    
+
                     this.removeFromFigure(AxisReference)
                     this.GUIObjects = fill(p(1,:),p(2,:),...
                         fillcolor,...'FaceColor',fillcolor,...
@@ -1120,7 +1120,7 @@ classdef Body < handle
                     return;
                 end
             end
-            
+
             %% Case 3: It is an annulus
             % Get extents of body
             [~,~,minx, maxx] = this.limits(enumOrient.Vertical);
@@ -1141,7 +1141,7 @@ classdef Body < handle
                         R*[gmaxy;maxx]+RootPosition ...
                         R*[gmaxy;minx]+RootPosition ...
                         R*[gminy;minx]+RootPosition];
-                    
+
                     this.Group.Model.GhostGUIObjects(end+1) = fill(p(1,:),p(2,:),...
                         fillcolor,...
                         'EdgeColor',edgecolor,...
@@ -1149,12 +1149,12 @@ classdef Body < handle
                         'HitTest','off',...
                         'FaceAlpha',0.25,...
                         'EdgeAlpha',0.75);
-                    
+
                     p = [R*[gminy;-minx]+RootPosition ...
                         R*[gminy;-maxx]+RootPosition ...
                         R*[gmaxy;-maxx]+RootPosition ...
                         R*[gmaxy;-minx]+RootPosition];
-                    
+
                     this.Group.Model.GhostGUIObjects(end+1) = fill(p(1,:),p(2,:),...
                         fillcolor,...'FaceColor',fillcolor,...
                         'EdgeColor',edgecolor,...
@@ -1169,7 +1169,7 @@ classdef Body < handle
             OffsetRot = this.Group.Position.Rot;
             R = RotMatrix(OffsetRot);
             RootPosition = [this.Group.Position.x; this.Group.Position.y];
-            
+
             p1 = [R*[miny;maxx]+RootPosition ...
                 R*[maxy;maxx]+RootPosition ...
                 R*[maxy;minx]+RootPosition ...
@@ -1178,7 +1178,7 @@ classdef Body < handle
                 R*[miny;-maxx]+RootPosition ...
                 R*[maxy;-maxx]+RootPosition ...
                 R*[maxy;-minx]+RootPosition];
-            
+
             if length(this.GUIObjects) == 2 && ...
                     isgraphics(this.GUIObjects(1)) && ...
                     isgraphics(this.GUIObjects(2))
@@ -1203,9 +1203,9 @@ classdef Body < handle
                     'LineWidth',1,...
                     'HitTest','off');
             end
-            
+
         end
-        
+
     end
 end
 

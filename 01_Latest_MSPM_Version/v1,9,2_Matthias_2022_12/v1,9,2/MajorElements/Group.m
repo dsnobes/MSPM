@@ -1,7 +1,7 @@
 classdef Group < handle
     %Group Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties (Constant)
         ConnectionTolerance = 1e-6; % 0.001 mm plenty small enough for films
         Extension = 1.33;
@@ -10,7 +10,7 @@ classdef Group < handle
         HighlightedColor = [0 1 0];
         NormalColor = [0 0 0];
     end
-    
+
     properties (Dependent)
         isValid;
         Width;
@@ -19,7 +19,7 @@ classdef Group < handle
         InvalidBorder;
         isDiscretized;
     end
-    
+
     properties (Hidden)
         isStateValid logical = false;
         WidthState double;
@@ -29,25 +29,25 @@ classdef Group < handle
         isStateDiscretized logical = false;
         isEnvironmentCasted logical = false;
     end
-    
+
     properties
         isChanged logical = true;
         Bodies Body;
         Connections Connection;
         RelationManagers RelationManager;
-        
+
         GUIObjects;
         isActive = true;
         name = 'Default Group';
         Model Model;
         Position Position;
-        
+
         Nodes Node;
         Faces Face;
     end
-    
+
     methods
-        
+
         %% Constructor Function
         function this = Group(inputModel,inputPosition,inputBodies)
             if nargin == 0; return; end
@@ -100,7 +100,7 @@ classdef Group < handle
             % Remove any visual remenant
             this.removeFromFigure(gca);
         end
-        
+
         %% Get/Set Interface
         function Item = get(this,PropertyName)
             switch PropertyName
@@ -130,7 +130,7 @@ classdef Group < handle
                         ' is not found XXX\n']);
             end
         end
-        
+
         %% Add Objects
         function addBody(this,inputBodies)
             if isrow(inputBodies)
@@ -165,7 +165,7 @@ classdef Group < handle
             end
             this.Connections = unique(this.Connections,'rows');
         end
-        
+
         %% Clean up and Organization
         function cleanUpConnections(this)
             % Ensure Group.Connections Reflects the bodies within it
@@ -189,7 +189,7 @@ classdef Group < handle
             end
             if any(~keep); this.Connections = this.Connections(keep);
             end
-            
+
             keep = true(size(this.Connections));
             for i = 1:length(this.Connections)
                 if ~keep(i)
@@ -208,7 +208,7 @@ classdef Group < handle
                                     end
                                     iCon.addBody(jBody);
                                 end
-                                
+
                                 for iBridge = this.Model.Bridges
                                     if iBridge.Connection1 == jCon
                                         iBridge.Connection1 = iCon;
@@ -216,7 +216,7 @@ classdef Group < handle
                                         iBridge.Connection2 = iCon;
                                     end
                                 end
-                                
+
                                 for iLeak = this.Model.LeakConnections
                                     if iLeak.Connection1 == jCon
                                         iLeak.Connection1 = iCon;
@@ -224,14 +224,14 @@ classdef Group < handle
                                         iLeak.Connection2 = iCon;
                                     end
                                 end
-                                
+
                                 jCon.removeFromFigure(gca);
                             end
                         end
                     end
                 end
             end
-            
+
             if any(~keep)
                 for i = 1:length(this.Connections)
                     if ~keep(i)
@@ -240,7 +240,7 @@ classdef Group < handle
                 end
                 this.Connections = this.Connections(keep);
             end
-            
+
             for iCon = this.Connections
                 keep = true(size(iCon.Bodies));
                 for i = 1:length(iCon.Bodies)
@@ -252,7 +252,7 @@ classdef Group < handle
                     iCon.Bodies = iCon.Bodies(keep);
                 end
             end
-            
+
             count1 = false;
             count2 = false;
             for iCon = this.Connections
@@ -290,7 +290,7 @@ classdef Group < handle
                 end
             end
         end
-        
+
         %% Update on Demand
         function change(this)
             this.isChanged = true;
@@ -339,7 +339,7 @@ classdef Group < handle
                     'XXX \n']);
             end
             this.isStateValid = varb;
-            
+
             %% Update Width
             % From each body get the maximum radius of the cylindrical connections
             vard = this.MinimumDisplayLength;
@@ -350,7 +350,7 @@ classdef Group < handle
                 end
             end
             this.WidthState = vard*2;
-            
+
             %% Update Height
             % From each body get the maximum radius of the cylindrical connections
             vard = this.MinimumDisplayWidth;
@@ -361,7 +361,7 @@ classdef Group < handle
                 end
             end
             this.HeightState = vard;
-            
+
             %% Update isDiscretized
             varb = true;
             for iBody = this.Bodies
@@ -379,7 +379,7 @@ classdef Group < handle
                 end
             end
             this.isStateDiscretized = varb;
-            
+
             this.isChanged = false;
         end
         function updateBorder(this,castToConnections)
@@ -415,14 +415,14 @@ classdef Group < handle
                         end
                         j = i + 1;
                     end
-                    
+
                     %% Decimate duplicate points and merge
                     Finished = Line2DChain.empty;
                     old_n = inf;
                     while ~isempty(Lines)
                         % Combine Step
                         n = length(Lines);
-                        
+
                         Eliminated = zeros(1,n);
                         for i = length(Lines):-1:2
                             for j = i-1:-1:1
@@ -444,7 +444,7 @@ classdef Group < handle
                         end
                         Finished = [Finished Lines(isDone)];
                         Lines(isDone) = [];
-                        
+
                         if old_n == n
                             fprintf('XXX Infinite Loop detected, exiting XXX\n');
                             Finished = [Finished Lines];
@@ -452,7 +452,7 @@ classdef Group < handle
                         end
                         old_n = n;
                     end
-                    
+
                     if length(Finished) > 1
                         % There can only be one valid border
                         % Pick the one with the largest value of x
@@ -514,7 +514,7 @@ classdef Group < handle
             if ~this.Model.surroundings.isDiscretized
                 this.Model.surroundings.discretize();
             end
-            
+
             for iCon = this.Connections
                 % Remove exising environment connections
                 k = 1; keep = true(size(iCon.NodeContacts));
@@ -528,7 +528,7 @@ classdef Group < handle
                 end
                 iCon.NodeContacts = iCon.NodeContacts(keep);
             end
-            
+
             % For each segment of pnts
             for i = 1:length(this.ValidBorderState.Pnts)-1
                 Start = this.ValidBorderState.Pnts(i);
@@ -562,7 +562,7 @@ classdef Group < handle
             end
             Discretized = this.isStateDiscretized;
         end
-        
+
         %% Discretizing
         function resetDiscretization(this)
             for iBody = this.Bodies
@@ -599,11 +599,11 @@ classdef Group < handle
                                         max(2,ceil(iBody.divides(2)*derefinement_factor));
                                 elseif iBody.divides(2) == 1
                                     iBody.divides(1) = ...
-                                        max(2,ceil(iBody.divides(1)*derefinement_factor)); % Matthias: Corrected 
-                                        % Old (Steven)
-%                                         max(2,ceil(iBody.divides(2)*derefinement_factor));
-%                                         
-%                                         
+                                        max(2,ceil(iBody.divides(1)*derefinement_factor)); % Matthias: Corrected
+                                    % Old (Steven)
+                                    %                                         max(2,ceil(iBody.divides(2)*derefinement_factor));
+                                    %
+                                    %
                                 end
                             end
                         end
@@ -636,7 +636,7 @@ classdef Group < handle
             end
             % Discretize the surroundings
             this.updateBorder(true);
-            
+
             for iCon = this.Connections
                 if ~iCon.isDiscretized
                     iCon.discretize();
@@ -687,7 +687,7 @@ classdef Group < handle
             end
             this.isStateDiscretized = true;
         end
-        
+
         %% Finding things
         function Con = FindConnection(this,Pos,Orient,notCon)
             Pos = Pos(1,1:2);
@@ -751,7 +751,7 @@ classdef Group < handle
             y = center.x*Rot(2,1) + center.y*Rot(2,2) + this.Position.y;
             Pnt = Pnt2D(x,y);
         end
-        
+
         %% Graphics
         function color = getColor(this)
             if this.isActive; color = Group.HighlightedColor;
@@ -781,7 +781,7 @@ classdef Group < handle
                     this.removeFromFigure(AxisReference); % Group and Environmental
                     if showOptions(1) % Show Groups
                         color = this.getColor();
-                        
+
                         % Plot a single line
                         % Find horizontal extent of the Group
                         VectorLength = this.Width;
@@ -792,7 +792,7 @@ classdef Group < handle
                         VStart = [this.Position.x ; this.Position.y ] - ...
                             R * [(TotalVectorLength-VectorLength)/2; 0];
                         VEnd = R * [TotalVectorLength; 0] + VStart;
-                        
+
                         % Plot line
                         this.GUIObjects = line(...
                             [VStart(1) VEnd(1)],...
@@ -826,14 +826,14 @@ classdef Group < handle
                         rotate = RotMatrix(this.Position.Rot - pi/2);
                         % Show the validBorder
                         if ~isempty(this.ValidBorder)
-                          if ~isvalid(this.ValidBorder)
-                            this.update();
-                          end
-                          [XData, YData] = ...
+                            if ~isvalid(this.ValidBorder)
+                                this.update();
+                            end
+                            [XData, YData] = ...
                                 DistortPositionVectors(...
                                 this.ValidBorder.XData, this.ValidBorder.YData, ...
                                 shift, rotate);
-                            
+
                             this.GUIObjects(end+1) = line(...
                                 'XData',XData,...
                                 'YData',YData,...
@@ -867,7 +867,7 @@ classdef Group < handle
                 case 'Static'
                     if showOptions(1) % Show Groups
                         color = this.getColor();
-                        
+
                         % Plot a single line
                         % Find horizontal extent of the Group
                         VectorLength = max(...
@@ -880,7 +880,7 @@ classdef Group < handle
                             this.Position.y ] - ...
                             R * [(TotalVectorLength-VectorLength)/2; 0];
                         VEnd = R * [TotalVectorLength; 0] + VStart;
-                        
+
                         % Plot line
                         this.GUIObjects = line(...
                             [VStart(1) VEnd(1)],...
@@ -904,165 +904,165 @@ classdef Group < handle
 end
 
 function [Lines,i,j] = intersects(i,j,Lines)
-if i < 1 || j < 1 || i > length(Lines) || j > length(Lines)
-    return;
-end
-kill_i = false;
-kill_j = false;
-istart = Lines(i).Pnts(1);
-iend = Lines(i).Pnts(end);
-jstart = Lines(j).Pnts(1);
-jend = Lines(j).Pnts(end);
-if all(Lines(i).XData == Lines(j).XData) && ~(istart.y == iend.y)
-    % Both Vertical and may overlap
-    if iend.y < jstart.y || istart.y > jend.y
+    if i < 1 || j < 1 || i > length(Lines) || j > length(Lines)
         return;
     end
-    x = istart.x;
-    if istart.y <= jstart.y
-        % i starts before j
-        if iend.y <= jend.y
-            % i is staggered with j
-            temp = iend.y;
-            if (istart == jstart)
-                kill_i = true;
-            else
-                Lines(i).Pnts(end).y = jstart.y;
-            end
-            if (jend.y == temp)
-                kill_j = true;
-            else
-                Lines(j).Pnts(1).y = temp;
-            end
-        else
-            % j is within i
-            if (iend ~= jend)
-                Lines(end+1) = Line2DChain(x,jend.y,x,iend.y);
-            end
-            if (istart == jstart)
-                kill_i = true;
-            else
-                Lines(i).Pnts(end).y = jstart.y;
-            end
-            kill_j = true;
+    kill_i = false;
+    kill_j = false;
+    istart = Lines(i).Pnts(1);
+    iend = Lines(i).Pnts(end);
+    jstart = Lines(j).Pnts(1);
+    jend = Lines(j).Pnts(end);
+    if all(Lines(i).XData == Lines(j).XData) && ~(istart.y == iend.y)
+        % Both Vertical and may overlap
+        if iend.y < jstart.y || istart.y > jend.y
+            return;
         end
-    else
-        % j starts before i
-        if jend.y <= iend.y
-            % j is staggered with i
-            temp = jend.y;
-            if (istart == jstart)
-                kill_j = true;
-            else
-                Lines(j).Pnts(end).y = istart.y;
-            end
-            if (iend.y == temp)
-                kill_i = true;
-            else
-                Lines(i).Pnts(1).y = temp;
-            end
-        else
-            % i is within j
-            if (iend ~= jend)
-                Lines(end+1) = Line2DChain(x,iend.y,x,jend.y);
-            end
-            if (istart == jstart)
-                kill_j = true;
-            else
-                Lines(j).Pnts(end).y = istart.y;
-            end
-            kill_i = true;
-        end
-    end
-elseif all(Lines(i).YData == Lines(j).YData) && ~(istart.x == iend.x)
-    % Both Horizontal and may overlap
-    if iend.x < jstart.x || istart.x > jend.x
-        return;
-    end
-    if istart.x == jstart.x && iend.x == jend.x
-        kill_i = true;
-        kill_j = true;
-    else
-        y = istart.y;
-        if istart.x <= jstart.x
+        x = istart.x;
+        if istart.y <= jstart.y
             % i starts before j
-            if iend.x <= jend.x
+            if iend.y <= jend.y
                 % i is staggered with j
-                % i --|-|
-                % j   |-|--
-                temp = iend.x;
-                if (istart.x == jstart.x)
+                temp = iend.y;
+                if (istart == jstart)
                     kill_i = true;
                 else
-                    Lines(i).Pnts(end).x = jstart.x;
+                    Lines(i).Pnts(end).y = jstart.y;
                 end
-                if (temp == jend.x)
+                if (jend.y == temp)
                     kill_j = true;
                 else
-                    Lines(j).Pnts(1).x = temp;
+                    Lines(j).Pnts(1).y = temp;
                 end
             else
                 % j is within i
-                % i -|--|-
-                % j  |--|
-                kill_j = true;
-                if (iend.x ~= jend.x)
-                    Lines(end+1) = Line2DChain(jend.x,y,iend.x,y);
+                if (iend ~= jend)
+                    Lines(end+1) = Line2DChain(x,jend.y,x,iend.y);
                 end
-                if (istart.x == jstart.x)
+                if (istart == jstart)
                     kill_i = true;
+                else
+                    Lines(i).Pnts(end).y = jstart.y;
                 end
-                Lines(i).Pnts(end).x = jstart.x;
+                kill_j = true;
             end
         else
             % j starts before i
-            if jend.x <= iend.x
+            if jend.y <= iend.y
                 % j is staggered with i
-                % i   |-|--
-                % j --|-|
-                temp = jend.x;
+                temp = jend.y;
                 if (istart == jstart)
                     kill_j = true;
                 else
-                    Lines(j).Pnts(end).x = istart.x;
+                    Lines(j).Pnts(end).y = istart.y;
                 end
-                if (iend.x == temp)
+                if (iend.y == temp)
                     kill_i = true;
                 else
-                    Lines(i).Pnts(1).x = temp;
+                    Lines(i).Pnts(1).y = temp;
                 end
             else
                 % i is within j
-                % i  |--|
-                % j -|--|-
-                kill_i = true;
                 if (iend ~= jend)
-                    Lines(end+1) = Line2DChain(iend.x,y,jend.x,y);
+                    Lines(end+1) = Line2DChain(x,iend.y,x,jend.y);
                 end
                 if (istart == jstart)
                     kill_j = true;
                 else
-                    Lines(j).Pnts(end).x = istart.x;
+                    Lines(j).Pnts(end).y = istart.y;
+                end
+                kill_i = true;
+            end
+        end
+    elseif all(Lines(i).YData == Lines(j).YData) && ~(istart.x == iend.x)
+        % Both Horizontal and may overlap
+        if iend.x < jstart.x || istart.x > jend.x
+            return;
+        end
+        if istart.x == jstart.x && iend.x == jend.x
+            kill_i = true;
+            kill_j = true;
+        else
+            y = istart.y;
+            if istart.x <= jstart.x
+                % i starts before j
+                if iend.x <= jend.x
+                    % i is staggered with j
+                    % i --|-|
+                    % j   |-|--
+                    temp = iend.x;
+                    if (istart.x == jstart.x)
+                        kill_i = true;
+                    else
+                        Lines(i).Pnts(end).x = jstart.x;
+                    end
+                    if (temp == jend.x)
+                        kill_j = true;
+                    else
+                        Lines(j).Pnts(1).x = temp;
+                    end
+                else
+                    % j is within i
+                    % i -|--|-
+                    % j  |--|
+                    kill_j = true;
+                    if (iend.x ~= jend.x)
+                        Lines(end+1) = Line2DChain(jend.x,y,iend.x,y);
+                    end
+                    if (istart.x == jstart.x)
+                        kill_i = true;
+                    end
+                    Lines(i).Pnts(end).x = jstart.x;
+                end
+            else
+                % j starts before i
+                if jend.x <= iend.x
+                    % j is staggered with i
+                    % i   |-|--
+                    % j --|-|
+                    temp = jend.x;
+                    if (istart == jstart)
+                        kill_j = true;
+                    else
+                        Lines(j).Pnts(end).x = istart.x;
+                    end
+                    if (iend.x == temp)
+                        kill_i = true;
+                    else
+                        Lines(i).Pnts(1).x = temp;
+                    end
+                else
+                    % i is within j
+                    % i  |--|
+                    % j -|--|-
+                    kill_i = true;
+                    if (iend ~= jend)
+                        Lines(end+1) = Line2DChain(iend.x,y,jend.x,y);
+                    end
+                    if (istart == jstart)
+                        kill_j = true;
+                    else
+                        Lines(j).Pnts(end).x = istart.x;
+                    end
                 end
             end
         end
     end
-end
-if kill_i
-    Lines(i) = [];
-    if kill_j
-        if (i > j)
+    if kill_i
+        Lines(i) = [];
+        if kill_j
+            if (i > j)
+                Lines(j) = [];
+            else
+                Lines(j-1) = [];
+            end
+        end
+        j = i;
+        i = i - 1;
+    else
+        if kill_j
             Lines(j) = [];
-        else
-            Lines(j-1) = [];
+            j = j - 1;
         end
     end
-    j = i;
-    i = i - 1;
-else
-    if kill_j
-        Lines(j) = [];
-        j = j - 1;
-    end
-end
 end

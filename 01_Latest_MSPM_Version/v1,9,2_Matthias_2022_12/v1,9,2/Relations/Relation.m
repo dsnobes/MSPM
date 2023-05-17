@@ -5,7 +5,7 @@ classdef Relation < handle
     % ... -> con1 - Connection
     % ... -> con2 - Connection
     % ... -> frame - Frame, associated with a mechanism with stroke
-    
+
     properties
         name;
         mode enumRelation;
@@ -14,7 +14,7 @@ classdef Relation < handle
         frame Frame;
         manager RelationManager;
     end
-    
+
     methods
         function this = Relation(manager,name,mode,con1,con2,frame)
             this.manager = manager;
@@ -29,7 +29,7 @@ classdef Relation < handle
         function deReference(this)
             for i = length(this.manager.Relations):-1:1
                 if this.manager.Relations(i).con1 == this.con1 && ...
-                    this.manager.Relations(i).con2 == this.con2
+                        this.manager.Relations(i).con2 == this.con2
                     this.manager.Relations(i) = [];
                 end
             end

@@ -1,7 +1,7 @@
 classdef Mesher < handle
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties
         % Solid Related
         oscillation_depth_N int16 = 6;
@@ -9,14 +9,14 @@ classdef Mesher < handle
         maximum_growth double = 1.5;
         HeatExchangerFinDivisions int16 = 3;
         MinSolidTimeStep = 1e-4;
-        
+
         % Gas Related
         Gas_Entrance_Exit_N int16 = 8;
         Gas_Maximum_Size double = 0.02;
         Gas_Minimum_Size double = 0.003;
         name = 'Universal Mesher';
     end
-    
+
     methods
         function item = get(this,Property)
             switch Property
@@ -33,11 +33,11 @@ classdef Mesher < handle
                 case 'Minimum Solid Time Step'
                     item = this.MinSolidTimeStep;
                 case 'Gas Entrance Exit N'
-                  item = this.Gas_Entrance_Exit_N;
+                    item = this.Gas_Entrance_Exit_N;
                 case 'Gas Maximum Size'
-                  item = this.Gas_Maximum_Size;
+                    item = this.Gas_Maximum_Size;
                 case 'Gas Minimum Size'
-                  item = this.Gas_Minimum_Size;
+                    item = this.Gas_Minimum_Size;
                 otherwise
                     fprintf(['XXX Mesher GET Inteface for ' Property ' is not found XXX\n']);
             end
@@ -57,11 +57,11 @@ classdef Mesher < handle
                 case 'Minimum Solid Time Step'
                     this.MinSolidTimeStep = item;
                 case 'Gas Entrance Exit N'
-                  this.Gas_Entrance_Exit_N = item;
+                    this.Gas_Entrance_Exit_N = item;
                 case 'Gas Maximum Size'
-                  this.Gas_Maximum_Size = item;
+                    this.Gas_Maximum_Size = item;
                 case 'Gas Minimum Size'
-                  this.Gas_Minimum_Size = item;
+                    this.Gas_Minimum_Size = item;
                 otherwise
                     fprintf(['XXX Mesher SET Inteface for ' Property ' is not found XXX\n']);
             end
@@ -151,6 +151,6 @@ classdef Mesher < handle
             doesit = false;
         end
     end
-    
+
 end
 

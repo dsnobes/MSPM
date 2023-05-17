@@ -4,11 +4,11 @@ SIK = sum(abs(statistics.To_Sink));
 FLO = sum(abs(statistics.Flow_Loss));
 
 if isfield(statistics,'ExergyLossShuttle')
-  EXShuttle = sum(abs(statistics.ExergyLossShuttle));
+    EXShuttle = sum(abs(statistics.ExergyLossShuttle));
 end
 if isfield(statistics,'ExergyLossStatic')
-  EXStatic = sum(abs(statistics.ExergyLossStatic));
+    EXStatic = sum(abs(statistics.ExergyLossStatic));
 end
 if isfield(statistics,'Power')
-  POW = mean(statistics.Power);
+    POW = mean(statistics.Power);
 end

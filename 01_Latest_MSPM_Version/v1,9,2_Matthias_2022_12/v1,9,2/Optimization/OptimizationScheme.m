@@ -1,5 +1,5 @@
 classdef OptimizationScheme < handle
-    
+
     properties
         Model;
         name;
@@ -10,7 +10,7 @@ classdef OptimizationScheme < handle
         Fields;
         History;
     end
-    
+
     methods
         function this = OptimizationScheme(Model)
             if nargin > 0

@@ -1,7 +1,7 @@
 classdef ListObj < handle
     %LISTOBJ Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties
         MODE = '';
         lvl int8;
@@ -11,7 +11,7 @@ classdef ListObj < handle
         Info; % Various
         Subs ListObj;
     end
-    
+
     methods
         function this = ListObj(MODE,lvl,Parent,Child,info)
             if nargin > 0
@@ -24,7 +24,7 @@ classdef ListObj < handle
                 end
             end
         end
-        
+
         function on_click(this)
             switch this.MODE
                 case 'Editstr'
@@ -43,26 +43,26 @@ classdef ListObj < handle
                         {num2str(get(this.Parent,this.Child))});
                     if ~isempty(newvalue)
                         number = SymbolicMath(newvalue{1});
-    % Matthias: Custom Heat Transfer Coefficient is allowed to be NaN                   
-                        if strcmp(this.Child,'Custom Heat Transfer Coefficient') && number <= 0                         
-                                msgbox('Must be greater than zero.');
+                        % Matthias: Custom Heat Transfer Coefficient is allowed to be NaN
+                        if strcmp(this.Child,'Custom Heat Transfer Coefficient') && number <= 0
+                            msgbox('Must be greater than zero.');
                         elseif ~strcmp(this.Child,'Custom Heat Transfer Coefficient') && isnan(number)
-                                msgbox('Invalid formula: Ensure that your formula is complete and avoids scientific notation.');
+                            msgbox('Invalid formula: Ensure that your formula is complete and avoids scientific notation.');
                         else
-                            set(this.Parent,this.Child,number);   
+                            set(this.Parent,this.Child,number);
                         end
-                    end                  
-%                     if strcmp(this.Child,'Custom Heat Transfer Coefficient')
-%                         if number <= 0
-%                             msgbox('Must be greater than zero.');
-%                         end    
-%                     else
-%                         if isnan(number)
-%                             msgbox('Invalid formula: Ensure that your formula is complete and avoids scientific notation.');
-%                         else
-%                             set(this.Parent,this.Child,number);
-%                         end
-%                     end
+                    end
+                    %                     if strcmp(this.Child,'Custom Heat Transfer Coefficient')
+                    %                         if number <= 0
+                    %                             msgbox('Must be greater than zero.');
+                    %                         end
+                    %                     else
+                    %                         if isnan(number)
+                    %                             msgbox('Invalid formula: Ensure that your formula is complete and avoids scientific notation.');
+                    %                         else
+                    %                             set(this.Parent,this.Child,number);
+                    %                         end
+                    %                     end
                 case 'Editnumconvert'
                     % Bring up user form inputdlg
                     newvalue = (inputdlg(['Edit the value of ' this.Child ' in ' this.Info{2}],...
@@ -157,7 +157,7 @@ classdef ListObj < handle
                     end
             end
         end
-        
+
         function [objects] = getObjs(this,expanded)
             if ischar(this.Child)
                 if ~strcmp(this.Child,'Deleteobj')
@@ -225,7 +225,7 @@ classdef ListObj < handle
                                         ListObj('Expandobj',slvl,Item,'Expand Matrix');...
                                         ListObj('Pickfunction',slvl,Item,'Radial Discretization Function','Function - Discretization'); ...
                                         ListObj('Pickfunction',slvl,Item,'Axial Discretization Function','Function - Discretization'); ...
-% Matthias: Added to display and edit custom heat transfer coefficient                                        
+                                        % Matthias: Added to display and edit custom heat transfer coefficient
                                         ListObj('Editnum',slvl,Item,'Custom Heat Transfer Coefficient','W/m^2 K (Only for Solid Bodies or gas bodies with a matrix containing a source! ''NaN'' to disable.)'); ...
                                         ListObj('Deleteobj',slvl,Item,'[X] Delete')];
                                 case 'Connection'
@@ -339,7 +339,7 @@ classdef ListObj < handle
                 objects = this;
             end
         end
-        
+
         function [output] = getString(this)
             starter = repmat('. . . ',1,this.lvl);
             if ischar(this.Child)
@@ -393,7 +393,7 @@ classdef ListObj < handle
                     end
             end
         end
-        
+
         function [indicator] = isExpandable(this)
             switch this.MODE
                 case {'Expandobj', 'Expandlist'}
@@ -403,6 +403,6 @@ classdef ListObj < handle
             end
         end
     end
-    
+
 end
 

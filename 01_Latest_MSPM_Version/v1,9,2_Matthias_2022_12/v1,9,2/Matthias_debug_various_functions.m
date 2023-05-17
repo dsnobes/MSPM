@@ -27,22 +27,22 @@ legend
 
 %% find const temp bodies in model while debugging
 for o=1:length(this.Groups.Bodies)
-if strcmp(this.Groups.Bodies(o).matl.name,'Constant Temperature'); disp(o); end
+    if strcmp(this.Groups.Bodies(o).matl.name,'Constant Temperature'); disp(o); end
 end
 %%
 for o=1:length(ME.Model.Sensors)
-if strfind(ME.Model.Sensors(o).name,'Re'); disp(o + ": "+ME.Model.Sensors(o).name); end
+    if strfind(ME.Model.Sensors(o).name,'Re'); disp(o + ": "+ME.Model.Sensors(o).name); end
 end
 %%
 xs = [];
 Dhs=[];
 for o=1:length(this.Groups.Bodies(1, 21).Faces  )
-if isfield(this.Groups.Bodies(1, 21).Faces(o).data,'Dh')
-    Dhs(end+1) = this.Groups.Bodies(1, 21).Faces(o).data.Dh;
-    xs(end+1) = o;
-%     xs(end+1) = this.Groups.Bodies(1, 21).Faces(o).ymin;
-    disp(o + ": "+Dhs(end));
-end
+    if isfield(this.Groups.Bodies(1, 21).Faces(o).data,'Dh')
+        Dhs(end+1) = this.Groups.Bodies(1, 21).Faces(o).data.Dh;
+        xs(end+1) = o;
+        %     xs(end+1) = this.Groups.Bodies(1, 21).Faces(o).ymin;
+        disp(o + ": "+Dhs(end));
+    end
 end
 figure
 plot(xs,Dhs)
@@ -57,14 +57,14 @@ end
 
 %%
 for i=1:length(this.Groups.Bodies)
-   if  strcmp(this.Groups.Bodies(i).name, 'App Gap')
-       disp(i)
-   end
+    if  strcmp(this.Groups.Bodies(i).name, 'App Gap')
+        disp(i)
+    end
 end
 for i=1:length(this.Groups.Bodies(1, 12).Nodes.Faces    )
-   if  this.Groups.Bodies(1, 12).Nodes.Faces  (i).Type == 'Gas'
-       disp(i)
-   end
+    if  this.Groups.Bodies(1, 12).Nodes.Faces  (i).Type == 'Gas'
+        disp(i)
+    end
 end
 'Exp Space'
 'HX Inlet top'
