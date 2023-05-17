@@ -2079,7 +2079,7 @@ classdef Simulation < handle
         sz = size(recordValues{region},1);
         if sz > length(temp)
             temp = [temp; NaN(sz-length(temp),1)];
-            disp('XXX Simulation.m: Using error correction for loops. May lead to invalid result. XXX')
+            % disp('XXX Simulation.m: Using error correction for loops. May lead to invalid result. XXX')
         end
         recordValues{region}(1:length(temp),end) = temp;
         
