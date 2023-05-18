@@ -26,7 +26,7 @@ NodeFactor = 1;
 
 RunConditions_temp = struct(... %Default values
     'Model', model{1},...
-    'title','Raphael Old HX',...
+    'title','Raphael_Old_HX',...
     'simTime', simTime,... [s]
     'minCycles', minCycles,...
     'SS', SS,...
@@ -47,7 +47,7 @@ for i = 1:length(model)
             RunConditions(n).Model = model{i};
             RunConditions(n).rpm = speeds(speed);
             RunConditions(n).EnginePressure = pressures(pressure);
-            RunConditions(n).title = strcat(RunConditions_temp.title, " RPM-", num2str(speeds(speed)), " P-", num2str(pressures(pressure)));
+            RunConditions(n).title = convertStringsToChars(strcat(RunConditions_temp.title, "_RPM-", num2str(speeds(speed)), "_P-", num2str(pressures(pressure))));
             n = n+1;
         end
     end
