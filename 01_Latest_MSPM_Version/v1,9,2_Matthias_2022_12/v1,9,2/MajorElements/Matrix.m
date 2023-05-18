@@ -166,7 +166,7 @@ classdef Matrix < handle
                         else; msgbox('Numeric Values only'); end
                         op = inputdlg(...
                             {'Porosity (%)','Wire Diameter (m)'},...
-                            'Generate a Woven Screen Matrix',[1 35],op);
+                            'Generate a Woven Screen Matrix',[1 100],op);
                     end
                     this.data.Porosity = str2double(op{1})/100;
                     %this.Volumetric_HeatCapacity = (1 - this.data.Porosity)*this.matl.HeatCapacity*this.matl.Density;
@@ -204,7 +204,7 @@ classdef Matrix < handle
                         else; msgbox('Numeric Values only'); end
                         op = inputdlg(...
                             {'Porosity (%)','Wire Diameter (m)'},...
-                            'Generate a Random Fibre Matrix',[1 35],op);
+                            'Generate a Random Fibre Matrix',[1 100],op);
                     end
                     this.data.Porosity = str2double(op{1})/100;
                     %this.Volumetric_HeatCapacity = (1-this.data.Porosity)*this.matl.HeatCapacity*this.matl.Density;
@@ -242,7 +242,7 @@ classdef Matrix < handle
                         else; msgbox('Numeric Values only'); end
                         op = inputdlg(...
                             {'Porosity (%)','Particle Diameter (m)'},...
-                            'Generate a Stacked Particle Matrix',[1 35],op);
+                            'Generate a Stacked Particle Matrix',[1 100],op);
                     end
                     this.data.Porosity = str2double(op{1});
                     %this.Volumetric_HeatCapacity = (1-this.data.Porosity)*this.matl.HeatCapacity*this.matl.Density;
@@ -280,7 +280,7 @@ classdef Matrix < handle
                         else; msgbox('Numeric Values only'); end
                         op = inputdlg(...
                             {'Gap Width (m)','Sheet Thickness (m)','Sheet Roughness (m)'},...
-                            'Generate a Stacked Foil Matrix',[1 35],op);
+                            'Generate a Stacked Foil Matrix',[1 100],op);
                     end
                     this.data.gap = str2double(op{1});
                     this.data.dw = str2double(op{2});
@@ -325,7 +325,7 @@ classdef Matrix < handle
                         else; msgbox('Numeric Values only'); end
                         op = inputdlg(...
                             {'C1','C2','C3','C4','Surface area to volume ratio [m^2/m^3]','Porosity'},...
-                            'Provide Parameters Nu = C1*Re^C2, F = C3*Re^C4 and other properties',[1 35],op);
+                            'Provide Parameters Nu = C1*Re^C2, F = C3*Re^C4 and other properties',[1 100],op);
                     end
                     this.data.C1 = str2double(op{1});
                     this.data.C2 = str2double(op{2});
@@ -376,7 +376,7 @@ classdef Matrix < handle
                             end
                         end
                         if ~found; index = 1; end
-                        index = listdlg('ListString',Source,'SelectionMode','single','InitialValue',index,'ListSize',[300 300]); % [W H] Default: [160 300]
+                        index = listdlg('ListString',Source,'SelectionMode','single','InitialValue',index,'ListSize',[300 350]); % [W H] Default: [160 300]
                         if isempty(this.data); this.data = struct('Classification',Source{index});
                         else; this.data.Classification = Source{index}; end
 
@@ -396,7 +396,7 @@ classdef Matrix < handle
                                     DeterminingFinProperties = true;
 
                                     while (DeterminingFinProperties)
-                                        op = inputdlg(Source,'Determine Fin Properties',[1 35],op);
+                                        op = inputdlg(Source,'Determine Fin Properties',[1 100],op);
                                         if isempty(op); ChoosingClassification = true; break; end
 
                                         % If the User inputed the appropriate data
@@ -416,7 +416,7 @@ classdef Matrix < handle
                                             for iCon = this.Body.Connections
                                                 Source{i} = iCon.name; i = i + 1;
                                             end
-                                            index = listdlg('ListString',Source,'SelectionMode','single','InitialValue',1, 'ListSize',[300 300]); % [W H] Default: [160 300]
+                                            index = listdlg('ListString',Source,'SelectionMode','single','InitialValue',1, 'ListSize',[300 350]); % [W H] Default: [160 300]
 
                                             % If the User made a selection
                                             if index > 0
@@ -485,7 +485,7 @@ classdef Matrix < handle
 
                                     while (DeterminingGeneralChannelGeometry)
                                         op = inputdlg(Source,'Define General Heat Exchanger Geometry',...
-                                            [1 35],op);
+                                            [1 100],op);
                                         if isempty(op); ChoosingClassification = true; break; end
                                         if isStrNumeric(op{1}) && isStrNumeric(op{2}) && ...
                                                 isStrNumeric(op{3}) && isStrNumeric(op{4})
@@ -519,7 +519,7 @@ classdef Matrix < handle
 
                                                     while (DetermingGeometryProperties)
                                                         op = inputdlg(Source,'Define In Channel Geometry',...
-                                                            [1 35],op);
+                                                            [1 100],op);
                                                         if isempty(op); DeterminingGeometry = true; break; end
                                                         this.data.BaseWidth = str2double(op{1});
                                                         this.data.FinThickness = str2double(op{2});
@@ -643,7 +643,7 @@ classdef Matrix < handle
                                     DeterminingNormalToTubeType = true;
                                     while (DeterminingNormalToTubeType)
                                         op = inputdlg(Source,'Define Finned Tube HX Geometry',...
-                                            [1 35],op);
+                                            [1 100],op);
                                         if isempty(op); ChoosingClassification = true; break;
                                         end
                                         if isStrNumeric(op{1}) && isStrNumeric(op{2}) && ...
@@ -832,7 +832,7 @@ classdef Matrix < handle
                                     DeterminingNormalToTubeType = true;
                                     while (DeterminingNormalToTubeType)
                                         op = inputdlg(Source,'Define Tube Bank Internal HX Geometry',...
-                                            [1 35],op);
+                                            [1 100],op);
                                         if isempty(op); ChoosingClassification = true; break;
                                         end
                                         if isStrNumeric(op{1}) && isStrNumeric(op{2}) && ...
@@ -906,7 +906,7 @@ classdef Matrix < handle
                                     DeterminingParameterSet = true;
                                     while (DeterminingParameterSet)
                                         op = inputdlg(Source,'Pick Nu = C1*Re^C2*Pr^0.33, F = C3*Re^C4, HX Surface to Volume Ratio and porosity',...
-                                            [1 35],op);
+                                            [1 100],op);
                                         if isempty(op); ChoosingClassification = true; break;
                                         end
                                         if isStrNumeric(op{1}) && isStrNumeric(op{2}) && ...

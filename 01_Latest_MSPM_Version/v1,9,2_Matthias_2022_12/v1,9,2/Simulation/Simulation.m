@@ -296,7 +296,7 @@ classdef Simulation < handle
                 while isempty(ME.Model.name) && ~isempty(ME.Model.Sensors)
                     answer = inputdlg(...
                         ['Please name the model so that ' ...
-                        'the data can be saved properly'],'Name Model',[1 50],{''});
+                        'the data can be saved properly'],'Name Model',[1 200],{''});
                     if ~isempty(answer{1})
                         ME.Model.name = answer{1};
                     end

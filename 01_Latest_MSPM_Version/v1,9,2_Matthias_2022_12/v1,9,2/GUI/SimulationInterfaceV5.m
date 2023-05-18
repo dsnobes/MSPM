@@ -315,7 +315,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                                 [~,~,defaultval,~] = h.SelectBody(2).limits(enumOrient.Vertical);
                             end
                         end
-                        x = inputdlg(prompt,'Specify Bridge Offset',[1 35],{num2str(defaultval)});
+                        x = inputdlg(prompt,'Specify Bridge Offset',[1, 200],{num2str(defaultval)});
                         % Define the Bridge
                         if ~isempty(x)
                             h.SelectBody(h.IndexB) = Bod;
@@ -455,7 +455,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                         'PromptString','Which Object did you select?',...
                         'ListString',names,...
                         'SelectionMode','single',...
-                        'ListSize',[400 100]);
+                        'ListSize',[400 250]);
                 else
                     index = 1;
                     tf = true;
@@ -475,7 +475,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                         'PromptString','Which Object did you select?',...
                         'ListString',names,...
                         'SelectionMode','single',...
-                        'ListSize',[400 100]);
+                        'ListSize',[400 250]);
                 else
                     index = 1;
                     tf = true;
@@ -517,7 +517,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                                     'PromptString','What type of relationship?',...
                                     'ListString',names,...
                                     'SelectionMode','single',...
-                                    'ListSize',[400 100]);
+                                    'ListSize',[400 250]);
                                 switch names{Type}
                                     case 'Constant Offset'
                                         EnumType = enumRelation.Constant;

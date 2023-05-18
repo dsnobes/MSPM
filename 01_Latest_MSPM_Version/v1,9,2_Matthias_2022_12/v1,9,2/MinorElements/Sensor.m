@@ -86,7 +86,7 @@ classdef Sensor < handle
                         notdone = true;
                         while notdone
                             answer = inputdlg('How many sample points along the line?',...
-                                'Integer only',[1 50]);
+                                'Integer only',[1 200]);
                             test = str2double(answer);
                             if ~isnan(test)
                                 if floor(test) == test

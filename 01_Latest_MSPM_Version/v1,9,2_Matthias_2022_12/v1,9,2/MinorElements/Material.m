@@ -116,21 +116,21 @@ classdef Material < handle
                     this.Color = [0.1 0.1 0.8]; % Blue
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.25; % W/(m*K)
-                    this.dT_du = 1/1690; % Specific heat capacity	1,390	–	1,920	J/kg·K
+                    this.dT_du = 1/1690; % Specific heat capacity	1,390	ï¿½	1,920	J/kgï¿½K
                     this.Density = 1050;
                 case 'Plastic, Acrylic'
                     % http://www.matweb.com/search/datasheet.aspx?bassnum=O1303&ckck=1
                     this.Color = [0.909 0.941 1]; %
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.198; % W/(m*K)
-                    this.dT_du = 1/1810; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1810; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 1185; % kg/(m^3)
                 case 'Plastic, Polycarbonate (High Viscosity)'
                     % MatWeb
                     this.Color = [0.909 0.941 1]; %
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.198; % W/(m*K)
-                    this.dT_du = 1/1810; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1810; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 1200; % kg/(m^3)
                 case 'Plastic, Poly-Ethylene (High Density)'
                     % MatWeb
@@ -140,7 +140,7 @@ classdef Material < handle
                     % engineeringtoolbox
                     this.ThermalConductivity = 0.453; % W/(m*K)
                     % this.ThermalConductivity = 0.196; % W/(m*K)
-                    this.dT_du = 1/1540; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1540; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 946; % kg/(m^3)
                 case 'Plastic, Polyester (PET)'
                     % Added by Matthias, Nov26 2021
@@ -149,7 +149,7 @@ classdef Material < handle
                     % https://www.sciencedirect.com/book/9781895198478/handbook-of-polymers
                     this.ThermalConductivity = 0.15; % W/(m*K)
                     % https://www.professionalplastics.com/professionalplastics/ThermalPropertiesofPlasticMaterials.pdf
-                    this.dT_du = 1/1275; % Specific heat capacity	1,200 - 1,350	J/kg·K
+                    this.dT_du = 1/1275; % Specific heat capacity	1,200 - 1,350	J/kgï¿½K
                     this.Density = 1350; % kg/(m^3)
                 case 'SIL 180 oil (as solid)'
                     % Added by Matthias
@@ -164,12 +164,12 @@ classdef Material < handle
                         op = {'150','0.1'}; % Default temperature and conductivity
                         op = inputdlg(...
                             {'Temperature for material properties (between 20C and 170C)','Thermal Conductivity in W/mK (default is from SIL180 datasheet)'},...
-                            'SIL 180 oil',[1 35],op);
+                            'SIL 180 oil',[1 100],op);
                         inputs = str2double(op);
                         if ~any(isnan(inputs))
                             done = true;
                             this.ThermalConductivity = inputs(2); % W/(m*K) (datasheet at 20C)
-                            this.dT_du = 1/ interp1(temps_c,c_values,inputs(1)); % Specific heat capacity	J/kg·K (estimated from SYLTHERM 800)
+                            this.dT_du = 1/ interp1(temps_c,c_values,inputs(1)); % Specific heat capacity	J/kgï¿½K (estimated from SYLTHERM 800)
                             this.Density = interp1(temps_d,dens_values,inputs(1)); % kg/(m^3) (measured)
                             MaterialName = [MaterialName ', k=' num2str(inputs(2)) ' W/mK, T=' num2str(inputs(1)) ' C'];
                         end
@@ -183,28 +183,28 @@ classdef Material < handle
                     % https://dielectricmfg.com/knowledge-base/ultem/
                     % https://www.azom.com/properties.aspx?ArticleID=1883
                     % https://www.professionalplastics.com/professionalplastics/ThermalPropertiesofPlasticMaterials.pdf
-                    this.dT_du = 1/1666; % Specific heat capacity	1500 (2 sources) - 2000	J/kg·K
+                    this.dT_du = 1/1666; % Specific heat capacity	1500 (2 sources) - 2000	J/kgï¿½K
                     this.Density = 1290; % kg/(m^3)
                 case 'Rubber, Polychloroprene (Neoprene)'
                     % https://thermtest.com/materials-database#NEOPRENE
                     this.Color = [0.1 0.1 0.1];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.192; % W/(m*K)
-                    this.dT_du = 1/1029; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1029; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 1250; % kg/(m^3)
                 case 'Rubber, Acrylonitrile-Butadiene (Nitrile)'
                     % https://thermtest.com/materials-database#NITRILE
                     this.Color = [33/255 16/255 0];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.243; % W/(m*K)
-                    this.dT_du = 1/1966; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1966; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 1000; % kg/(m^3)
                 case 'Rubber, Silicone'
                     % https://thermtest.com/materials-database#SILICONE-RUBBER-(MEDIU
                     this.Color = [22/255 25/255 37/255];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.335; % W/(m*K)
-                    this.dT_du = 1/1255; % Specific heat capacity	1,460	–	2,160	J/kg·K
+                    this.dT_du = 1/1255; % Specific heat capacity	1,460	ï¿½	2,160	J/kgï¿½K
                     this.Density = 1300; % kg/(m^3)
                 case 'Foam, Expanded Polystyrene'
                     % http://www.eyoungindustry.com/uploadfile/file/20160612/20160612155656_94768.pdf
@@ -225,13 +225,13 @@ classdef Material < handle
                         this.Density = Temp(index);
                     else
                         this.Density = str2double(inputdlg('Enter EPS density',...
-                            'Custom Expanded Polystyrene',[1 35],{'16'}));
+                            'Custom Expanded Polystyrene',[1 100],{'16'}));
                     end
                     this.Color = [1 0.83 0.83];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.1142*(this.Density)^(-0.371); % W/(m*K)
                     % https://www.engineeringtoolbox.com/specific-heat-capacity-d_391.html
-                    this.dT_du = 1/(1400); % Specific heat capacity	1,300	–	1,500	J/kg·K
+                    this.dT_du = 1/(1400); % Specific heat capacity	1,300	ï¿½	1,500	J/kgï¿½K
                 case 'Foam, Extruded Polystyrene'
                     % http://www.eyoungindustry.com/uploadfile/file/20160612/20160612155656_94768.pdf
                     % Implement subtype interface
@@ -248,13 +248,13 @@ classdef Material < handle
                         this.Density = Temp(index);
                     else
                         this.Density = str2double(inputdlg('Enter XPS density',...
-                            'Custom Expanded Polystyrene',[1 35],{'30'}));
+                            'Custom Expanded Polystyrene',[1 100],{'30'}));
                     end
                     this.Color = [1 0.83 0.83];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.036; % W/(m*K)
                     % https://www.engineeringtoolbox.com/specific-heat-capacity-d_391.html
-                    this.dT_du = 1/(1400); % Specific heat capacity	1,300	–	1,500	J/kg·K
+                    this.dT_du = 1/(1400); % Specific heat capacity	1,300	ï¿½	1,500	J/kgï¿½K
                 case 'Foam, Rigid Polyurethane'
                     % http://www.react-ite.eu/uploads/tx_mddownloadbox/PP02_Thermal_insulation_materials_-_PP02_20130715.pdf
                     % Implement subtype interface
@@ -274,18 +274,18 @@ classdef Material < handle
                         this.Density = Temp(index);
                     else
                         this.Density = str2double(inputdlg('Enter PUR density',...
-                            'Custom Rigid Polyurethane',[1 35],{'16'}));
+                            'Custom Rigid Polyurethane',[1 100],{'16'}));
                     end
                     this.Color = [0.957 0.937 0.745];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.0371*(this.Density)^(-0.098); % W/(m*K)
-                    this.dT_du = 1/1500; % Specific heat capacity	1,300	–	1,500	J/kg·K
+                    this.dT_du = 1/1500; % Specific heat capacity	1,300	ï¿½	1,500	J/kgï¿½K
                 case 'Rigid Polyurethane Foam, General Plastics FR-4718'
                     % https://www.generalplastics.com/products/fr-4700
                     this.Color = [0.957 0.937 0.745];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 0.06; % (at 24C) W/(m*K)
-                    this.dT_du = 1/1500; % (as above) Specific heat capacity	J/kg·K
+                    this.dT_du = 1/1500; % (as above) Specific heat capacity	J/kgï¿½K
                     this.Density = 288; % kg/(m^3)
                 case 'AIR' % Standard Air
                     this.Color = [0.906 0.906 0.906];% [231 231 231];

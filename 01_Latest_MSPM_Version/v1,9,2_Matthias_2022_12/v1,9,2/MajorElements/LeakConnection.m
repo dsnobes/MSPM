@@ -27,7 +27,7 @@ classdef LeakConnection < handle
             answer = {'0.2','0.5'};
             prompt = {'C1: ', 'C2: '};
             dlgtitle = 'What parameters are part of the leak equation Flow Rate [m^3/s] = C1*(dP)^C2?';
-            dims = [1 35];
+            dims = [1 100];
             trial = 1;
             while trial == 1 || ~isStrNumeric(answer{1}) || ~isStrNumeric(answer{2})
                 answer = inputdlg(prompt,dlgtitle,dims,answer);

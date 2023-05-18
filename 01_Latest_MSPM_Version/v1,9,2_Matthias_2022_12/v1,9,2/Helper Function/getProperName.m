@@ -8,7 +8,7 @@ function [ answer ] = getProperName( ObjectName )
         end
         trial = trial + 1;
         answer = inputdlg(['Enter a descriptive name for the ' ObjectName],...
-            'Name(filename,title,etc...):',[1 50]);
+            'Name(filename,title,etc...):',[1 200]);
         if isempty(answer{1})
             answer = '';
             return;
