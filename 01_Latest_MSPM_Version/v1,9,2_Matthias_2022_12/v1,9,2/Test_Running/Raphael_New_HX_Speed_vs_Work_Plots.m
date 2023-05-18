@@ -1,4 +1,4 @@
-function [RunConditions] = AA_Raphael_Sensitivity()
+function [RunConditions] = Raphael_New_HX_Speed_vs_Work_Plots()
 % Written by Steven Middleton
 % Experimental data extraction added by Connor Speer, September 2021.
 % Debuged and finalized by Sara Eghbali, 24 Sep 2021
@@ -9,7 +9,7 @@ function [RunConditions] = AA_Raphael_Sensitivity()
 %% Input Parameters
 % Name of experimental data files.
 model = {
-   'Original Raphael New HX - Adjusted Start Temperature' 
+   'Original Raphael New HX - Updated H' 
     }; % Name of MSPM model geometry.
 
 pressures = [300, 435, 570] .*1000; % [Pa]
@@ -26,7 +26,7 @@ NodeFactor = 1;
 
 RunConditions_temp = struct(... %Default values
     'Model', model{1},...
-    'title','',...
+    'title','Raphael_New_HX',...
     'simTime', simTime,... [s]
     'minCycles', minCycles,...
     'SS', SS,...
@@ -47,9 +47,7 @@ for i = 1:length(model)
             RunConditions(n).Model = model{i};
             RunConditions(n).rpm = speeds(speed);
             RunConditions(n).EnginePressure = pressures(pressure);
-            RunConditions(n).title = RunConditions(n).Model;
-            RunConditions(n).SourceTemp = 150 + 273.15;
-            RunConditions(n).SourceTemp = 5 + 273.15;
+            RunConditions(n).title = convertStringsToChars(strcat(RunConditions_temp.title, "_RPM-", num2str(speeds(speed)), "_P-", num2str(pressures(pressure))));
             n = n+1;
         end
     end
