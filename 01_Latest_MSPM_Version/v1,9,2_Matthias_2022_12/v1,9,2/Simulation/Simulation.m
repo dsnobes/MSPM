@@ -280,7 +280,7 @@ classdef Simulation < handle
                 % temperatures from RunConditions (here 'options') to not be
                 % applied to the model.
                 % 'bCond' is used in solid temperature acceleration code (in this function).
-                % 'bCond' is created in Model.discretize and filled with the Souce
+                % 'bCond' is created in Model.discretize and filled with the Source
                 % and Sink temp from the model file. Here it is updated with the
                 % correct temperatures.
                 NGas = length(ME.P) - 1;
