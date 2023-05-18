@@ -455,7 +455,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                         'PromptString','Which Object did you select?',...
                         'ListString',names,...
                         'SelectionMode','single',...
-                        'ListSize',[400 250]);
+                        'ListSize',[1000 800]);
                 else
                     index = 1;
                     tf = true;
@@ -475,7 +475,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
                         'PromptString','Which Object did you select?',...
                         'ListString',names,...
                         'SelectionMode','single',...
-                        'ListSize',[400 250]);
+                        'ListSize',[1000 800]);
                 else
                     index = 1;
                     tf = true;
@@ -1022,9 +1022,9 @@ function saveModel(savenew,h)
         notdone = true;
         while notdone
             if ~isempty(h.Model.name)
-                name = inputdlg('Save as...','Save Model',1,{h.Model.name});
+                name = inputdlg('Save as...','Save Model',[1, 200],{h.Model.name});
             else
-                name = inputdlg('Save as...','Save Model');
+                name = inputdlg('Save as...','Save Model',[1, 200]);
             end
             if isempty(name); return; else; name = name{1}; end
             if ~isempty(regexp(name,'[/\*:?"<>|]','once'))
