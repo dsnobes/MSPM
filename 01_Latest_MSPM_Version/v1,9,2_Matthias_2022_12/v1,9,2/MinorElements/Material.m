@@ -25,7 +25,13 @@ classdef Material < handle
             'AIR';
             'N2 Gas';
             'H2 Gas';
-            'Helium Gas';
+            'OLD Helium Gas';
+            '100% Helium';  % Helium data aquired from NIST and interpolated with a 3rd degree polynomial
+            '99% Helium';   % from 100-600K. dT_du(1/Cv) was approximated as a constant
+            '95% Helium';
+            '90% Helium';
+            '85% Helium';
+            '80% Helium';
             'SIL 180 oil (as solid)'
             'Perfect Insulator';
             'Constant Temperature'};
@@ -37,8 +43,8 @@ classdef Material < handle
         Color double;
         Phase enumMaterial;
         ThermalConductivity double;
-        dT_du double;
-        dh_dT double;
+        dT_du double;   % 1/Cv [(kg*K)/J]
+        dh_dT double;   % Cp [J/(kg*K)]
         u2T function_handle;
         Density double;
 
@@ -329,17 +335,83 @@ classdef Material < handle
                     this.u2T = @(u) - 4.0202E-13*(u.^2) + 1.0068E-04*u + 1.8779E+00; % Matthias: corrected variable
                     this.kFunc = @(T) 9.0864E-10*(T.^3) - 1.0269E-06*(T.^2) + 8.7129E-04*T - 7.4747E-03; % Verified
                     this.muFunc = @(T) 8.4578E-13*(T.^3) - 1.8183E-09*(T.^2) + 2.8432E-06*T+ 1.8282E-04; % Verified
-                case 'Helium Gas' % Helium
-                    this.Color = [0.906 0.906 0.906];% [231 231 231];
+                case 'OLD Helium Gas' % Helium Gas
+                    this.Color = [1.0 0.70 1.0]; % [214 111 206];
                     this.Phase = enumMaterial.Gas;
-                    this.R = 2077.1;
-                    this.dT_duFunc = @(u) 0.00032096; % Verified
+                    this.R = 2077.27;
+                    this.dT_duFunc = @(u) 0.00032096; % Verified  Change in temperature/unit change in internal energy
                     this.dT_du = this.dT_duFunc(298);
                     this.dh_dTFunc = @(T) 20.786/0.004002602;
                     this.dh_dT = this.dh_dTFunc(298);
                     this.u2T = @(u) 0.00032096*u; % Verified
                     this.kFunc = @(T) 1.7109E-10*(T.^3) - 3.3300E-07*(T.^2) + 4.5124E-04*(T) + 3.9533E-02; % Verified
                     this.muFunc = @(T) 2.8183E-14*(T.^3) - 5.6714E-11*(T.^2) + 7.0661E-08*(T) + 3.4685E-06; % Verified
+                case '100% Helium' % 100/0 Helium/Air
+                    this.Color = [1.0 0.70 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 2077.27;
+                    this.dT_duFunc = @(u) 0.00032089;  
+                    this.dT_du = this.dT_duFunc(298); 
+                    this.dh_dTFunc = @(T) -5.3406e-08*(T.^3) + 6.8448842e-05*(T.^2) - 0.028154819*(T) + 5196.8234;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00032089*u;
+                    this.kFunc = @(T) 2.3243e-10*(T.^3) - 4.0939e-07*(T.^2) + 0.00054371*(T) + 0.023579;
+                    this.muFunc = @(T) 2.171e-14*(T.^3) - 4.1676e-11*(T.^2) + 6.4811e-08*(T) + 3.6548e-06;
+                case '99% Helium' % 99/1 Helium/Air
+                    this.Color = [1.0 0.75 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 1955.33;
+                    this.dT_duFunc = @(u) 0.00032334;
+                    this.dT_du = this.dT_duFunc(298);
+                    this.dh_dTFunc = @(T) -6.088e-08*(T.^3) + 8.1068432e-05*(T.^2) - 0.033304878*(T) + 5155.6355;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00032334*u;e
+                    this.kFunc = @(T) 2.3175e-10*(T.^3) - 4.0764e-07*(T.^2) + 0.0005372*(T) + 0.022493;
+                    this.muFunc = @(T) 2.2741e-14*(T.^3) - 4.339e-11*(T.^2) + 6.6019e-08*(T) + 3.5264e-06;
+                case '95% Helium' % 95/5 Helium/Air
+                    this.Color = [1.0 0.80 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 1583.50;
+                    this.dT_duFunc = @(u) 0.00033355;  
+                    this.dT_du = this.dT_duFunc(298);
+                    this.dh_dTFunc = @(T) -9.0776e-08*(T.^3) + 0.00013154679*(T.^2) - 0.053905116*(T) + 4990.8843;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00033355*u;
+                    this.kFunc = @(T) 2.2683e-10*(T.^3) - 3.976e-07*(T.^2) + 0.00051085*(T) + 0.018682;
+                    this.muFunc = @(T) 2.6206e-14*(T.^3) - 4.9223e-11*(T.^2) + 7.0094e-08*(T) + 3.059e-06;
+                case '90% Helium' % 90/10 Helium/Air
+                    this.Color = [1.0 0.85 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 1279.39;
+                    this.dT_duFunc = @(u) 0.00034726;
+                    this.dT_du = this.dT_duFunc(298);
+                    this.dh_dTFunc = @(T) -1.2815e-07*(T.^3) + 0.00019464474*(T.^2) - 0.079655412*(T) + 4784.9453;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00034726*u;
+                    this.kFunc = @(T) 2.1731e-10*(T.^3) - 3.8042e-07*(T.^2) + 0.00047804*(T) + 0.014891;
+                    this.muFunc = @(T) 2.9371e-14*(T.^3) - 5.4685e-11*(T.^2) + 7.3836e-08*(T) + 2.5658e-06;
+                case '85% Helium' % 85/15 Helium/Air
+                    this.Color = [1.0 0.9 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 1073.27;
+                    this.dT_duFunc = @(u) 0.00036213;
+                    this.dT_du = this.dT_duFunc(298);
+                    this.dh_dTFunc = @(T) -1.6552e-07*(T.^3) + 0.00025774269*(T.^2) - 0.10540571*(T) + 4579.0062;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00036213*u;
+                    this.kFunc = @(T) 2.0571e-10*(T.^3) - 3.6039e-07*(T.^2) + 0.00044615*(T) + 0.011914;
+                    this.muFunc = @(T) 3.1607e-14*(T.^3) - 5.8661e-11*(T.^2) + 7.6488e-08*(T) + 2.156e-06;
+                case '80% Helium' % 80/20 Helium/Air
+                    this.Color = [1.0 0.95 1.0];
+                    this.Phase = enumMaterial.Gas;
+                    this.R = 924.34;
+                    this.dT_duFunc = @(u) 0.00037834;
+                    this.dT_du = this.dT_duFunc(298);
+                    this.dh_dTFunc = @(T) -2.0289e-07*(T.^3) + 0.00032084064*(T.^2) - 0.13115601*(T) + 4373.0672;
+                    this.dh_dT = this.dh_dTFunc(298);
+                    this.u2T = @(u) 0.00037834*u;
+                    this.kFunc = @(T) 1.9314e-10*(T.^3) - 3.3907e-07*(T.^2) + 0.00041563*(T) + 0.009548;
+                    this.muFunc = @(T) 3.3187e-14*(T.^3) - 6.1566e-11*(T.^2) + 7.8357e-08*(T) + 1.8136e-06;
                 case 'Perfect Insulator'
                     this.Color = [0.15 0.15 0.15];
                     this.Phase = enumMaterial.Solid;
