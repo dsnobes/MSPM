@@ -1757,8 +1757,10 @@ function RunTestSet_Callback(~, ~, h)
     % NOV26 2021: updated by Matthias to use uigetfile for convenience
     sel = uigetfile('Test_Running\*.m');
     if sel
-        func = str2func(sel(1:end-2)); % cut off '.m' file ending
-        Test_Set = func();
+       ParallelTestSet(sel, h)
+
+        % func = str2func(sel(1:end-2)); % cut off '.m' file ending
+        % Test_Set = func();
         
     % ORIGINAL CODE
     % % Find the Folder "Test_Running"
@@ -1783,19 +1785,19 @@ function RunTestSet_Callback(~, ~, h)
     %     Test_Set = func();
         
         % Chunk the test set into groups that have the same model
-        group_start = 1;
-        group_end = 1;
-        while group_end <= length(Test_Set)
-            Model = Test_Set(group_start).Model;
-            while group_end <= length(Test_Set) && ...
-                    strcmp(Model,Test_Set(group_end).Model)
-                group_end = group_end + 1;
-            end
-            group_end = group_end - 1;
-            h = load_sub(Model, h);
-            h.Model.Run(Test_Set(group_start:group_end));
-            group_start = group_end + 1;
-            group_end = group_start;
+        % group_start = 1;
+        % group_end = 1;
+        % while group_end <= length(Test_Set)
+        %     Model = Test_Set(group_start).Model;
+        %     while group_end <= length(Test_Set) && ...
+        %             strcmp(Model,Test_Set(group_end).Model)
+        %         group_end = group_end + 1;
+        %     end
+        %     group_end = group_end - 1;
+        %     h = load_sub(Model, h);
+        %     h.Model.Run(Test_Set(group_start:group_end));
+        %     group_start = group_end + 1;
+        %     group_end = group_start;
             
             
             % The Model name is the default name used, it overwrites automatically
@@ -1804,7 +1806,7 @@ function RunTestSet_Callback(~, ~, h)
             %     Model = h.Model;
             %     save(newfile,'Model');
             %     fprintf('Model Saved.\n');
-        end
+        % end
     end
 end
 
