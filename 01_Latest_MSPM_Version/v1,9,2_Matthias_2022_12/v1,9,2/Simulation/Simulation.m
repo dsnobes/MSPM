@@ -2087,8 +2087,6 @@ classdef Simulation < handle
 end
 
 function [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles)
-    %% Main Loop
-
     ME.curTime = 0;
     ME.CycledE = 0;
     cycle_count = 0;
