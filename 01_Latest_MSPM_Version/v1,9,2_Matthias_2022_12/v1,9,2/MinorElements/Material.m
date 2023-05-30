@@ -365,7 +365,7 @@ classdef Material < handle
                     this.dT_du = this.dT_duFunc(298);
                     this.dh_dTFunc = @(T) -6.088e-08*(T.^3) + 8.1068432e-05*(T.^2) - 0.033304878*(T) + 5155.6355;
                     this.dh_dT = this.dh_dTFunc(298);
-                    this.u2T = @(u) 0.00032334*u;e
+                    this.u2T = @(u) 0.00032334*u;
                     this.kFunc = @(T) 2.3175e-10*(T.^3) - 4.0764e-07*(T.^2) + 0.0005372*(T) + 0.022493;
                     this.muFunc = @(T) 2.2741e-14*(T.^3) - 4.339e-11*(T.^2) + 6.6019e-08*(T) + 3.5264e-06;
                 case '95% Helium' % 95/5 Helium/Air
