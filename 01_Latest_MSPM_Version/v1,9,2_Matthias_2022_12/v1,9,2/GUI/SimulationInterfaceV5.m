@@ -113,6 +113,507 @@ function varargout = SimulationInterfaceV5_OutputFcn(hObject, ~, handles) %#ok<I
     varargout{1} = handles.output;
 end
 
+function InsertBody(h, C)
+    % Select 4 connections
+    switch get(gcf,'SelectionType')
+        case 'normal'
+            L = true;
+        case 'alt'
+            L = false;
+        case 'extend'
+            L = false;
+        otherwise
+            L = true;
+    end
+    found = false;
+    %% Get round specific information
+    switch h.IndexC
+        case 1
+            DIR = enumOrient.Vertical;
+            prompt = 'New Body Inner Radius 1: ';
+            OFFSET = 0;
+        case 2
+            OFFSET = h.SelectCon(1).x;
+            if h.SelectCon(1).Orient == enumOrient.Vertical
+                DIR = enumOrient.Vertical;
+                prompt = 'New Body Radial Thickness: ';
+            else
+                DIR = enumOrient.Horizontal;
+                prompt = 'New Body Vertical Thickness: ';
+            end
+        case 3
+            OFFSET = 0;
+            if h.SelectCon(2).Orient == enumOrient.Vertical
+                DIR = enumOrient.Horizontal;
+                prompt = 'New Body Lower Vertical Position: ';
+            else
+                DIR = enumOrient.Vertical;
+                prompt = 'New Body Inner Radius: ';
+            end
+        case 4
+            OFFSET = h.SelectCon(3).x;
+            if h.SelectCon(2).Orient == enumOrient.Vertical
+                DIR = enumOrient.Horizontal;
+                prompt = 'New Body Thickness: ';
+            else
+                DIR = enumOrient.Vertical;
+                prompt = 'New Body Radial Thickness: ';
+            end
+        otherwise % We are done here
+            found = true;
+    end
+    
+    %% Find connection at click
+    if L && found == false % Left Click
+        if h.IndexC == 1
+            h.SelectCon(h.IndexC) = ...
+                h.Model.ActiveGroup.FindConnection(C);
+            found = true;
+            fprintf(['Selected Connection: ' ...
+                h.SelectCon(h.IndexC).name '.\n']);
+        else
+            Con = h.Model.ActiveGroup.FindConnection(...
+                C,DIR,h.SelectCon(h.IndexC-1));
+            if ~isempty(Con)
+                h.SelectCon(h.IndexC) = Con;
+                fprintf(['Selected Connection: ' ...
+                    h.SelectCon(h.IndexC).name '.\n']);
+                found = true;
+            else
+                found = false;
+            end
+        end
+    end
+    
+    %% Get user Input
+    if found == false
+        % Get User Radius Submission
+        DIM = '';
+        while ~isnumeric(DIM)
+            answer = inputdlg(prompt,'Specify Dimension Window');
+            if ~isempty(answer)
+                DIM = str2double(answer{1});
+            else
+                return;
+            end
+        end
+        % If this does not match any Group Connection then CreateNew
+        found = false;
+        for iCon = h.Model.ActiveGroup.Connections
+            if iCon.Orient == DIR && iCon.x == DIM+OFFSET
+                h.SelectCon(h.IndexC) = iCon;
+                found = true;
+            end
+        end
+        if ~found
+            h.SelectCon(h.IndexC) = Connection(DIM+OFFSET,DIR,h.Model.ActiveGroup);
+        end
+    end
+    
+    %% Iterate or finish up
+    if h.IndexC == 4
+        % Define the body
+        matl = [];
+        show_Model(h);
+        while isempty(matl)
+            [matl, tf] = listdlg(...
+                'PromptString','Select a material type for this new body:',...
+                'SelectionMode','single',...
+                'ListString',Material.Source);
+        end
+        if tf
+            newBody = Body(...
+                h.Model.ActiveGroup,...
+                h.SelectCon,...
+                Material(Material.Source{matl}));
+%                 if handles.Model.ActiveGroup.isOverlaping(newBody)
+%                     fprintf('XXX New Body overlaps, creation cancelled XXX\n');
+%                     handles.Model.clearHighLighting();
+%                 else
+                h.Model.ActiveGroup.addBody(newBody);
+%                 end
+        else
+            fprintf('XXX You must select a material, creation cancelled XXX\n');
+            h.Model.clearHighLighting();
+        end
+        h.IndexC = 1;
+    else
+        h.Model.HighLight(h.SelectCon(1:h.IndexC));
+        h.IndexC = h.IndexC + 1;
+    end
+end
+
+function InsertGroup(h, C)
+    % Will simply define a vertical Group at the next slot
+    % Determine where the user clicked
+    C = get(gca,'Currentpoint'); C = C(1,1:2);
+    h.Model.addGroup(Group(h.Model,Position(C(1),0,pi/2),[]));
+    h.Model.distributeGroup(h.InterGroupDistance);
+end
+
+function InsertBridge(h, C)
+    % Select 2 horizontal connections and 2 bodies
+    if h.IndexC == 1
+        if h.IndexB == 1
+            % Picking the first Connection
+            if isempty(h.Model.ActiveGroup)
+                ChangeGroup_Callback(hObject, [], h);
+            end
+            Con = h.Model.ActiveGroup.FindConnection(C);
+            if ~isempty(Con)
+                h.SelectCon(h.IndexC) = Con;
+                h.Model.HighLight(Con);
+                h.IndexC = 2;
+                set(h.message,'String','[click] Select the Foundation Body');
+            end
+        end
+    elseif h.IndexC == 2
+        if h.IndexB == 1
+            % Picking the first Body
+            Bod = h.SelectCon(1).findConnectedBody(C);
+            if ~isempty(Bod)
+                h.SelectBody(h.IndexB) = Bod;
+                h.Model.HighLight(Bod);
+                h.IndexB = 2;
+                set(h.message,'String','[click] Select the Connection for the other body (the Body that may shift)');
+            end
+        else
+            % Picking the second Connection
+            ChangeGroup_Callback(hObject, [], h);
+            Con = h.Model.ActiveGroup.FindConnection(C);
+            if ~isempty(Con)
+                h.SelectCon(h.IndexC) = Con;
+                h.Model.HighLight(Con);
+                h.IndexC = 3;
+                set(h.message,'String','[click] Select the associated body');
+            end
+        end
+    else
+        if h.IndexB == 2
+            % Picking the second Body
+            Bod = h.SelectCon(2).findConnectedBody(C);
+            if ~isempty(Bod)
+                % Finish and Create
+                if h.SelectCon(1).Orient == h.SelectCon(2).Orient
+                    if h.SelectCon(1).Orient == enumOrient.Vertical
+                        prompt = 'Select the height adjustment for body 2 as it is placed around body 1';
+                        [~,~,defaultval,~] = h.SelectBody(1).limits(enumOrient.Vertical);
+                    else
+                        prompt = 'Select the radial offset distance';
+                        defaultval = 0;
+                    end
+                else
+                    prompt = 'Select the vertical center offset for the horizontal face to be up the vertical face';
+                    if h.SelectCon(1).Orient == enumOrient.Vertical
+                        [~,~,defaultval,~] = h.SelectBody(1).limits(enumOrient.Vertical);
+                    else
+                        [~,~,defaultval,~] = h.SelectBody(2).limits(enumOrient.Vertical);
+                    end
+                end
+                x = inputdlg(prompt,'Specify Bridge Offset',[1, 200],{num2str(defaultval)});
+                % Define the Bridge
+                if ~isempty(x)
+                    h.SelectBody(h.IndexB) = Bod;
+                    h.Model.HighLight(Bod);
+                    h.Model.addBridge(Bridge(...
+                        h.SelectBody(1),h.SelectBody(2),...
+                        h.SelectCon(1),h.SelectCon(2),str2double(x{1})));
+                    h.IndexC = 1;
+                    h.IndexB = 1;
+                    set(h.message,'String','---');
+                end
+            end
+        end
+    end
+end
+
+function InsertLeakConnection(h, C)
+    % Select 2 horizontal connections and 2 bodies/Environments
+    Bod = Body.empty;
+    if h.IndexB == 1
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if ~isempty(Bod)
+            h.SelectBody(h.IndexB) = Bod;
+            h.Model.HighLight(Bod);
+            h.IndexB = 2;
+            set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
+        end
+    elseif h.IndexB == 2
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if Bod ~= h.SelectBody(1)
+            if ~isempty(Bod)
+                h.SelectBody(h.IndexB) = Bod;
+                h.Model.HighLight(Bod);
+                set(h.message,'String','---');
+                [N,E] = LeakConnection.getParameters();
+                h.Model.addLeakConnection(...
+                    LeakConnection(h.SelectBody(1),h.SelectBody(2),N,E));
+            end
+            return;
+        end
+        % No object was selected, select the environment instead
+        set(h.message,'String','---');
+        [N,E] = LeakConnection.getParameters();
+        h.Model.addLeakConnection(LeakConnection(h.SelectBody(1),h.Model.surroundings,N,E));
+    end
+end
+
+function InsertSensor(h, C)
+    % Select a group
+    C = C(1,1:2);
+    % Select a body
+    [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(objects)
+        for obj = objects
+            if isa(obj{1},'Body')
+                h.Model.HighLight(obj{1});
+                h.Model.addSensor(Sensor(h.Model,obj{1}));
+            end
+        end
+    end
+end
+
+function InsertPVoutput(h, C)
+    % Find, within a radius of confidence, the nearest Body
+    C = C(1,1:2);
+    [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(objects)
+        for obj = objects
+            if isa(obj{1},'Body')
+                if obj{1}.matl.Phase == enumMaterial.Gas
+                    h.Model.addPVoutput(PVoutput(obj{1}));
+                    set(h.message,'String',['PVoutput added to Body: ' obj{1}.name]);
+                else
+                    set(h.message,'String','Must select a Gas Body');
+                end
+            end
+        end
+    end
+end
+
+function InsertNonConnection(h, C)
+    % Select 2 horizontal connections and 2 bodies
+    Bod = Body.empty;
+    if h.IndexB == 1
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if ~isempty(Bod)
+            h.SelectBody(h.IndexB) = Bod;
+            h.Model.HighLight(Bod);
+            h.IndexB = 2;
+            set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
+        end
+    elseif h.IndexB == 2
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if Bod ~= h.SelectBody(1)
+            if ~isempty(Bod)
+                h.SelectBody(h.IndexB) = Bod;
+                h.Model.HighLight(Bod);
+                set(h.message,'String','---');
+                h.Model.addNonConnection(...
+                    NonConnection(h.SelectBody(1),h.SelectBody(2)));
+            end
+            return;
+        end
+        % No object was selected, select the environment instead
+        set(h.message,'String','---');
+        h.Model.addNonConnection(...
+            NonConnection(h.SelectBody(1),h.Model.surroundings));
+    end
+end
+
+function InsertCustomMinorLoss(h, C)
+    % Find, within a radius of confidence, the nearest body
+    C = C(1,1:2);
+    [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(objects)
+        for obj = objects
+            if isa(obj{1},'Body')
+                h.SelectBody(h.IndexB) = obj{1};
+                if (h.IndexB == 2)
+                    % Finalize Custom Minor Loss
+                    h.IndexB = 1;
+                    h.Model.addCustomMinorLoss(...
+                        CustomMinorLoss(...
+                        h.SelectBody(1),...
+                        h.SelectBody(2)));
+                end
+                h.IndexB = 2;
+            end
+        end
+    end
+end
+
+function Select(h, C)
+    % Find, within a radius of confidence, the nearest...
+    %   Body, Group, Connection, Bridge and Leak Connection
+    C = C(1,1:2);
+    [names, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(names)
+        if length(names) > 1
+            [index,tf] = listdlg(...
+                'PromptString','Which Object did you select?',...
+                'ListString',names,...
+                'SelectionMode','single',...
+                'ListSize',[1000 800]);
+        else
+            index = 1;
+            tf = true;
+        end
+        if tf
+            h.Model.switchHighLighting(objects{index});
+        end
+    end
+end
+
+function MultiSelect(h, C)
+    % Find, within a radius of confidence, the nearest...
+    %   Body, Group, Connection, Bridge and Leak Connection
+    C = C(1,1:2);
+    [names, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(names)
+        if length(names) > 1
+            [index,tf] = listdlg(...
+                'PromptString','Which Object did you select?',...
+                'ListString',names,...
+                'SelectionMode','single',...
+                'ListSize',[1000 800]);
+        else
+            index = 1;
+            tf = true;
+        end
+        if tf
+            h.Model.HighLight(objects{index});
+        end
+    end
+end
+
+function InsertRelation(h, C)
+    % Find, within a radius of confidence, the nearest connection
+    C = C(1,1:2);
+    [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+    if ~isempty(objects)
+        for objcll = objects
+            obj = objcll{1};
+            if isa(obj,'Connection')
+                if h.IndexC == 1 || ...
+                        (obj.Orient == h.SelectCon(1).Orient && ...
+                        obj.Group == h.SelectCon(1).Group)
+                    h.SelectCon(h.IndexC) = obj;
+                    if (h.IndexC == 2)
+                        % Finalize the new relation
+                        % Ask the user about the type
+                        names = {
+                            'Constant Offset', ...
+                            'Cross-Section Maintaining', ...
+                            'Zero x Based Scale', ...
+                            'Smallest x Based Scale', ...
+                            'Width Set'};
+                        if obj.Orient == enumOrient.Horizontal
+                            names{end+1} = 'Defines Stroke Length';
+                            names{end+1} = 'Defines Piston Length';
+                        end
+                        for RMan = obj.Group.RelationManagers
+                            if RMan.Orient == obj.Orient; break; end
+                        end
+                        if ~isempty(RMan)
+                            [Type, tf] = listdlg(...
+                            'PromptString','What type of relationship?',...
+                            'ListString',names,...
+                            'SelectionMode','single',...
+                            'ListSize',[400 250]);
+                        switch names{Type}
+                            case 'Constant Offset'
+                                EnumType = enumRelation.Constant;
+                            case 'Cross-Section Maintaining'
+                                EnumType = enumRelation.AreaConstant;
+                            case 'Zero x Based Scale'
+                                EnumType = enumRelation.Scaled;
+                            case 'Smallest x Based Scale'
+                                EnumType = enumRelation.LowestScaled;
+                            case 'Width Set'
+                                EnumType = enumRelation.Width;
+                            case 'Defines Stroke Length'
+                                EnumType = enumRelation.Stroke;
+                            case 'Defines Piston Length'
+                                EnumType = enumRelation.Piston;
+                        end
+                        if tf
+                            Label = RMan.getLabel(EnumType, ...
+                                h.SelectCon(1), h.SelectCon(2));
+                            if isempty(Label)
+                                Label = getProperName([names{Type} ' Relation']);
+                            end
+                            if isempty(Label); return; end
+                            if EnumType == enumRelation.Stroke || ...
+                                    EnumType == enumRelation.Piston
+                                % Ask which mechanism?
+                                objs = h.Model.Converters;
+                                mecs = cell(0);
+                                for index = length(objs):-1:1
+                                    mecs{index} = objs(index).name;
+                                end
+                                index = listdlg(...
+                                    'ListString',mecs,...
+                                    'SelectionMode','single');
+                                if isempty(index)
+                                    break;
+                                else
+                                    Mech = objs(index).Frames(1);
+                                end
+                            end
+                            switch EnumType
+                                case {enumRelation.Constant, ...
+                                        enumRelation.AreaConstant, ...
+                                        enumRelation.Scaled, ...
+                                        enumRelation.LowestScaled, ...
+                                        enumRelation.Width}
+                                    success = RMan.addRelation(...
+                                        Label, ...
+                                        EnumType, ...
+                                        h.SelectCon(1), ...
+                                        h.SelectCon(2));
+                                case {enumRelation.Stroke, ...
+                                        enumRelation.Piston}
+                                    % Ask which mechanism?
+                                    success = RMan.addRelation(...
+                                        Label, ...
+                                        EnumType, ...
+                                        h.SelectCon(1), ...
+                                        h.SelectCon(2), ...
+                                        Mech);
+                                otherwise
+                                    msgbox(['Selected relation type' ...
+                                        ' is not implemented']);
+                                    h.IndexC = 1;
+                                    break;
+                            end
+                            if ~success
+                                msgbox(['Relationship was not ' ...
+                                    'added successfully']);
+                            end
+                            h.IndexC = 1;
+                        end
+                        end
+                        h.IndexC = 1;
+                    end
+                    h.IndexC = 2;
+                else
+                    msgbox(['The two connections must have the ' ...
+                        'same orientation.']);
+                end
+            end
+        end
+    end
+end
+
 %% General button codes
 function GUI_ButtonDownFcn(hObject, ~, h)
     C = get(hObject,'Currentpoint');
@@ -121,488 +622,33 @@ function GUI_ButtonDownFcn(hObject, ~, h)
         % Select the group based on where the user clicked
         h.Model.FindGroup(C);
     end
+    % switch case for which button was pressed, out of the whole GUI
     switch h.MODE
         case 'InsertBody'
-            % Select 4 connections
-            switch get(gcf,'SelectionType')
-                case 'normal'
-                    L = true;
-                case 'alt'
-                    L = false;
-                case 'extend'
-                    L = false;
-                otherwise
-                    L = true;
-            end
-            found = false;
-            %% Get round specific information
-            switch h.IndexC
-                case 1
-                    DIR = enumOrient.Vertical;
-                    prompt = 'New Body Inner Radius 1: ';
-                    OFFSET = 0;
-                case 2
-                    OFFSET = h.SelectCon(1).x;
-                    if h.SelectCon(1).Orient == enumOrient.Vertical
-                        DIR = enumOrient.Vertical;
-                        prompt = 'New Body Radial Thickness: ';
-                    else
-                        DIR = enumOrient.Horizontal;
-                        prompt = 'New Body Vertical Thickness: ';
-                    end
-                case 3
-                    OFFSET = 0;
-                    if h.SelectCon(2).Orient == enumOrient.Vertical
-                        DIR = enumOrient.Horizontal;
-                        prompt = 'New Body Lower Vertical Position: ';
-                    else
-                        DIR = enumOrient.Vertical;
-                        prompt = 'New Body Inner Radius: ';
-                    end
-                case 4
-                    OFFSET = h.SelectCon(3).x;
-                    if h.SelectCon(2).Orient == enumOrient.Vertical
-                        DIR = enumOrient.Horizontal;
-                        prompt = 'New Body Thickness: ';
-                    else
-                        DIR = enumOrient.Vertical;
-                        prompt = 'New Body Radial Thickness: ';
-                    end
-                otherwise % We are done here
-                    found = true;
-            end
-            
-            %% Find connection at click
-            if L && found == false % Left Click
-                if h.IndexC == 1
-                    h.SelectCon(h.IndexC) = ...
-                        h.Model.ActiveGroup.FindConnection(C);
-                    found = true;
-                    fprintf(['Selected Connection: ' ...
-                        h.SelectCon(h.IndexC).name '.\n']);
-                else
-                    Con = h.Model.ActiveGroup.FindConnection(...
-                        C,DIR,h.SelectCon(h.IndexC-1));
-                    if ~isempty(Con)
-                        h.SelectCon(h.IndexC) = Con;
-                        fprintf(['Selected Connection: ' ...
-                            h.SelectCon(h.IndexC).name '.\n']);
-                        found = true;
-                    else
-                        found = false;
-                    end
-                end
-            end
-            
-            %% Get user Input
-            if found == false
-                % Get User Radius Submission
-                DIM = '';
-                while ~isnumeric(DIM)
-                    answer = inputdlg(prompt,'Specify Dimension Window');
-                    if ~isempty(answer)
-                        DIM = str2double(answer{1});
-                    else
-                        return;
-                    end
-                end
-                % If this does not match any Group Connection then CreateNew
-                found = false;
-                for iCon = h.Model.ActiveGroup.Connections
-                    if iCon.Orient == DIR && iCon.x == DIM+OFFSET
-                        h.SelectCon(h.IndexC) = iCon;
-                        found = true;
-                    end
-                end
-                if ~found
-                    h.SelectCon(h.IndexC) = Connection(DIM+OFFSET,DIR,h.Model.ActiveGroup);
-                end
-            end
-            
-            %% Iterate or finish up
-            if h.IndexC == 4
-                % Define the body
-                matl = [];
-                show_Model(h);
-                while isempty(matl)
-                    [matl, tf] = listdlg(...
-                        'PromptString','Select a material type for this new body:',...
-                        'SelectionMode','single',...
-                        'ListString',Material.Source);
-                end
-                if tf
-                    newBody = Body(...
-                        h.Model.ActiveGroup,...
-                        h.SelectCon,...
-                        Material(Material.Source{matl}));
-    %                 if handles.Model.ActiveGroup.isOverlaping(newBody)
-    %                     fprintf('XXX New Body overlaps, creation cancelled XXX\n');
-    %                     handles.Model.clearHighLighting();
-    %                 else
-                        h.Model.ActiveGroup.addBody(newBody);
-    %                 end
-                else
-                    fprintf('XXX You must select a material, creation cancelled XXX\n');
-                    h.Model.clearHighLighting();
-                end
-                h.IndexC = 1;
-            else
-                h.Model.HighLight(h.SelectCon(1:h.IndexC));
-                h.IndexC = h.IndexC + 1;
-            end
+            InsertBody(h, C);
         case 'InsertGroup'
-            % Will simply define a vertical Group at the next slot
-            % Determine where the user clicked
-            C = get(gca,'Currentpoint'); C = C(1,1:2);
-            h.Model.addGroup(Group(h.Model,Position(C(1),0,pi/2),[]));
-            h.Model.distributeGroup(h.InterGroupDistance);
+            InsertGroup(h, C);
         case 'InsertBridge'
-            % Select 2 horizontal connections and 2 bodies
-            if h.IndexC == 1
-                if h.IndexB == 1
-                    % Picking the first Connection
-                    if isempty(h.Model.ActiveGroup)
-                        ChangeGroup_Callback(hObject, [], h);
-                    end
-                    Con = h.Model.ActiveGroup.FindConnection(C);
-                    if ~isempty(Con)
-                        h.SelectCon(h.IndexC) = Con;
-                        h.Model.HighLight(Con);
-                        h.IndexC = 2;
-                        set(h.message,'String','[click] Select the Foundation Body');
-                    end
-                end
-            elseif h.IndexC == 2
-                if h.IndexB == 1
-                    % Picking the first Body
-                    Bod = h.SelectCon(1).findConnectedBody(C);
-                    if ~isempty(Bod)
-                        h.SelectBody(h.IndexB) = Bod;
-                        h.Model.HighLight(Bod);
-                        h.IndexB = 2;
-                        set(h.message,'String','[click] Select the Connection for the other body (the Body that may shift)');
-                    end
-                else
-                    % Picking the second Connection
-                    ChangeGroup_Callback(hObject, [], h);
-                    Con = h.Model.ActiveGroup.FindConnection(C);
-                    if ~isempty(Con)
-                        h.SelectCon(h.IndexC) = Con;
-                        h.Model.HighLight(Con);
-                        h.IndexC = 3;
-                        set(h.message,'String','[click] Select the associated body');
-                    end
-                end
-            else
-                if h.IndexB == 2
-                    % Picking the second Body
-                    Bod = h.SelectCon(2).findConnectedBody(C);
-                    if ~isempty(Bod)
-                        % Finish and Create
-                        if h.SelectCon(1).Orient == h.SelectCon(2).Orient
-                            if h.SelectCon(1).Orient == enumOrient.Vertical
-                                prompt = 'Select the height adjustment for body 2 as it is placed around body 1';
-                                [~,~,defaultval,~] = h.SelectBody(1).limits(enumOrient.Vertical);
-                            else
-                                prompt = 'Select the radial offset distance';
-                                defaultval = 0;
-                            end
-                        else
-                            prompt = 'Select the vertical center offset for the horizontal face to be up the vertical face';
-                            if h.SelectCon(1).Orient == enumOrient.Vertical
-                                [~,~,defaultval,~] = h.SelectBody(1).limits(enumOrient.Vertical);
-                            else
-                                [~,~,defaultval,~] = h.SelectBody(2).limits(enumOrient.Vertical);
-                            end
-                        end
-                        x = inputdlg(prompt,'Specify Bridge Offset',[1, 200],{num2str(defaultval)});
-                        % Define the Bridge
-                        if ~isempty(x)
-                            h.SelectBody(h.IndexB) = Bod;
-                            h.Model.HighLight(Bod);
-                            h.Model.addBridge(Bridge(...
-                                h.SelectBody(1),h.SelectBody(2),...
-                                h.SelectCon(1),h.SelectCon(2),str2double(x{1})));
-                            h.IndexC = 1;
-                            h.IndexB = 1;
-                            set(h.message,'String','---');
-                        end
-                    end
-                end
-            end
+            InsertBridge(h, C);
         case 'InsertLeakConnection'
-            % Select 2 horizontal connections and 2 bodies/Environments
-            Bod = Body.empty;
-            if h.IndexB == 1
-                % Picking the first Body
-                [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-                for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-                if ~isempty(Bod)
-                    h.SelectBody(h.IndexB) = Bod;
-                    h.Model.HighLight(Bod);
-                    h.IndexB = 2;
-                    set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
-                end
-            elseif h.IndexB == 2
-                % Picking the first Body
-                [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-                for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-                if Bod ~= h.SelectBody(1)
-                    if ~isempty(Bod)
-                        h.SelectBody(h.IndexB) = Bod;
-                        h.Model.HighLight(Bod);
-                        set(h.message,'String','---');
-                        [N,E] = LeakConnection.getParameters();
-                        h.Model.addLeakConnection(...
-                            LeakConnection(h.SelectBody(1),h.SelectBody(2),N,E));
-                    end
-                    return;
-                end
-                % No object was selected, select the environment instead
-                set(h.message,'String','---');
-                [N,E] = LeakConnection.getParameters();
-                h.Model.addLeakConnection(LeakConnection(h.SelectBody(1),h.Model.surroundings,N,E));
-            end
+            InsertLeakConnection(h, C);
         case 'InsertSensor'
-            % Select a group
-            C = C(1,1:2);
-            % Select a body
-            [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(objects)
-                for obj = objects
-                    if isa(obj{1},'Body')
-                        h.Model.HighLight(obj{1});
-                        h.Model.addSensor(Sensor(h.Model,obj{1}));
-                    end
-                end
-            end
+            InsertSensor(h, C);
         case 'InsertPVoutput'
-            % Find, within a radius of confidence, the nearest Body
-            C = C(1,1:2);
-            [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(objects)
-                for obj = objects
-                    if isa(obj{1},'Body')
-                        if obj{1}.matl.Phase == enumMaterial.Gas
-                            h.Model.addPVoutput(PVoutput(obj{1}));
-                            set(h.message,'String',['PVoutput added to Body: ' obj{1}.name]);
-                        else
-                            set(h.message,'String','Must select a Gas Body');
-                        end
-                    end
-                end
-            end
+            InsertPVoutput(h, C);
         case 'InsertNonConnection'
-            % Select 2 horizontal connections and 2 bodies
-            Bod = Body.empty;
-            if h.IndexB == 1
-                % Picking the first Body
-                [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-                for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-                if ~isempty(Bod)
-                    h.SelectBody(h.IndexB) = Bod;
-                    h.Model.HighLight(Bod);
-                    h.IndexB = 2;
-                    set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
-                end
-            elseif h.IndexB == 2
-                % Picking the first Body
-                [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-                for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-                if Bod ~= h.SelectBody(1)
-                    if ~isempty(Bod)
-                        h.SelectBody(h.IndexB) = Bod;
-                        h.Model.HighLight(Bod);
-                        set(h.message,'String','---');
-                        h.Model.addNonConnection(...
-                            NonConnection(h.SelectBody(1),h.SelectBody(2)));
-                    end
-                    return;
-                end
-                % No object was selected, select the environment instead
-                set(h.message,'String','---');
-                h.Model.addNonConnection(...
-                    NonConnection(h.SelectBody(1),h.Model.surroundings));
-            end
+            InsertNonConnection(h, C);
         case 'InsertCustomMinorLoss'
-            % Find, within a radius of confidence, the nearest body
-            C = C(1,1:2);
-            [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(objects)
-                for obj = objects
-                    if isa(obj{1},'Body')
-                        h.SelectBody(h.IndexB) = obj{1};
-                        if (h.IndexB == 2)
-                            % Finalize Custom Minor Loss
-                            h.IndexB = 1;
-                            h.Model.addCustomMinorLoss(...
-                                CustomMinorLoss(...
-                                h.SelectBody(1),...
-                                h.SelectBody(2)));
-                        end
-                        h.IndexB = 2;
-                    end
-                end
-            end
+            InsertCustomMinorLoss(h, C);
         case 'Select'
-            % Find, within a radius of confidence, the nearest...
-            %   Body, Group, Connection, Bridge and Leak Connection
-            C = C(1,1:2);
-            [names, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(names)
-                if length(names) > 1
-                    [index,tf] = listdlg(...
-                        'PromptString','Which Object did you select?',...
-                        'ListString',names,...
-                        'SelectionMode','single',...
-                        'ListSize',[1000 800]);
-                else
-                    index = 1;
-                    tf = true;
-                end
-                if tf
-                    h.Model.switchHighLighting(objects{index});
-                end
-            end
+            Select(h, C);
         case 'MultiSelect'
-            % Find, within a radius of confidence, the nearest...
-            %   Body, Group, Connection, Bridge and Leak Connection
-            C = C(1,1:2);
-            [names, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(names)
-                if length(names) > 1
-                    [index,tf] = listdlg(...
-                        'PromptString','Which Object did you select?',...
-                        'ListString',names,...
-                        'SelectionMode','single',...
-                        'ListSize',[1000 800]);
-                else
-                    index = 1;
-                    tf = true;
-                end
-                if tf
-                    h.Model.HighLight(objects{index});
-                end
-            end
+            MultiSelect(h, C);
         case 'InsertRelation'
-            % Find, within a radius of confidence, the nearest connection
-            C = C(1,1:2);
-            [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-            if ~isempty(objects)
-                for objcll = objects
-                    obj = objcll{1};
-                    if isa(obj,'Connection')
-                        if h.IndexC == 1 || ...
-                                (obj.Orient == h.SelectCon(1).Orient && ...
-                                obj.Group == h.SelectCon(1).Group)
-                            h.SelectCon(h.IndexC) = obj;
-                            if (h.IndexC == 2)
-                                % Finalize the new relation
-                                % Ask the user about the type
-                                names = {
-                                    'Constant Offset', ...
-                                    'Cross-Section Maintaining', ...
-                                    'Zero x Based Scale', ...
-                                    'Smallest x Based Scale', ...
-                                    'Width Set'};
-                                if obj.Orient == enumOrient.Horizontal
-                                    names{end+1} = 'Defines Stroke Length';
-                                    names{end+1} = 'Defines Piston Length';
-                                end
-                                for RMan = obj.Group.RelationManagers
-                                    if RMan.Orient == obj.Orient; break; end
-                                end
-                                if ~isempty(RMan)
-                                    [Type, tf] = listdlg(...
-                                    'PromptString','What type of relationship?',...
-                                    'ListString',names,...
-                                    'SelectionMode','single',...
-                                    'ListSize',[400 250]);
-                                switch names{Type}
-                                    case 'Constant Offset'
-                                        EnumType = enumRelation.Constant;
-                                    case 'Cross-Section Maintaining'
-                                        EnumType = enumRelation.AreaConstant;
-                                    case 'Zero x Based Scale'
-                                        EnumType = enumRelation.Scaled;
-                                    case 'Smallest x Based Scale'
-                                        EnumType = enumRelation.LowestScaled;
-                                    case 'Width Set'
-                                        EnumType = enumRelation.Width;
-                                    case 'Defines Stroke Length'
-                                        EnumType = enumRelation.Stroke;
-                                    case 'Defines Piston Length'
-                                        EnumType = enumRelation.Piston;
-                                end
-                                if tf
-                                    Label = RMan.getLabel(EnumType, ...
-                                        h.SelectCon(1), h.SelectCon(2));
-                                    if isempty(Label)
-                                        Label = getProperName([names{Type} ' Relation']);
-                                    end
-                                    if isempty(Label); return; end
-                                    if EnumType == enumRelation.Stroke || ...
-                                            EnumType == enumRelation.Piston
-                                        % Ask which mechanism?
-                                        objs = h.Model.Converters;
-                                        mecs = cell(0);
-                                        for index = length(objs):-1:1
-                                            mecs{index} = objs(index).name;
-                                        end
-                                        index = listdlg(...
-                                            'ListString',mecs,...
-                                            'SelectionMode','single');
-                                        if isempty(index)
-                                            break;
-                                        else
-                                            Mech = objs(index).Frames(1);
-                                        end
-                                    end
-                                    switch EnumType
-                                        case {enumRelation.Constant, ...
-                                                enumRelation.AreaConstant, ...
-                                                enumRelation.Scaled, ...
-                                                enumRelation.LowestScaled, ...
-                                                enumRelation.Width}
-                                            success = RMan.addRelation(...
-                                                Label, ...
-                                                EnumType, ...
-                                                h.SelectCon(1), ...
-                                                h.SelectCon(2));
-                                        case {enumRelation.Stroke, ...
-                                                enumRelation.Piston}
-                                            % Ask which mechanism?
-                                            success = RMan.addRelation(...
-                                                Label, ...
-                                                EnumType, ...
-                                                h.SelectCon(1), ...
-                                                h.SelectCon(2), ...
-                                                Mech);
-                                        otherwise
-                                            msgbox(['Selected relation type' ...
-                                                ' is not implemented']);
-                                            h.IndexC = 1;
-                                            break;
-                                    end
-                                    if ~success
-                                        msgbox(['Relationship was not ' ...
-                                            'added successfully']);
-                                    end
-                                    h.IndexC = 1;
-                                end
-                                end
-                                h.IndexC = 1;
-                            end
-                            h.IndexC = 2;
-                        else
-                            msgbox(['The two connections must have the ' ...
-                                'same orientation.']);
-                        end
-                    end
-                end
-            end
+            InsertRelation(h, C);
         otherwise
     end
+    %% refresh displays
     show_Model(h);
     hP = pan(h.output);
     hP.ModeHandle.Blocking = false;
