@@ -577,459 +577,9 @@ classdef Simulation < handle
                     ME.continuetoSS = false;
                 end
             end
+            
+            [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles);
 
-            %% Main Loop
-
-            ME.curTime = 0;
-            ME.CycledE = 0;
-            cycle_count = 0;
-            MechCycleEnergy = 0;
-            %       Plot_Powers = zeros(1000,1);
-            % MAtthias
-            Plot_Powers = 0;
-
-            Plot_Speed = 0;
-
-            Plot_Learning_Rate = zeros(1000,1);
-            since_inflection = 0;
-            Plot_Number = 0;
-            power_factor = 1;
-            % Matthias: Display power and power factor plots in one figure, two
-            % subplots
-            fig = figure;
-            if ME.MoveCondition == 2
-                Convergence_Plot = subplot(3,1,1);
-                Factor_Plot = subplot(3,1,2);
-                Speed_Plot = subplot(3,1,3);
-            else
-                Convergence_Plot = subplot(2,1,1);
-                Factor_Plot = subplot(2,1,2);
-            end
-            %       Convergence_Plot = figure();
-            %       Factor_Plot = figure();
-
-            if ME.ss_condition
-                Tavg = zeros(size(ME.T));
-                Tavg_count = 0;
-            end
-            % Matthias: added continuetoSS to loop condition to allow surpassing simTime if in final cycle.
-            while (ME.curTime < simTime) || ME.continuetoSS
-                %% Main Solve
-                ME.dt_max = 2*ME.A_Inc/(ME.dA_old + ME.dA);
-                Forces = ME.Iteration_Solve();
-                for i = length(Forces)
-                    for j = length(Forces{i})
-                        if isnan(Forces{i}(j)) || ~isreal(Forces{i}(j))
-                            ME.stop = true;
-                            success = false;
-                        end
-                    end
-                end
-                if ME.stop
-                    %           fprintf('Simulation Finished Prematurely. (in Run)\n');
-                    clear assignDynamic;
-                    clear implicitSolve;
-                    % clear dUFunc;
-                    clear KValue;
-                    clear solve_loops;
-                    return;
-                end
-                ME.curTime = ME.curTime +  ME.dt_max;
-                progressbar(ME.curTime/simTime);
-                Power = ME.MechanicalSystem.Solve(ME.Inc,(ME.dA_old + ME.dA)/2,0,Forces);
-                MechCycleEnergy = MechCycleEnergy + Power*ME.dt_max;
-                if ~isempty(ME.MechanicalSystem.LoadFunction)
-                    Power = Power - ME.MechanicalSystem.LoadFunction((ME.dA_old + ME.dA)/2)*(ME.dA_old + ME.dA)/2;
-                end
-                switch ME.MoveCondition
-                    case 1 % For Constant Motion Systems
-                        % Do nothing
-                    case 2 % For variable systems
-                        ME.dA_old = ME.dA;
-                        % fprintf([num2str(Power*ME.dt_max) '\n']);
-                        new_ke = Power*ME.dt_max + 0.5*ME.MechanicalSystem.Inertia*ME.dA^2;
-                        if new_ke < 0 && ME.ss_condition && ...
-                                ME.Model.recordOnlyLastCycle && ...
-                                Load_Function_is_Not_Given
-                            ME.dA = 0.1*2*pi; % Minimum speed of 0.1 Hz
-                        else
-                            if new_ke < 0
-                                ME.stop = true;
-                            else
-                                ME.dA = sqrt(2*new_ke/ME.MechanicalSystem.Inertia);
-                            end
-                        end
-                        if ME.ss_condition && ...
-                                ME.Model.recordOnlyLastCycle && ...
-                                Load_Function_is_Not_Given
-                            if ME.dA < 0.1*2*pi
-                                ME.dA = 0.1*2*pi;
-                            end
-                        end
-                        % fprintf([num2str(ME.dA) '\n']);
-                end
-
-                if ME.stop
-                    fprintf('Simulation Finished Prematurely. (in "Run", line 660)\n');
-                    clear assignDynamic;
-                    clear implicitSolve;
-                    % clear dUFunc;
-                    clear KValue;
-                    clear solve_loops;
-                    return;
-                end
-
-                %% Obtain Results
-                if ME.Model.recordOnlyLastCycle
-                    Results.Data.dA(ME.Inc) = ME.dA;
-                    Results.Data.t(ME.Inc) = ME.curTime - AdjustTime;
-                    if grab_Pressure; Results.Data.P(:,ME.Inc) = ME.P; end
-                    if grab_Temperature; Results.Data.T(:,ME.Inc) = ME.T; end
-                    if grab_Velocity
-                        Results.Data.U(:,ME.Inc) = ME.Fc_V./ME.Fc_Area(indf);
-                    end
-                    if grab_PressureDrop
-                        Results.Data.dP(:,ME.Inc) = ME.dP;
-                    end
-                    if grab_Turbulence; Results.Data.turb(:,ME.Inc) = ME.turb; end
-                    if grab_ConductionFlux; Results.Data.cond(:,ME.Inc) = ME.CondFlux; end
-                    %new
-                    if grab_Reynolds; Results.Data.RE(:,ME.Inc) = ME.RE; end
-
-                    if ME.Model.recordStatistics
-                        % 'E_To...' is energy [J] transferred per time increment
-                        % ('Inc').
-                        Results.Data.QEnv(ME.Inc) = ME.E_ToEnvironment;
-                        Results.Data.QSource(ME.Inc) = ME.E_ToSource;
-                        Results.Data.QSink(ME.Inc) = ME.E_ToSink;
-                        Results.Data.Flow_Loss(ME.Inc) = ME.E_Flow_Loss;
-                        Results.Data.Power(ME.Inc) = Power;
-                        Results.Data.CR = ME.VolMax(:)./ME.VolMin(:);
-                        % Reset them
-                        ME.E_ToEnvironment = 0;
-                        ME.E_ToSource = 0;
-                        ME.E_ToSink = 0;
-                        ME.E_Flow_Loss = 0;
-                    end
-                else
-                    % if ME.MoveCondition == 2
-                    Results.Data.A(n) = Results.Data.A(n-1) + ME.A_Inc;
-                    Results.Data.dA(n) = ME.dA;
-                    Results.Data.t(n) = ME.curTime;
-                    if length(Results.Data.t) == n
-                        LEN = abs(min([100 ceil(((simTime-ME.curTime)*ME.dA/ME.A_Inc))]));
-                        Results.Data.A(n:n+LEN) = linspace(Results.Data.A(n-1),Results.Data.A(n-1)+...
-                            LEN*ME.A_Inc,LEN+1);
-                        Results.Data.dA(n+LEN) = 0;
-                        Results.Data.t(n+LEN) = 0;
-                        if grab_Pressure; Results.Data.P(length(ME.P),n+LEN) = 0; end
-                        if grab_Temperature; Results.Data.T(length(ME.P),n+LEN) = 0; end
-                        if grab_Velocity
-                            Results.Data.U(length(ME.Fc_dx),n+LEN) = 0;
-                        end
-                        if grab_PressureDrop
-                            Results.Data.dP(length(ME.P),n+LEN) = 0;
-                        end
-                        if grab_Turbulence; Results.Data.turb(length(ME.turb),n+LEN) = 0; end
-                        if grab_ConductionFlux; Results.Data.cond(length(ME.CondFlux),n+LEN) = 0; end
-                        if ME.Model.recordStatistics
-                            Results.Data.QEnv(n+LEN) = 0;
-                            Results.Data.QSource(n+LEN) = 0;
-                            Results.Data.QSink(n+LEN) = 0;
-                            Results.Data.Power(n+LEN) = 0;
-                        end
-                    end
-                    % end
-                    if grab_Pressure; Results.Data.P(:,n) = ME.P; end
-                    if grab_Temperature; Results.Data.T(:,n) = ME.T; end
-                    if grab_Velocity
-                        Results.Data.U(:,n) = ME.Fc_V./ME.Fc_Area(indf);
-                    end
-                    if grab_PressureDrop
-                        Results.Data.dP(:,n) = ME.dP;
-                    end
-                    if grab_Turbulence; Results.Data.turb(:,n) = ME.turb; end
-                    if grab_ConductionFlux; Results.Data.cond(:,n) = ME.CondFlux; end
-                    %new
-                    if grab_Reynolds; Results.Data.RE(:,n) = ME.RE; end
-
-                    if ME.Model.recordStatistics
-                        Results.Data.QEnv(n) = ME.E_ToEnvironment;
-                        Results.Data.QSource(n) = ME.E_ToSource;
-                        Results.Data.QSink(n) = ME.E_ToSink;
-                        Results.Data.Flow_Loss(n) = ME.E_Flow_Loss;
-                        Results.Data.Power(n) = Power;
-                        Results.Data.CR = ME.VolMax(:)./ME.VolMin(:);
-                        % Reset them
-                        ME.E_ToEnvironment = 0;
-                        ME.E_ToSource = 0;
-                        ME.E_ToSink = 0;
-                        ME.E_Flow_Loss = 0;
-                    end
-                end
-                if ~isempty(ME.Model.Sensors)
-                    for iSensor = ME.Model.Sensors; iSensor.getData(ME); end
-                end
-                if ~isempty(ME.Model.PVoutputs)
-                    for iPVoutput = ME.Model.PVoutputs; iPVoutput.getData(ME); end
-                end
-                if ME.curTime > previousTime + ME.Model.animationFrameTime
-                    previousTime = ME.curTime;
-                end
-                ME.old_vol = ME.vol;
-                n = n + 1;
-
-                %% Test Conditions (Reverse, Steady State, etc...)
-                if ME.ss_condition && ME.Model.recordOnlyLastCycle
-                    if ME.MoveCondition == 2
-                        if Load_Function_is_Not_Given
-                            if ME.dA < 0
-                                ME.dA = 0.1*2*pi; % Minimum speed of 0.1 Hz
-                            end
-                        end
-                    end
-                end
-                if ME.dA < 0
-                    fprintf('XXX Engine Reversed Directions, solving exited XXX\n');
-                    return;
-                else
-                    if ME.ss_condition && ~ME.continuetoSS
-                        Tavg = Tavg + ME.T;
-                        Tavg_count = Tavg_count + 1;
-                        if Tavg_count == 1
-                            T_previous = Tavg;
-                        end
-                    end
-                    ME.Inc = ME.Inc + 1;
-                    if ME.Inc == Frame.NTheta
-                        % if the current increment completed a whole engine cycle.
-                        % the simulation cycles the engine and after each cycle
-                        % displays the speed and power and
-                        % checks if the steady state conditions have been met.
-                        cycle_count = cycle_count + 1;
-                        Plot_Number = Plot_Number + 1;
-                        Plot_Powers(Plot_Number) = MechCycleEnergy/(ME.curTime - AdjustTime);
-                        % Matthias: Added cycle count to output
-                        % Added final speed to output
-                        Plot_Speed(Plot_Number) = 60*ME.dA/(2*pi); % rpm
-                        fprintf(['Cycle Count: ' num2str(cycle_count) '\tSpeed: (rpm) ' num2str(Plot_Speed(Plot_Number)) ...
-                            '\tPower: (W) ' num2str(Plot_Powers(Plot_Number)) '\n']);
-
-                        Results.Data.SnapShot_P = ME.Rs.*ME.T(1:length(ME.P)).*...
-                            ME.m(1:length(ME.P))./ME.vol(1:length(ME.P));
-
-                        if ME.Model.showLivePV
-                            for iPVoutput = ME.Model.PVoutputs; iPVoutput.updatePlot(); end
-                        end
-
-                        % Acquire an understanding of the solution plateauing
-                        MechCycleEnergy = 0;
-                        % Power Plot
-                        Plot_Learning_Rate(Plot_Number) = power_factor;
-                        %             if isempty(Convergence_Plot) || ...
-                        %                 ~isvalid(Convergence_Plot) || ...
-                        %                 Convergence_Plot < 1
-                        %               Convergence_Plot = figure();
-                        %             end
-                        %             figure(Convergence_Plot);
-                        % Power factor plot
-                        axes(Convergence_Plot);
-                        plot(1:Plot_Number,Plot_Powers(1:Plot_Number));
-                        xlabel('Cycle Number')
-                        ylabel('Shaft Power [W]')
-
-                        %cycle_count = cycle_count + 1;
-                        ME.Inc = 1;
-
-                        %             if isempty(Factor_Plot) || ...
-                        %                 ~isvalid(Factor_Plot) || ...
-                        %                 Factor_Plot < 1
-                        %               Factor_Plot = figure();
-                        %             end
-                        %             figure(Factor_Plot);
-                        axes(Factor_Plot);
-                        plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number));
-                        xlabel('Cycle Number')
-                        ylabel('Power Factor')
-
-                        % Speed plot
-                        if ME.MoveCondition == 2
-                            axes(Speed_Plot);
-                            plot(1:Plot_Number,Plot_Speed(1:Plot_Number));
-                            xlabel('Cycle Number')
-                            ylabel('Speed [rpm]')
-                        end
-
-                        % Get Local curvature
-                        if Plot_Number > 2
-                            Power_curv_backup = power_curv;
-                            power_curv = (Plot_Powers(Plot_Number) - ...
-                                2*Plot_Powers(Plot_Number - 1) + ...
-                                Plot_Powers(Plot_Number - 2));
-                            if Plot_Number > 3
-                                % Detect if crossed inflection point
-                                if sign(power_curv) ~= sign(Power_curv_backup) && since_inflection > 3
-                                    power_factor = 0;
-                                    since_inflection = 0;
-                                else
-                                    power_factor = ...
-                                        min(1,max(0,...
-                                        power_factor + 0.25/(1 + 2*abs(power_factor - 0.5))));
-                                end
-                            end
-                        else
-                            power_curv = 1;
-                            power_factor = ...
-                                min(1,max(0,...
-                                power_factor + 0.25/(1 + 2*abs(power_factor - 0.5))));
-                        end
-                        since_inflection = since_inflection + 1;
-
-                        % Detect if it is steady state
-                        if ME.ss_condition
-                            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                            % Following is the solid temperature acceleration code
-                            if ~ME.continuetoSS
-                                %                 fprintf(['Mixed Face Conduction: ' ...
-                                %                   num2str(sum(ME.CondEff / ME.CycleTime)) '.\n']);
-                                %                 fprintf(['Volume Averaged Reynolds Number: ' ...
-                                %                   num2str(sum(ME.EffRE / ME.CycleTime)) '.\n']);
-                                %                 ME.EffRE(:) = 0;
-                                % Calculate Average Temperatures and current shift
-                                Tavg = Tavg/Tavg_count;
-
-                                % Modify T_delta to prevent a constant change in
-                                % ... temperature being regarded as an oscillation.
-                                T_constant = ME.T - T_previous;
-                                Tavg = Tavg + T_constant/2;
-                                T_delta = ME.T - Tavg;
-
-                                A = ME.ACond;
-                                b = ME.bCond;
-                                ME.CondEff = ME.CondEff / ME.CycleTime;
-                                ME.CondTempEff = ME.CondTempEff / ME.CycleTime;
-                                for i = ME.BoundaryNodes
-                                    % Modify the diagonal from default values to include the
-                                    % ... average conductance to other nodes (gas nodes)
-                                    A(i,i) = A(i,i) + sum(ME.CondEff(ME.MixFcs{i}));
-                                    % Calculate the b values so that they are:
-                                    % ...  bi = sum of others( sum of other(delta * Cond * To))
-                                    % ...                    ( / sum of delta
-                                    b(i) = b(i) + sum(ME.CondTempEff(ME.MixFcs{i}));
-                                end
-
-                                if cycle_count == 1
-                                    for i = 1:size(A,1)
-                                        if all(A(i,:) == 0)
-                                            ME.ACond(i,i) = 1;
-                                            ME.bCond(i) = 298;
-                                            A(i,i) = 1;
-                                            b(i) = 298;
-                                        end
-                                    end
-                                end
-
-                                ME.CondEff(:) = 0;
-                                ME.CondTempEff(:) = 0;
-                                ME.CycleTime = 0;
-
-                                A = sparse(A);
-                                var = A\b;
-
-                                % Calculate shifted values based on current transient
-                                ME.T(sindn) = var + T_delta(sindn);
-
-                                % Reset Tavg for the next cycle
-                                Tavg(:) = 0;
-                                Tavg_count = 0;
-
-                            end
-                            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-                            % Detect if it is steady state
-                            % Compare the average over 10 cycles to see if it appears to
-                            % be converged
-                            %               Precord(1:ss_cycles-1) = Precord(2:ss_cycles);
-                            %               Precord(ss_cycles) = Plot_Powers(Plot_Number);
-                            %               temp = ss_tolerance*max(Precord(end),1);
-                            % Matthias
-                            temp = ss_tolerance*max(abs(Plot_Powers(end)),1);
-
-                            % ContinuetoSS is a flag for the last cycle which is run
-                            % ... at a finer timestep that the converging cycles.
-                            if ME.continuetoSS; break; end
-                            % Matthias: added 'MinCycles' as option in RunConditions to specify minimum
-                            % number of cycles to complete. Useful e.g. when differences between
-                            % subsequent runs setpoints are small and cause only small change in power from
-                            % previoues snapshot.
-                            if ~isfield(options,'minCycles')
-                                options.minCycles = 1;
-                            end
-                            if (cycle_count >= ss_cycles)
-                                % Matthias: added 2nd condition below to enforce simulation to run for
-                                % entire simTime but still use the steady state temperature acceleration.
-                                if (CustomRSSQ(diff(Plot_Powers(end-ss_cycles+1:end))) < temp)...
-                                        && (cycle_count >= options.minCycles)...
-                                        %                   && (ME.curTime >= simTime)
-
-                                    ME.continuetoSS = true;
-                                    ME.MaxCourant = ME.Model.MaxCourantFinal;
-                                    ME.MaxFourier = ME.Model.MaxFourierFinal;
-                                end
-                            end
-                        end
-
-                        % Modify Gas Mass so that the engine is at the engine pressure.
-                        if ME.Model.recordOnlyLastCycle
-                            %i = 1;
-                            for i = 1:length(ME.Regions)
-                                if ~ME.isEnvironmentRegion(i)
-                                    nodes = ME.Regions{i};
-                                    Pregion = ME.PRegion(i)/ME.PRegionTime;
-                                    ME.m(nodes) = ...
-                                        (power_factor*engine_Pressure/Pregion + ...
-                                        (1-power_factor))*ME.m(nodes);
-                                end
-                            end
-                            ME.PRegion(:) = 0; ME.PRegionTime(:) = 0;
-                            %               for iPVoutput = ME.Model.PVoutputs
-                            %                 Pregion = ME.PRegion(i)/ME.PRegionTime(i);
-                            %                 ME.PRegion(i) = 0; ME.PRegionTime(i) = 0;
-                            %                 ME.m(iPVoutput.RegionNodes) = ...
-                            %                   (power_factor*engine_Pressure/Pregion + ...
-                            %                   (1-power_factor))*ME.m(iPVoutput.RegionNodes);
-                            %                 i = i + 1;
-                            %               end
-
-                        end
-                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        % Matthias: This code should be obsolete now as 'LoadRecord' is now
-                        % assigned to the load function earlier.
-                        % Assess cycle time and modify mechanism load accordingly
-                        if ME.ss_condition && ME.Model.recordOnlyLastCycle
-                            if ME.MoveCondition == 2
-                                if Load_Function_is_Not_Given
-                                    % Modify Load to approach initial speed
-                                    % Calculate Speed
-                                    speed = 2*pi/(ME.curTime - AdjustTime);
-                                    dspeed = min(0.01/(max(log(Plot_Number),1)), ...
-                                        0.5*abs((SetSpeed - speed)/SetSpeed));
-                                    if speed < SetSpeed
-                                        LoadRecord = LoadRecord - power_factor*dspeed;
-                                    else
-                                        LoadRecord = LoadRecord + power_factor*dspeed;
-                                    end
-                                    ME.MechanicalSystem.LoadFunction = @(Speed) LoadRecord;
-                                end
-                            end
-                        end
-                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-                        AdjustTime = ME.curTime;
-                    end
-                    assignDynamic(ME,ME.Inc,false); % Initialize the dynamic function
-                end
-            end
             progressbar(1);
 
             if ~ME.Model.recordOnlyLastCycle
@@ -2534,5 +2084,460 @@ classdef Simulation < handle
 
     end
 
+end
+
+function [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles)
+    %% Main Loop
+
+    ME.curTime = 0;
+    ME.CycledE = 0;
+    cycle_count = 0;
+    MechCycleEnergy = 0;
+    %       Plot_Powers = zeros(1000,1);
+    % MAtthias
+    Plot_Powers = 0;
+
+    Plot_Speed = 0;
+
+    Plot_Learning_Rate = zeros(1000,1);
+    since_inflection = 0;
+    Plot_Number = 0;
+    power_factor = 1;
+    % Matthias: Display power and power factor plots in one figure, two
+    % subplots
+    fig = figure;
+    if ME.MoveCondition == 2
+        Convergence_Plot = subplot(3,1,1);
+        Factor_Plot = subplot(3,1,2);
+        Speed_Plot = subplot(3,1,3);
+    else
+        Convergence_Plot = subplot(2,1,1);
+        Factor_Plot = subplot(2,1,2);
+    end
+    %       Convergence_Plot = figure();
+    %       Factor_Plot = figure();
+
+    if ME.ss_condition
+        Tavg = zeros(size(ME.T));
+        Tavg_count = 0;
+    end
+    % Matthias: added continuetoSS to loop condition to allow surpassing simTime if in final cycle.
+    while (ME.curTime < simTime) || ME.continuetoSS
+        %% Main Solve
+        ME.dt_max = 2*ME.A_Inc/(ME.dA_old + ME.dA);
+        Forces = ME.Iteration_Solve();
+        for i = length(Forces)
+            for j = length(Forces{i})
+                if isnan(Forces{i}(j)) || ~isreal(Forces{i}(j))
+                    ME.stop = true;
+                    success = false;
+                end
+            end
+        end
+        if ME.stop
+            %           fprintf('Simulation Finished Prematurely. (in Run)\n');
+            clear assignDynamic;
+            clear implicitSolve;
+            % clear dUFunc;
+            clear KValue;
+            clear solve_loops;
+            return;
+        end
+        ME.curTime = ME.curTime +  ME.dt_max;
+        progressbar(ME.curTime/simTime);
+        Power = ME.MechanicalSystem.Solve(ME.Inc,(ME.dA_old + ME.dA)/2,0,Forces);
+        MechCycleEnergy = MechCycleEnergy + Power*ME.dt_max;
+        if ~isempty(ME.MechanicalSystem.LoadFunction)
+            Power = Power - ME.MechanicalSystem.LoadFunction((ME.dA_old + ME.dA)/2)*(ME.dA_old + ME.dA)/2;
+        end
+        switch ME.MoveCondition
+            case 1 % For Constant Motion Systems
+                % Do nothing
+            case 2 % For variable systems
+                ME.dA_old = ME.dA;
+                % fprintf([num2str(Power*ME.dt_max) '\n']);
+                new_ke = Power*ME.dt_max + 0.5*ME.MechanicalSystem.Inertia*ME.dA^2;
+                if new_ke < 0 && ME.ss_condition && ...
+                        ME.Model.recordOnlyLastCycle && ...
+                        Load_Function_is_Not_Given
+                    ME.dA = 0.1*2*pi; % Minimum speed of 0.1 Hz
+                else
+                    if new_ke < 0
+                        ME.stop = true;
+                    else
+                        ME.dA = sqrt(2*new_ke/ME.MechanicalSystem.Inertia);
+                    end
+                end
+                if ME.ss_condition && ...
+                        ME.Model.recordOnlyLastCycle && ...
+                        Load_Function_is_Not_Given
+                    if ME.dA < 0.1*2*pi
+                        ME.dA = 0.1*2*pi;
+                    end
+                end
+                % fprintf([num2str(ME.dA) '\n']);
+        end
+
+        if ME.stop
+            fprintf('Simulation Finished Prematurely. (in "Run", line 660)\n');
+            clear assignDynamic;
+            clear implicitSolve;
+            % clear dUFunc;
+            clear KValue;
+            clear solve_loops;
+            return;
+        end
+
+        %% Obtain Results
+        if ME.Model.recordOnlyLastCycle
+            Results.Data.dA(ME.Inc) = ME.dA;
+            Results.Data.t(ME.Inc) = ME.curTime - AdjustTime;
+            if grab_Pressure; Results.Data.P(:,ME.Inc) = ME.P; end
+            if grab_Temperature; Results.Data.T(:,ME.Inc) = ME.T; end
+            if grab_Velocity
+                Results.Data.U(:,ME.Inc) = ME.Fc_V./ME.Fc_Area(indf);
+            end
+            if grab_PressureDrop
+                Results.Data.dP(:,ME.Inc) = ME.dP;
+            end
+            if grab_Turbulence; Results.Data.turb(:,ME.Inc) = ME.turb; end
+            if grab_ConductionFlux; Results.Data.cond(:,ME.Inc) = ME.CondFlux; end
+            %new
+            if grab_Reynolds; Results.Data.RE(:,ME.Inc) = ME.RE; end
+
+            if ME.Model.recordStatistics
+                % 'E_To...' is energy [J] transferred per time increment
+                % ('Inc').
+                Results.Data.QEnv(ME.Inc) = ME.E_ToEnvironment;
+                Results.Data.QSource(ME.Inc) = ME.E_ToSource;
+                Results.Data.QSink(ME.Inc) = ME.E_ToSink;
+                Results.Data.Flow_Loss(ME.Inc) = ME.E_Flow_Loss;
+                Results.Data.Power(ME.Inc) = Power;
+                Results.Data.CR = ME.VolMax(:)./ME.VolMin(:);
+                % Reset them
+                ME.E_ToEnvironment = 0;
+                ME.E_ToSource = 0;
+                ME.E_ToSink = 0;
+                ME.E_Flow_Loss = 0;
+            end
+        else
+            % if ME.MoveCondition == 2
+            Results.Data.A(n) = Results.Data.A(n-1) + ME.A_Inc;
+            Results.Data.dA(n) = ME.dA;
+            Results.Data.t(n) = ME.curTime;
+            if length(Results.Data.t) == n
+                LEN = abs(min([100 ceil(((simTime-ME.curTime)*ME.dA/ME.A_Inc))]));
+                Results.Data.A(n:n+LEN) = linspace(Results.Data.A(n-1),Results.Data.A(n-1)+...
+                    LEN*ME.A_Inc,LEN+1);
+                Results.Data.dA(n+LEN) = 0;
+                Results.Data.t(n+LEN) = 0;
+                if grab_Pressure; Results.Data.P(length(ME.P),n+LEN) = 0; end
+                if grab_Temperature; Results.Data.T(length(ME.P),n+LEN) = 0; end
+                if grab_Velocity
+                    Results.Data.U(length(ME.Fc_dx),n+LEN) = 0;
+                end
+                if grab_PressureDrop
+                    Results.Data.dP(length(ME.P),n+LEN) = 0;
+                end
+                if grab_Turbulence; Results.Data.turb(length(ME.turb),n+LEN) = 0; end
+                if grab_ConductionFlux; Results.Data.cond(length(ME.CondFlux),n+LEN) = 0; end
+                if ME.Model.recordStatistics
+                    Results.Data.QEnv(n+LEN) = 0;
+                    Results.Data.QSource(n+LEN) = 0;
+                    Results.Data.QSink(n+LEN) = 0;
+                    Results.Data.Power(n+LEN) = 0;
+                end
+            end
+            % end
+            if grab_Pressure; Results.Data.P(:,n) = ME.P; end
+            if grab_Temperature; Results.Data.T(:,n) = ME.T; end
+            if grab_Velocity
+                Results.Data.U(:,n) = ME.Fc_V./ME.Fc_Area(indf);
+            end
+            if grab_PressureDrop
+                Results.Data.dP(:,n) = ME.dP;
+            end
+            if grab_Turbulence; Results.Data.turb(:,n) = ME.turb; end
+            if grab_ConductionFlux; Results.Data.cond(:,n) = ME.CondFlux; end
+            %new
+            if grab_Reynolds; Results.Data.RE(:,n) = ME.RE; end
+
+            if ME.Model.recordStatistics
+                Results.Data.QEnv(n) = ME.E_ToEnvironment;
+                Results.Data.QSource(n) = ME.E_ToSource;
+                Results.Data.QSink(n) = ME.E_ToSink;
+                Results.Data.Flow_Loss(n) = ME.E_Flow_Loss;
+                Results.Data.Power(n) = Power;
+                Results.Data.CR = ME.VolMax(:)./ME.VolMin(:);
+                % Reset them
+                ME.E_ToEnvironment = 0;
+                ME.E_ToSource = 0;
+                ME.E_ToSink = 0;
+                ME.E_Flow_Loss = 0;
+            end
+        end
+        if ~isempty(ME.Model.Sensors)
+            for iSensor = ME.Model.Sensors; iSensor.getData(ME); end
+        end
+        if ~isempty(ME.Model.PVoutputs)
+            for iPVoutput = ME.Model.PVoutputs; iPVoutput.getData(ME); end
+        end
+        if ME.curTime > previousTime + ME.Model.animationFrameTime
+            previousTime = ME.curTime;
+        end
+        ME.old_vol = ME.vol;
+        n = n + 1;
+
+        %% Test Conditions (Reverse, Steady State, etc...)
+        if ME.ss_condition && ME.Model.recordOnlyLastCycle
+            if ME.MoveCondition == 2
+                if Load_Function_is_Not_Given
+                    if ME.dA < 0
+                        ME.dA = 0.1*2*pi; % Minimum speed of 0.1 Hz
+                    end
+                end
+            end
+        end
+        if ME.dA < 0
+            fprintf('XXX Engine Reversed Directions, solving exited XXX\n');
+            return;
+        else
+            if ME.ss_condition && ~ME.continuetoSS
+                Tavg = Tavg + ME.T;
+                Tavg_count = Tavg_count + 1;
+                if Tavg_count == 1
+                    T_previous = Tavg;
+                end
+            end
+            ME.Inc = ME.Inc + 1;
+            if ME.Inc == Frame.NTheta
+                % if the current increment completed a whole engine cycle.
+                % the simulation cycles the engine and after each cycle
+                % displays the speed and power and
+                % checks if the steady state conditions have been met.
+                cycle_count = cycle_count + 1;
+                Plot_Number = Plot_Number + 1;
+                Plot_Powers(Plot_Number) = MechCycleEnergy/(ME.curTime - AdjustTime);
+                % Matthias: Added cycle count to output
+                % Added final speed to output
+                Plot_Speed(Plot_Number) = 60*ME.dA/(2*pi); % rpm
+                fprintf(['Cycle Count: ' num2str(cycle_count) '\tSpeed: (rpm) ' num2str(Plot_Speed(Plot_Number)) ...
+                    '\tPower: (W) ' num2str(Plot_Powers(Plot_Number)) '\n']);
+
+                Results.Data.SnapShot_P = ME.Rs.*ME.T(1:length(ME.P)).*...
+                    ME.m(1:length(ME.P))./ME.vol(1:length(ME.P));
+
+                if ME.Model.showLivePV
+                    for iPVoutput = ME.Model.PVoutputs; iPVoutput.updatePlot(); end
+                end
+
+                % Acquire an understanding of the solution plateauing
+                MechCycleEnergy = 0;
+                % Power Plot
+                Plot_Learning_Rate(Plot_Number) = power_factor;
+                %             if isempty(Convergence_Plot) || ...
+                %                 ~isvalid(Convergence_Plot) || ...
+                %                 Convergence_Plot < 1
+                %               Convergence_Plot = figure();
+                %             end
+                %             figure(Convergence_Plot);
+                % Power factor plot
+                axes(Convergence_Plot);
+                plot(1:Plot_Number,Plot_Powers(1:Plot_Number));
+                xlabel('Cycle Number')
+                ylabel('Shaft Power [W]')
+
+                %cycle_count = cycle_count + 1;
+                ME.Inc = 1;
+
+                %             if isempty(Factor_Plot) || ...
+                %                 ~isvalid(Factor_Plot) || ...
+                %                 Factor_Plot < 1
+                %               Factor_Plot = figure();
+                %             end
+                %             figure(Factor_Plot);
+                axes(Factor_Plot);
+                plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number));
+                xlabel('Cycle Number')
+                ylabel('Power Factor')
+
+                % Speed plot
+                if ME.MoveCondition == 2
+                    axes(Speed_Plot);
+                    plot(1:Plot_Number,Plot_Speed(1:Plot_Number));
+                    xlabel('Cycle Number')
+                    ylabel('Speed [rpm]')
+                end
+
+                % Get Local curvature
+                if Plot_Number > 2
+                    Power_curv_backup = power_curv;
+                    power_curv = (Plot_Powers(Plot_Number) - ...
+                        2*Plot_Powers(Plot_Number - 1) + ...
+                        Plot_Powers(Plot_Number - 2));
+                    if Plot_Number > 3
+                        % Detect if crossed inflection point
+                        if sign(power_curv) ~= sign(Power_curv_backup) && since_inflection > 3
+                            power_factor = 0;
+                            since_inflection = 0;
+                        else
+                            power_factor = ...
+                                min(1,max(0,...
+                                power_factor + 0.25/(1 + 2*abs(power_factor - 0.5))));
+                        end
+                    end
+                else
+                    power_curv = 1;
+                    power_factor = ...
+                        min(1,max(0,...
+                        power_factor + 0.25/(1 + 2*abs(power_factor - 0.5))));
+                end
+                since_inflection = since_inflection + 1;
+
+                % Detect if it is steady state
+                if ME.ss_condition
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Following is the solid temperature acceleration code
+                    if ~ME.continuetoSS
+                        %                 fprintf(['Mixed Face Conduction: ' ...
+                        %                   num2str(sum(ME.CondEff / ME.CycleTime)) '.\n']);
+                        %                 fprintf(['Volume Averaged Reynolds Number: ' ...
+                        %                   num2str(sum(ME.EffRE / ME.CycleTime)) '.\n']);
+                        %                 ME.EffRE(:) = 0;
+                        % Calculate Average Temperatures and current shift
+                        Tavg = Tavg/Tavg_count;
+
+                        % Modify T_delta to prevent a constant change in
+                        % ... temperature being regarded as an oscillation.
+                        T_constant = ME.T - T_previous;
+                        Tavg = Tavg + T_constant/2;
+                        T_delta = ME.T - Tavg;
+
+                        A = ME.ACond;
+                        b = ME.bCond;
+                        ME.CondEff = ME.CondEff / ME.CycleTime;
+                        ME.CondTempEff = ME.CondTempEff / ME.CycleTime;
+                        for i = ME.BoundaryNodes
+                            % Modify the diagonal from default values to include the
+                            % ... average conductance to other nodes (gas nodes)
+                            A(i,i) = A(i,i) + sum(ME.CondEff(ME.MixFcs{i}));
+                            % Calculate the b values so that they are:
+                            % ...  bi = sum of others( sum of other(delta * Cond * To))
+                            % ...                    ( / sum of delta
+                            b(i) = b(i) + sum(ME.CondTempEff(ME.MixFcs{i}));
+                        end
+
+                        if cycle_count == 1
+                            for i = 1:size(A,1)
+                                if all(A(i,:) == 0)
+                                    ME.ACond(i,i) = 1;
+                                    ME.bCond(i) = 298;
+                                    A(i,i) = 1;
+                                    b(i) = 298;
+                                end
+                            end
+                        end
+
+                        ME.CondEff(:) = 0;
+                        ME.CondTempEff(:) = 0;
+                        ME.CycleTime = 0;
+
+                        A = sparse(A);
+                        var = A\b;
+
+                        % Calculate shifted values based on current transient
+                        ME.T(sindn) = var + T_delta(sindn);
+
+                        % Reset Tavg for the next cycle
+                        Tavg(:) = 0;
+                        Tavg_count = 0;
+
+                    end
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+                    % Detect if it is steady state
+                    % Compare the average over 10 cycles to see if it appears to
+                    % be converged
+                    %               Precord(1:ss_cycles-1) = Precord(2:ss_cycles);
+                    %               Precord(ss_cycles) = Plot_Powers(Plot_Number);
+                    %               temp = ss_tolerance*max(Precord(end),1);
+                    % Matthias
+                    temp = ss_tolerance*max(abs(Plot_Powers(end)),1);
+
+                    % ContinuetoSS is a flag for the last cycle which is run
+                    % ... at a finer timestep that the converging cycles.
+                    if ME.continuetoSS; break; end
+                    % Matthias: added 'MinCycles' as option in RunConditions to specify minimum
+                    % number of cycles to complete. Useful e.g. when differences between
+                    % subsequent runs setpoints are small and cause only small change in power from
+                    % previoues snapshot.
+                    if ~isfield(options,'minCycles')
+                        options.minCycles = 1;
+                    end
+                    if (cycle_count >= ss_cycles)
+                        % Matthias: added 2nd condition below to enforce simulation to run for
+                        % entire simTime but still use the steady state temperature acceleration.
+                        if (CustomRSSQ(diff(Plot_Powers(end-ss_cycles+1:end))) < temp)...
+                                && (cycle_count >= options.minCycles)...
+                                %                   && (ME.curTime >= simTime)
+
+                            ME.continuetoSS = true;
+                            ME.MaxCourant = ME.Model.MaxCourantFinal;
+                            ME.MaxFourier = ME.Model.MaxFourierFinal;
+                        end
+                    end
+                end
+
+                % Modify Gas Mass so that the engine is at the engine pressure.
+                if ME.Model.recordOnlyLastCycle
+                    %i = 1;
+                    for i = 1:length(ME.Regions)
+                        if ~ME.isEnvironmentRegion(i)
+                            nodes = ME.Regions{i};
+                            Pregion = ME.PRegion(i)/ME.PRegionTime;
+                            ME.m(nodes) = ...
+                                (power_factor*engine_Pressure/Pregion + ...
+                                (1-power_factor))*ME.m(nodes);
+                        end
+                    end
+                    ME.PRegion(:) = 0; ME.PRegionTime(:) = 0;
+                    %               for iPVoutput = ME.Model.PVoutputs
+                    %                 Pregion = ME.PRegion(i)/ME.PRegionTime(i);
+                    %                 ME.PRegion(i) = 0; ME.PRegionTime(i) = 0;
+                    %                 ME.m(iPVoutput.RegionNodes) = ...
+                    %                   (power_factor*engine_Pressure/Pregion + ...
+                    %                   (1-power_factor))*ME.m(iPVoutput.RegionNodes);
+                    %                 i = i + 1;
+                    %               end
+
+                end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Matthias: This code should be obsolete now as 'LoadRecord' is now
+                % assigned to the load function earlier.
+                % Assess cycle time and modify mechanism load accordingly
+                if ME.ss_condition && ME.Model.recordOnlyLastCycle
+                    if ME.MoveCondition == 2
+                        if Load_Function_is_Not_Given
+                            % Modify Load to approach initial speed
+                            % Calculate Speed
+                            speed = 2*pi/(ME.curTime - AdjustTime);
+                            dspeed = min(0.01/(max(log(Plot_Number),1)), ...
+                                0.5*abs((SetSpeed - speed)/SetSpeed));
+                            if speed < SetSpeed
+                                LoadRecord = LoadRecord - power_factor*dspeed;
+                            else
+                                LoadRecord = LoadRecord + power_factor*dspeed;
+                            end
+                            ME.MechanicalSystem.LoadFunction = @(Speed) LoadRecord;
+                        end
+                    end
+                end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+                AdjustTime = ME.curTime;
+            end
+            assignDynamic(ME,ME.Inc,false); % Initialize the dynamic function
+        end
+    end
 end
 
