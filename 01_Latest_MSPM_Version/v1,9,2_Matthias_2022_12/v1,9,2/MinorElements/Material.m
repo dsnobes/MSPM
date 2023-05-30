@@ -347,16 +347,16 @@ classdef Material < handle
                     this.kFunc = @(T) 1.7109E-10*(T.^3) - 3.3300E-07*(T.^2) + 4.5124E-04*(T) + 3.9533E-02; % Verified
                     this.muFunc = @(T) 2.8183E-14*(T.^3) - 5.6714E-11*(T.^2) + 7.0661E-08*(T) + 3.4685E-06; % Verified
                 case '100% Helium' % 100/0 Helium/Air
-                    this.Color = [1.0 0.70 1.0];
-                    this.Phase = enumMaterial.Gas;
-                    this.R = 2077.27;
-                    this.dT_duFunc = @(u) 0.00032089;  
+                    this.Color = [1.0 0.70 1.0];    % Color in MSPM model
+                    this.Phase = enumMaterial.Gas;  % Phase
+                    this.R = 2077.27;   % Individual Gas Constant
+                    this.dT_duFunc = @(u) 0.00032089;  % 1/Specific heat at constant volume C_v - 1/Cv [(kg*K)/J]
                     this.dT_du = this.dT_duFunc(298); 
                     this.dh_dTFunc = @(T) -5.3406e-08*(T.^3) + 6.8448842e-05*(T.^2) - 0.028154819*(T) + 5196.8234;
-                    this.dh_dT = this.dh_dTFunc(298);
-                    this.u2T = @(u) 0.00032089*u;
-                    this.kFunc = @(T) 2.3243e-10*(T.^3) - 4.0939e-07*(T.^2) + 0.00054371*(T) + 0.023579;
-                    this.muFunc = @(T) 2.171e-14*(T.^3) - 4.1676e-11*(T.^2) + 6.4811e-08*(T) + 3.6548e-06;
+                    this.dh_dT = this.dh_dTFunc(298);   % Specific heat at constant pressure C_p - Cp [J/(kg*K)]
+                    this.u2T = @(u) 0.00032089*u;   % Convert internal energy to temperature
+                    this.kFunc = @(T) 2.3243e-10*(T.^3) - 4.0939e-07*(T.^2) + 0.00054371*(T) + 0.023579;    % Thermal conductivity
+                    this.muFunc = @(T) 2.171e-14*(T.^3) - 4.1676e-11*(T.^2) + 6.4811e-08*(T) + 3.6548e-06;     % Dynamic viscocity
                 case '99% Helium' % 99/1 Helium/Air
                     this.Color = [1.0 0.75 1.0];
                     this.Phase = enumMaterial.Gas;
