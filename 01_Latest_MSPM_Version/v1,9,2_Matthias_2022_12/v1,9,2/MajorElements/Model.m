@@ -260,6 +260,7 @@ classdef Model < handle
                 case 'Mesher'
                     Item = this.Mesher;
                 case 'Mechanical System'
+                    % why does this GETTER modify this??????
                     if isempty(this.MechanicalSystem)
                         this.MechanicalSystem = MechanicalSystem(this,...
                             LinRotMechanism.empty,[],1,function_handle.empty);
