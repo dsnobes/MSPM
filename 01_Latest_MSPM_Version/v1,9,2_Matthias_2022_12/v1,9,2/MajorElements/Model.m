@@ -174,11 +174,6 @@ classdef Model < handle
             % Makes a list of all bodies in the Model, spanning multiple groups
             n = 0;
             for iGroup = this.Groups
-                n = n + length(iGroup.Bodies);
-            end
-            Bodies(n) = Body();
-            n = 0;
-            for iGroup = this.Groups
                 Bodies(n+1:n+length(iGroup.Bodies)) = iGroup.Bodies;
                 n = n + length(iGroup.Bodies);
             end
