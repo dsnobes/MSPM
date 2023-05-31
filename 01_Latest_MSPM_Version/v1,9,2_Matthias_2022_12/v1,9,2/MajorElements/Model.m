@@ -174,11 +174,6 @@ classdef Model < handle
             % Makes a list of all bodies in the Model, spanning multiple groups
             n = 0;
             for iGroup = this.Groups
-                n = n + length(iGroup.Bodies);
-            end
-            Bodies(n) = Body();
-            n = 0;
-            for iGroup = this.Groups
                 Bodies(n+1:n+length(iGroup.Bodies)) = iGroup.Bodies;
                 n = n + length(iGroup.Bodies);
             end
@@ -265,6 +260,7 @@ classdef Model < handle
                 case 'Mesher'
                     Item = this.Mesher;
                 case 'Mechanical System'
+                    % why does this GETTER modify this??????
                     if isempty(this.MechanicalSystem)
                         this.MechanicalSystem = MechanicalSystem(this,...
                             LinRotMechanism.empty,[],1,function_handle.empty);
@@ -285,6 +281,7 @@ classdef Model < handle
             this.change();
         end
         function set(this,PropertyName,Item)
+            % these are public properties??? why is there a setter? (it is basically unused as far as I can tell)
             switch PropertyName
                 case 'Name'
                     this.name = Item;
@@ -378,7 +375,7 @@ classdef Model < handle
             LEN = length(this.NonConnections);
             for i = length(NonConnectionToAdd):-1:1
                 this.NonConnections(LEN+i) = NonConnectionToAdd(i);
-                this.resetDiscretization();
+                this.resetDiscretization(); % why is this being done inside a for loop?
             end
             keep = true(size(this.NonConnections));
             for i = 1:length(this.NonConnections)
@@ -408,12 +405,13 @@ classdef Model < handle
             LEN = length(this.CustomMinorLosses);
             for i = length(CustomMinorLossToAdd):-1:1
                 this.CustomMinorLosses(LEN+i) = CustomMinorLossToAdd(i);
-                this.resetDiscretization();
+                this.resetDiscretization(); % why is this being done inside a for loop?
             end
             this.CustomMinorLosses = unique(this.CustomMinorLosses);
         end
 
         %% Update on Demand
+        % verifies that the model parameters are still valid (hopefully after any modification is made)
         function update(this)
             this.isStateDiscretized = true;
             if any(~isvalid(this.Bridges))
@@ -481,6 +479,7 @@ classdef Model < handle
 
         %% Process nodes and faces
         function isit = get.isDiscretized(this)
+            % why does a getter modify this???
             if this.isChanged; this.update(); end
             isit = this.isStateDiscretized;
         end
@@ -750,7 +749,7 @@ classdef Model < handle
 
             % Remove faces that are not allowed
             keep2 = true(size(this.NonConnections));
-            i = 1;
+            i = 1; % multiple definitions of the same variable "i" in nested for loops?
             for nonCon = this.NonConnections
                 iBody = nonCon.Body1;
                 if ~isvalid(iBody)
