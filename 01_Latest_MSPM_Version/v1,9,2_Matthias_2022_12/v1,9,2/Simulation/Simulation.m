@@ -578,7 +578,7 @@ classdef Simulation < handle
                 end
             end
             
-            [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf);
+            [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure);
 
             progressbar(1);
 
@@ -2086,7 +2086,7 @@ classdef Simulation < handle
 
 end
 
-function [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf)
+function [Plot_Powers, Plot_Speed, fig, ME, Results, n] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure)
     ME.curTime = 0;
     ME.CycledE = 0;
     cycle_count = 0;
