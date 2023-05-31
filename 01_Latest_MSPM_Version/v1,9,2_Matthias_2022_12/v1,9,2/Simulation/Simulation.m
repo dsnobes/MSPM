@@ -575,6 +575,7 @@ classdef Simulation < handle
                     SetSpeed = ME.dA;
                 else
                     ME.continuetoSS = false;
+                    SetSpeed = NaN;
                 end
             end
             
