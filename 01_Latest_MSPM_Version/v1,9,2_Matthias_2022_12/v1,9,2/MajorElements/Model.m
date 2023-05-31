@@ -749,7 +749,7 @@ classdef Model < handle
 
             % Remove faces that are not allowed
             keep2 = true(size(this.NonConnections));
-            i = 1;
+            i = 1; % multiple definitions of the same variable "i" in nested for loops?
             for nonCon = this.NonConnections
                 iBody = nonCon.Body1;
                 if ~isvalid(iBody)
