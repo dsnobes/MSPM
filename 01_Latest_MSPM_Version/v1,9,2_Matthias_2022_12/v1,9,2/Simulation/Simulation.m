@@ -268,7 +268,7 @@ classdef Simulation < handle
                     case 'C'; ME.MoveCondition = 1;
                     case 'V'; ME.MoveCondition = 2;
                 end
-                ME.dA = options.rpm*2*pi/60;
+                ME.dA = options.rpm*2*pi/60; % radians/s
                 ME.dA_old = ME.dA;
                 ME.MAXdt = options.max_dt;
                 %
@@ -715,9 +715,9 @@ classdef Simulation < handle
             persistent ExFc;
             persistent ExR1;
             persistent ExR2;
-            persistent ExLFc;
-            persistent ExLC;
-            persistent ExLN;
+            %persistent ExLFc;
+            %persistent ExLC;
+            %persistent ExLN;
             persistent FlowTimeStep;
             persistent RecordStatistics;
             persistent facesES;
@@ -2129,7 +2129,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
             for j = length(Forces{i})
                 if isnan(Forces{i}(j)) || ~isreal(Forces{i}(j))
                     ME.stop = true;
-                    success = false;
+                    %success = false;
                 end
             end
         end
