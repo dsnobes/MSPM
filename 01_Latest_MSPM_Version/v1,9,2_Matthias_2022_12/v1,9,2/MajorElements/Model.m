@@ -405,7 +405,7 @@ classdef Model < handle
             LEN = length(this.CustomMinorLosses);
             for i = length(CustomMinorLossToAdd):-1:1
                 this.CustomMinorLosses(LEN+i) = CustomMinorLossToAdd(i);
-                this.resetDiscretization();
+                this.resetDiscretization(); % why is this being done inside a for loop?
             end
             this.CustomMinorLosses = unique(this.CustomMinorLosses);
         end
