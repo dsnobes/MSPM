@@ -1604,8 +1604,7 @@ classdef Model < handle
                         if isfield(run,'HX_SA_V')
                             iBody.Matrix.data.SA_V = run.HX_SA_V;
                         end
-                    end
-                    if ~isempty(iBody.Matrix) && ...
+                    elseif ~isempty(iBody.Matrix) && ...
                             iBody.Matrix.Geometry == enumMatrix.CustomRegen
                         if isfield(run,'Regen_C1')
                             iBody.Matrix.data.C1 = run.Regen_C1;
