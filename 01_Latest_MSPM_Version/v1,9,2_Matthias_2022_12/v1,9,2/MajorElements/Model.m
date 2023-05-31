@@ -780,7 +780,7 @@ classdef Model < handle
                                 nd.Faces = nd.Faces(keep);
                             end
                         end
-                    else
+                    else % if nonCon.Body2 is not Environment
                         for nd = iBody.Nodes
                             keep = true(size(nd.Faces));
                             i = 1;
@@ -819,24 +819,17 @@ classdef Model < handle
             nds2del = Node.empty;
             count = 0;
             if nargin > 1 && isfield(run,'NodeFactor') && run.NodeFactor ~= 1 %FIXED
-                for i = 1:length(this.Faces)
-                    fc = this.Faces(i);
-                    [should_remove, nd2del, ~] = fc.Nodes(1).combineSolid(fc.Nodes(2),run.NodeFactor);
-                    if should_remove
-                        count = count + 1;
-                        keep(i) = false;
-                        nds2del(end+1) = nd2del;
-                    end
-                end
+                combine_solid_param = run.NodeFactor;
             else
-                for i = 1:length(this.Faces)
-                    fc = this.Faces(i);
-                    [should_remove, nd2del, ~] = fc.Nodes(1).combineSolid(fc.Nodes(2),1);
-                    if should_remove
-                        count = count + 1;
-                        keep(i) = false;
-                        nds2del(end+1) = nd2del;
-                    end
+                combine_solid_param = 1;
+            end
+            for i = 1:length(this.Faces)
+                fc = this.Faces(i);
+                [should_remove, nd2del, ~] = fc.Nodes(1).combineSolid(fc.Nodes(2),combine_solid_param);
+                if should_remove
+                    count = count + 1;
+                    keep(i) = false;
+                    nds2del(end+1) = nd2del;
                 end
             end
             fprintf([num2str(count) ' Node pairs collapsed\n']);
