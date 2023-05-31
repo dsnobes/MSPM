@@ -479,6 +479,7 @@ classdef Model < handle
 
         %% Process nodes and faces
         function isit = get.isDiscretized(this)
+            % why does a getter modify this???
             if this.isChanged; this.update(); end
             isit = this.isStateDiscretized;
         end
