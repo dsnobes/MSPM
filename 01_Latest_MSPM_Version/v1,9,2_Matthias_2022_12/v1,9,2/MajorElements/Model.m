@@ -375,7 +375,7 @@ classdef Model < handle
             LEN = length(this.NonConnections);
             for i = length(NonConnectionToAdd):-1:1
                 this.NonConnections(LEN+i) = NonConnectionToAdd(i);
-                this.resetDiscretization();
+                this.resetDiscretization(); % why is this being done inside a for loop?
             end
             keep = true(size(this.NonConnections));
             for i = 1:length(this.NonConnections)
