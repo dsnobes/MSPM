@@ -280,6 +280,7 @@ classdef Model < handle
             this.change();
         end
         function set(this,PropertyName,Item)
+            % these are public properties??? why is there a setter? (it is basically unused as far as I can tell)
             switch PropertyName
                 case 'Name'
                     this.name = Item;
