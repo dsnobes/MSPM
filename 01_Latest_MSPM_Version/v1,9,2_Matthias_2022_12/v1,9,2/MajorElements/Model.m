@@ -1183,10 +1183,10 @@ classdef Model < handle
                 Tri_Nodes{i} = Node.empty;
             end
             % Score All the Triads
+            backup = [0 0];
             for k = 1:length(Triads)
                 Tri = Triads{k};
                 Tri_Node_i = 3;
-                backup = [0 0];
                 % Get nodes for the Tri
                 for fc = Tri
                     for nd = fc.Nodes
@@ -1441,8 +1441,18 @@ classdef Model < handle
 
             % Deal with input options
             % 1. NodeFactor -> Already handled in initial discretization
+            
+            convection_multiplier = 1;
+            
             % 2. HX Convection ->
-            if isfield(run,'HX_Convection') && run.HX_Convection ~= 1
+            if isfield(run, 'HX_Convection')
+                convection_multiplier = convection_multiplier * run.HX_Convection;
+            end
+            % 3. Regen_Convection ->
+            if isfield(run, 'Regen_Convection')
+                convection_multiplier = convection_multiplier * run.Regen_Convection
+            end
+            if convection_multiplier ~= 1
                 % Find all bodies which are gases, but contain source nodes
                 for iGroup = this.Groups
                     for iBody = iGroup.Bodies
@@ -1454,51 +1464,17 @@ classdef Model < handle
                                         if isfield(nd.data,'NuFunc_l')
                                             func = nd.data.NuFunc_l;
                                             if nargin(func) == 2
-                                                nd.data.NuFunc_l = @(Re,Pr) run.HX_Convection.*func(Re,Pr);
+                                                nd.data.NuFunc_l = @(Re,Pr) convection_multiplier.*func(Re,Pr);
                                             else
-                                                nd.data.NuFunc_l = @(Re) run.HX_Convection.*func(Re);
+                                                nd.data.NuFunc_l = @(Re) convection_multiplier.*func(Re);
                                             end
                                         end
                                         if isfield(nd.data,'NuFunc_t')
                                             func = nd.data.NuFunc_t;
                                             if nargin(func) == 2
-                                                nd.data.NuFunc_t = @(Re,Pr) run.HX_Convection.*func(Re,Pr);
+                                                nd.data.NuFunc_t = @(Re,Pr) convection_multiplier.*func(Re,Pr);
                                             else
-                                                nd.data.NuFunc_t = @(Re) run.HX_Convection.*func(Re);
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            % 3. Regen_Convection ->
-            if isfield(run,'Regen_Convection') && run.Regen_Convection ~= 1
-                % Find all bodies which are gases but contain solids nodes without
-                % ... source nodes
-                for iGroup = this.Groups
-                    for iBody = iGroup.Bodies
-                        if iBody.matl.Phase == enumMaterial.Gas
-                            if ~isempty(iBody.Matrix) && ...
-                                    ~isfield(iBody.Matrix.data,'SourceTemperature')
-                                for nd = iBody.Nodes
-                                    if nd.Type ~= enumNType.SN
-                                        if isfield(nd.data,'NuFunc_l')
-                                            func = nd.data.NuFunc_l;
-                                            if nargin(func) == 2
-                                                nd.data.NuFunc_l = @(Re,Pr) run.Regen_Convection.*func(Re,Pr);
-                                            else
-                                                nd.data.NuFunc_l = @(Re) run.Regen_Convection.*func(Re);
-                                            end
-                                        end
-                                        if isfield(nd.data,'NuFunc_t')
-                                            func = nd.data.NuFunc_t;
-                                            if nargin(func) == 2
-                                                nd.data.NuFunc_t = @(Re,Pr) run.Regen_Convection.*func(Re,Pr);
-                                            else
-                                                nd.data.NuFunc_t = @(Re) run.Regen_Convection.*func(Re);
+                                                nd.data.NuFunc_t = @(Re) convection_multiplier.*func(Re);
                                             end
                                         end
                                     end
