@@ -411,6 +411,7 @@ classdef Model < handle
         end
 
         %% Update on Demand
+        % verifies that the model parameters are still valid (hopefully after any modification is made)
         function update(this)
             this.isStateDiscretized = true;
             if any(~isvalid(this.Bridges))
