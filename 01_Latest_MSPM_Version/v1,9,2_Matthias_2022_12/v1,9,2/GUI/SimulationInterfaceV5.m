@@ -113,7 +113,7 @@ function varargout = SimulationInterfaceV5_OutputFcn(hObject, ~, handles) %#ok<I
     varargout{1} = handles.output;
 end
 
-function InsertBody(h, C)
+function [h, C] = InsertBody(h, C)
     % Select 4 connections
     switch get(gcf,'SelectionType')
         case 'normal'
@@ -625,7 +625,7 @@ function GUI_ButtonDownFcn(hObject, ~, h)
     % switch case for which button was pressed, out of the whole GUI
     switch h.MODE
         case 'InsertBody'
-            InsertBody(h, C);
+            [h, C] = InsertBody(h, C);
         case 'InsertGroup'
             InsertGroup(h, C);
         case 'InsertBridge'
