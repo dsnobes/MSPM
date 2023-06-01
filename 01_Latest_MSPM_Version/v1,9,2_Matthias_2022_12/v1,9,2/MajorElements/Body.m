@@ -90,7 +90,7 @@ classdef Body < handle
                 end
                 if ~found
                     this.Sensors(end+1) = iS;
-                    this.Group.Model.addSensor(iS);
+                    this.Group.Model.addSensor(iS); % why create a duplicate of the sensor in a different part of the Model :(
                 end
             end
         end
