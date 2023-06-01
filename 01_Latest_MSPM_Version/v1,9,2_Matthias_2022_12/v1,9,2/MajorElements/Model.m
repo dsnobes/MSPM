@@ -3657,6 +3657,7 @@ classdef Model < handle
                         TestSetStatistics(end).Cycle_Count = cycle_count;
                         TestSetStatistics(end).Final_Speed = final_speed;
                         TestSetStatistics(end).Final_Power = final_power;
+                        TestSetStatistics(end).Charge_Pressure = get(ME, 'Engine Pressure');
                         TestSetStatistics(end).GN = MeshCounts.GN;
                         TestSetStatistics(end).SN = MeshCounts.SN;
                         TestSetStatistics(end).EN = MeshCounts.EN;

@@ -9,11 +9,11 @@ function [RunConditions] = Testing()
 %% Input Parameters
 % Name of experimental data files.
 model = {
-    'Raphael New HX - No Disp Heater - Air',...
+    'Raphael New HX - No Disp Heater - Helium 99',...
     }; % Name of MSPM model geometry.
 
-pressures = [300, 435] .*1000; % [Pa]
-speeds = [100, 135]; % [rpm]
+pressures = [300, 435, 570] .*1000; % [Pa]
+speeds = [100, 135, 170, 205, 240]; % [rpm]
 simTime = 600; %(s) Simulation time.
 minCycles = 10; % minimum number of engine cycles to complete before turning to steady state.
 SS = true; % Steady state toggle.

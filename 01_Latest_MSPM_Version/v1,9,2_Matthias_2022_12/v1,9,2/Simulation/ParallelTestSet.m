@@ -6,6 +6,9 @@ function ParallelTestSet(sel, h)
     
     % Start a progress for preprocessing
     progressbar('Preprocessing')
+
+    % Start timer
+    tic
     
     % Preprocess the test cases
     for i = 1:length(Test_Set)
@@ -22,13 +25,21 @@ function ParallelTestSet(sel, h)
 
     success = 1;
 
+    % Create parallel processing pool
+    parpool("Processes", [4,16])
+
     % Run the test sets
     parfor model = 1:length(Test_Set)
         success = Run(processed_models(model),Test_Set(model))
         send(D,i)
     end
 
+    % Delete the parallel processing pool
+    delete(gcp('nocreate'))
+
     disp("Done!!!!")
+
+    disp(toc)
 
     function UpdateProgressBar(~)
         progressbar(success/length(Test_Set))
