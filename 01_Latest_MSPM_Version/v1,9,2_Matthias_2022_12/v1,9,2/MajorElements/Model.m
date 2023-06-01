@@ -2515,6 +2515,8 @@ classdef Model < handle
             %% Creating Lookup Tables, Regions and Loops For Solver
             progressbar('Creating Regions and Loops For Solver');
 
+            % the four sections of code below could probably be made into a single function
+
             %% Group functions
             % Laminar Nusselt
             novel = true(size(Sim.P));
