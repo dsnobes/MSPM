@@ -3146,8 +3146,7 @@ classdef Model < handle
                                         end
                                     end
                                 end
-                            end
-                            if count == 1
+                            elseif count == 1
                                 for Fc = Nd.Faces
                                     if Fc.Type ~= enumFType.Mix
                                         if isscalar(Fc.data.Area) && isempty(Fc.Connection)
