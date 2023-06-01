@@ -4366,18 +4366,6 @@ classdef Model < handle
                 names{index} = TheConnection.name;
                 index = index + 1;
             end
-
-            %% Bridge
-            mindist = Tolerance;
-            for iBridge = this.Bridges
-
-            end
-
-            %% Leak Connection
-            mindist = Tolerance;
-            for iLeakCon = this.LeakConnections
-
-            end
         end
         function [TheGroup] = findNearestGroup(this,Pos,Tolerance)
             try Pnt = Pos(1,1:2);
