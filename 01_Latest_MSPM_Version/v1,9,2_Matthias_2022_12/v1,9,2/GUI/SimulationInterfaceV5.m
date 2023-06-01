@@ -113,7 +113,7 @@ function varargout = SimulationInterfaceV5_OutputFcn(hObject, ~, handles) %#ok<I
     varargout{1} = handles.output;
 end
 
-function [h, C] = InsertBody(h, C)
+function h = InsertBody(h, C)
     % Select 4 connections
     switch get(gcf,'SelectionType')
         case 'normal'
@@ -243,7 +243,7 @@ function [h, C] = InsertBody(h, C)
     end
 end
 
-function InsertGroup(h, C)
+function h = InsertGroup(h, C)
     % Will simply define a vertical Group at the next slot
     % Determine where the user clicked
     C = get(gca,'Currentpoint'); C = C(1,1:2);
@@ -251,7 +251,7 @@ function InsertGroup(h, C)
     h.Model.distributeGroup(h.InterGroupDistance);
 end
 
-function InsertBridge(h, C)
+function h = InsertBridge(h, C)
     % Select 2 horizontal connections and 2 bodies
     if h.IndexC == 1
         if h.IndexB == 1
@@ -327,7 +327,7 @@ function InsertBridge(h, C)
     end
 end
 
-function InsertLeakConnection(h, C)
+function h = InsertLeakConnection(h, C)
     % Select 2 horizontal connections and 2 bodies/Environments
     Bod = Body.empty;
     if h.IndexB == 1
@@ -362,7 +362,7 @@ function InsertLeakConnection(h, C)
     end
 end
 
-function InsertSensor(h, C)
+function h = InsertSensor(h, C)
     % Select a group
     C = C(1,1:2);
     % Select a body
@@ -377,7 +377,7 @@ function InsertSensor(h, C)
     end
 end
 
-function InsertPVoutput(h, C)
+function h = InsertPVoutput(h, C)
     % Find, within a radius of confidence, the nearest Body
     C = C(1,1:2);
     [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
@@ -395,7 +395,7 @@ function InsertPVoutput(h, C)
     end
 end
 
-function InsertNonConnection(h, C)
+function h = InsertNonConnection(h, C)
     % Select 2 horizontal connections and 2 bodies
     Bod = Body.empty;
     if h.IndexB == 1
@@ -429,7 +429,7 @@ function InsertNonConnection(h, C)
     end
 end
 
-function InsertCustomMinorLoss(h, C)
+function h = InsertCustomMinorLoss(h, C)
     % Find, within a radius of confidence, the nearest body
     C = C(1,1:2);
     [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
@@ -451,7 +451,7 @@ function InsertCustomMinorLoss(h, C)
     end
 end
 
-function Select(h, C)
+function h = Select(h, C)
     % Find, within a radius of confidence, the nearest...
     %   Body, Group, Connection, Bridge and Leak Connection
     C = C(1,1:2);
@@ -473,7 +473,7 @@ function Select(h, C)
     end
 end
 
-function MultiSelect(h, C)
+function h = MultiSelect(h, C)
     % Find, within a radius of confidence, the nearest...
     %   Body, Group, Connection, Bridge and Leak Connection
     C = C(1,1:2);
@@ -495,7 +495,7 @@ function MultiSelect(h, C)
     end
 end
 
-function InsertRelation(h, C)
+function h = InsertRelation(h, C)
     % Find, within a radius of confidence, the nearest connection
     C = C(1,1:2);
     [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
@@ -625,27 +625,27 @@ function GUI_ButtonDownFcn(hObject, ~, h)
     % switch case for which button was pressed, out of the whole GUI
     switch h.MODE
         case 'InsertBody'
-            [h, C] = InsertBody(h, C);
+            h = InsertBody(h, C);
         case 'InsertGroup'
-            InsertGroup(h, C);
+            h = InsertGroup(h, C);
         case 'InsertBridge'
-            InsertBridge(h, C);
+            h = InsertBridge(h, C);
         case 'InsertLeakConnection'
-            InsertLeakConnection(h, C);
+            h = InsertLeakConnection(h, C);
         case 'InsertSensor'
-            InsertSensor(h, C);
+            h = InsertSensor(h, C);
         case 'InsertPVoutput'
-            InsertPVoutput(h, C);
+            h = InsertPVoutput(h, C);
         case 'InsertNonConnection'
-            InsertNonConnection(h, C);
+            h = InsertNonConnection(h, C);
         case 'InsertCustomMinorLoss'
-            InsertCustomMinorLoss(h, C);
+            h = InsertCustomMinorLoss(h, C);
         case 'Select'
-            Select(h, C);
+            h = Select(h, C);
         case 'MultiSelect'
-            MultiSelect(h, C);
+            h = MultiSelect(h, C);
         case 'InsertRelation'
-            InsertRelation(h, C);
+            h = InsertRelation(h, C);
         otherwise
     end
     %% refresh displays
