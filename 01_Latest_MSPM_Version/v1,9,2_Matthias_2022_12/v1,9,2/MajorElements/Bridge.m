@@ -114,11 +114,6 @@ classdef Bridge < handle
             end
             name1 = [];
             for iBody = this.Body1
-                for i = 1:length(iBody.Group.Bodies)
-                    if iBody.Group.Bodies(i) == iBody
-                        break;
-                    end
-                end
                 name1 = [name1 num2str(i) ' '];
             end
             name1 = ['Bodies ' name1 ' of Group' this.Body1(1).Group.name];
