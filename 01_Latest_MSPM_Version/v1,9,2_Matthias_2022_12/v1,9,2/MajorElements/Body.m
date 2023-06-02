@@ -746,7 +746,7 @@ classdef Body < handle
 
             %% Y LIMITS
             [ymin,ymax,~,~] = this.limits(enumOrient.Horizontal);
-            if ~prod(ymax>=ymin) % Will give false if this is not true everywhere
+            if ~prod(ymax>=ymin) % Will give true if this is not true everywhere
                 changed_registered = false;
                 for iCon = this.Group.Connections
                     if iCon.Orient == this.Connections(3).Orient && ...
