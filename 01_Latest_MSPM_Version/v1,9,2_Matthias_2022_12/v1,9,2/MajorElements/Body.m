@@ -720,6 +720,12 @@ classdef Body < handle
                 % VVGN - Variable Volume Gas Node
                 % SAGS - Shearing Annular Gas Node
                 switch this.MovingStatus
+                    case enumMove.Static
+                        % Decide, is it shearing or just moving?
+                        % Looking at the two vertical connections
+                        for iCon = this.Connections
+                            NType = enumNType.SVGN;
+                        end
                     case enumMove.Moving
                         % Decide, is it shearing or just moving?
                         % Looking at the two vertical connections
