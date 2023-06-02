@@ -721,8 +721,7 @@ classdef Group < handle
                         end
                     end
                 end
-            end
-            if nargin == 2
+            elseif nargin == 2
                 CV = RotMatrix(pi/2 - this.Position.Rot)*Pos';
                 CH = RotMatrix(-this.Position.Rot)*Pos';
                 for iCon = this.Connections
