@@ -361,11 +361,7 @@ classdef Body < handle
                     end
                 end
                 if cons(1) == 0
-                    if cons(2) == 0
-                        dir = 2;
-                    else
-                        dir = 2;
-                    end
+                    dir = 2;
                 else
                     if cons(2) == 0
                         dir = 1;
@@ -724,26 +720,6 @@ classdef Body < handle
                 % VVGN - Variable Volume Gas Node
                 % SAGS - Shearing Annular Gas Node
                 switch this.MovingStatus
-                    case enumMove.Static
-                        % Decide, is it shearing or just moving?
-                        % Looking at the two vertical connections
-                        for iCon = this.Connections
-                            NType = enumNType.SVGN;
-                            if iCon.Orient == enumOrient.Vertical
-                                % Find a body that shares that
-                                % connection and scope of x
-                                for iBody = this.Group.Bodies
-                                    if iBody ~= this
-                                        if ~isempty(iBody.RefFrame)
-                                            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                                            %NType = enumNType.SAGN;
-                                            %frame = iBody.RefFrame;
-                                            break;
-                                        end
-                                    end
-                                end
-                            end
-                        end
                     case enumMove.Moving
                         % Decide, is it shearing or just moving?
                         % Looking at the two vertical connections
@@ -770,7 +746,7 @@ classdef Body < handle
 
             %% Y LIMITS
             [ymin,ymax,~,~] = this.limits(enumOrient.Horizontal);
-            if ~prod(ymax>=ymin) % Will give false if this is not true everywhere
+            if ~prod(ymax>=ymin) % Will give true if this is not true everywhere
                 changed_registered = false;
                 for iCon = this.Group.Connections
                     if iCon.Orient == this.Connections(3).Orient && ...
@@ -828,7 +804,7 @@ classdef Body < handle
                         return;
                     else
                         if this.divides(1) > 1
-                            [x] = this.DiscretizationFunctionRadial(this,this.Group.Model.Mesh,enumOrient.Vertical);
+                            [x] = this.DiscretizationFunctionRadial(this,this.Group.Model.Mesh,enumOrient.Vertical); % is this supposed to be .Mesh instead of .Mesher ???
                             if isempty(x); return; end
                             deltas = diff(x);
                             if ~(all(sign(deltas) > 0) || all(sign(deltas) < 0))
