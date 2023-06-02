@@ -2,6 +2,12 @@ classdef Sensor < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
 
+    properties (Constant)
+        ActiveColor = [0 1 0];
+        NormalColor = [1 0 1]; % magenta
+    end
+    
+    
     properties
         name;
         Body;
@@ -19,6 +25,8 @@ classdef Sensor < handle
         % Derived Components
         PlotCoordinates; % Vector 1xN
         LocalCoordinates;
+
+        isActive logical = false;
 
         index = 0; % adding to the data set
         GUIObjects;
@@ -467,6 +475,23 @@ classdef Sensor < handle
             figure(oldfigure);
             axes(oldaxes);
         end
+        
+        function color = getColor(this)
+            if this.isActive
+                color = Sensor.ActiveColor;
+            else
+                color = Sensor.NormalColor;
+            end
+        end
+        
+        function updateColor(this)
+            if ~isempty(this.GUIObjects)
+                for iGraphicsObject = this.GUIObjects
+                    set(iGraphicsObject,'FaceColor',this.getColor());
+                end
+            end
+        end
+        
         function removeFromFigure(this,AxisReference)
             if ~isempty(this.GUIObjects)
                 children = get(AxisReference,'Children');
@@ -485,7 +510,11 @@ classdef Sensor < handle
         end
         function show(this,AxisReference)
             this.removeFromFigure(AxisReference);
-            color = [1 0 1]; % magenta
+            if this.isActive
+                color = Sensor.ActiveColor;
+            else
+                color = Sensor.NormalColor;
+            end
             % Plot a yellow symbol where the sensor is
             if size(this.LocalCoordinates,2) == 2
                 % It is a line

@@ -4335,6 +4335,13 @@ classdef Model < handle
                 objects{index} = TheBody;
                 names{index} = TheBody.name;
                 index = index + 1;
+
+                for iSensor = TheBody.Sensors
+                    objects{index} = iSensor;
+                    names{index} = iSensor.name;
+                    index = index + 1;
+                end
+
             end
 
             %% Connection
