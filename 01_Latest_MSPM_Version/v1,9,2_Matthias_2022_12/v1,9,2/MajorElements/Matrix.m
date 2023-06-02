@@ -894,7 +894,7 @@ classdef Matrix < handle
                                     end
                                     this.data.hasSource = true;
                                 case 5 % Custom HX
-                                    Source = {'C1','C2','C3','C4','Surface are to gas volume ratio [m^2/m^3]','Porosity'};
+                                    Source = {'C1','C2','C3','C4','Surface area to gas volume ratio [m^2/m^3]','Porosity'};
                                     op = {'0.020', '0.8', '0.11', '-0.25', '1.5', '0.5'};
                                     if isfield(this.data,'C1'); op{1} = num2str(this.data.C1); end
                                     if isfield(this.data,'C2'); op{2} = num2str(this.data.C2); end
