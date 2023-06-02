@@ -361,11 +361,7 @@ classdef Body < handle
                     end
                 end
                 if cons(1) == 0
-                    if cons(2) == 0
-                        dir = 2;
-                    else
-                        dir = 2;
-                    end
+                    dir = 2;
                 else
                     if cons(2) == 0
                         dir = 1;
