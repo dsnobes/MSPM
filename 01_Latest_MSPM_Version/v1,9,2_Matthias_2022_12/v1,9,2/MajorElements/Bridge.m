@@ -92,10 +92,6 @@ classdef Bridge < handle
         function change(this)
             this.isChanged = true;
             this.isDiscretized = false;
-            if this.isDiscretized
-                this.Connection1.change();
-                this.Connection2.change();
-            end
         end
         function name = get.name(this)
             if this.Connection1.Orient == enumOrient.Vertical
