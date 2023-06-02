@@ -85,7 +85,7 @@ classdef Bridge < handle
                     fprintf(['XXX Bridge SET Inteface for ' PropertyName ' is not found XXX\n']);
                     return;
             end
-            this.change();
+            this.change(); % literally useless setter function that does nothing...
         end
 
         %% (Update on Demand)
