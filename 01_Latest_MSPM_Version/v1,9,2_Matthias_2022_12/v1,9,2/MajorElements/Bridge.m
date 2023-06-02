@@ -114,12 +114,22 @@ classdef Bridge < handle
             end
             name1 = [];
             for iBody = this.Body1
-                name1 = [name1 num2str(i) ' '];
+                for i = 1:length(iBody.Group.Bodies)
+                    if iBody.Group.Bodies(i) == iBody
+                        name1 = [name1 num2str(i) ' '];
+                        break;
+                    end
+                end
             end
             name1 = ['Bodies ' name1 ' of Group' this.Body1(1).Group.name];
             name2 = [];
             for iBody = this.Body2
-                name2 = [name2 num2str(i) ' '];
+                for i = 1:length(iBody.Group.Bodies)
+                    if iBody.Group.Bodies(i) == iBody
+                        name2 = [name2 num2str(i) ' '];
+                        break;
+                    end
+                end
             end
             name1 = ['Bodies ' name1 ' of Group' this.Body1(1).Group.name];
             name = ['Bridge btwn. ' descriptor1 ' of ' name1 ' and ' ...
