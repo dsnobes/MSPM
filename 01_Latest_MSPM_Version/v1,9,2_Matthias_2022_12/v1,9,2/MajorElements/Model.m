@@ -264,6 +264,7 @@ classdef Model < handle
                     if isempty(this.MechanicalSystem)
                         this.MechanicalSystem = MechanicalSystem(this,...
                             LinRotMechanism.empty,[],1,function_handle.empty);
+                        this.change();
                     end
                     Item = this.MechanicalSystem;
                 case 'Max Courant Final'
@@ -278,7 +279,6 @@ classdef Model < handle
                     fprintf(['XXX Model GET Inteface for ' PropertyName ' is not found XXX\n']);
                     return;
             end
-            this.change();
         end
         function set(this,PropertyName,Item)
             % these are public properties??? why is there a setter? (it is basically unused as far as I can tell)
