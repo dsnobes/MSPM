@@ -85,17 +85,13 @@ classdef Bridge < handle
                     fprintf(['XXX Bridge SET Inteface for ' PropertyName ' is not found XXX\n']);
                     return;
             end
-            this.change();
+            this.change(); % literally useless setter function that does nothing...
         end
 
         %% (Update on Demand)
         function change(this)
             this.isChanged = true;
             this.isDiscretized = false;
-            if this.isDiscretized
-                this.Connection1.change();
-                this.Connection2.change();
-            end
         end
         function name = get.name(this)
             if this.Connection1.Orient == enumOrient.Vertical
@@ -120,20 +116,20 @@ classdef Bridge < handle
             for iBody = this.Body1
                 for i = 1:length(iBody.Group.Bodies)
                     if iBody.Group.Bodies(i) == iBody
+                        name1 = [name1 num2str(i) ' '];
                         break;
                     end
                 end
-                name1 = [name1 num2str(i) ' '];
             end
             name1 = ['Bodies ' name1 ' of Group' this.Body1(1).Group.name];
             name2 = [];
             for iBody = this.Body2
                 for i = 1:length(iBody.Group.Bodies)
                     if iBody.Group.Bodies(i) == iBody
+                        name2 = [name2 num2str(i) ' '];
                         break;
                     end
                 end
-                name2 = [name2 num2str(i) ' '];
             end
             name1 = ['Bodies ' name1 ' of Group' this.Body1(1).Group.name];
             name = ['Bridge btwn. ' descriptor1 ' of ' name1 ' and ' ...
