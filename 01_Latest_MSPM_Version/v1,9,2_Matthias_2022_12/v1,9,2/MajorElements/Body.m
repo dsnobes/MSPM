@@ -931,7 +931,7 @@ classdef Body < handle
                 starty = CollapseVector(starty);
                 endy = CollapseVector(endy);
 
-                for ix = size(x,1) - 1:-1:1
+                for ix = (size(x,1) - 1):-1:1
                     %% Define this.Nodes
                     CurrentNode = Node(NType,x(ix),x(ix+1),starty,endy,Face.empty,Node.empty,this,0);
                     this.Nodes(ncount) = CurrentNode;
