@@ -5,7 +5,7 @@ function ParallelTestSet(sel, h)
     Test_Set = func();
     
     % Start a progress for preprocessing
-    progressbar('Preprocessing')
+    progressbar('Preprocessing for Parallel Execution')
 
     % Start timer
     tic

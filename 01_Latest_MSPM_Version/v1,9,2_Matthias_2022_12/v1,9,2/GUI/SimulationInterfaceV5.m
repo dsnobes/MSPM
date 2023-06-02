@@ -824,6 +824,7 @@ function updateSelectionList(h,index)
                     if strcmp(h.SData.ListObjs(index).MODE,'Deleteobj')
                         % Close all
                         Code = '';
+                        % drawnow(); pause(0.05);
                     else
                         Code = MakeCode(h.SData.ListObjs,index);
                     end
@@ -1043,6 +1044,9 @@ function Delete_Callback(~, ~, handles)
     end
     handles.Model.Selection = cell(0);
     % For all the selected items
+
+    % Re-draw the model to update
+    drawnow(); pause(0.05);
 end
 
 % --- Executes on button press in Revive.
