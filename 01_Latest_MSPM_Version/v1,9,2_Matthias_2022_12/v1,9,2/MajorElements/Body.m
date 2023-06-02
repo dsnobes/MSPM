@@ -924,7 +924,7 @@ classdef Body < handle
             %fcount = prod([divx divy]-[1 0])+prod(this.divides-[0 1]);
 
             %% FOR EACH DISTINCT NODE WITHIN BODY
-            for iy = size(y,1) - 1:-1:1
+            for iy = (size(y,1) - 1):-1:1
                 % loop initialization
                 starty = y(iy,:);
                 endy = y(iy+1,:);
