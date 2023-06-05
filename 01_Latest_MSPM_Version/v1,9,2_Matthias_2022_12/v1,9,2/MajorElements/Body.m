@@ -810,7 +810,7 @@ classdef Body < handle
                         return;
                     else
                         if this.divides(1) > 1
-                            [x] = this.DiscretizationFunctionRadial(this,this.Group.Model.Mesh,enumOrient.Vertical); % is this supposed to be .Mesh instead of .Mesher ???
+                            [x] = this.DiscretizationFunctionRadial(this,this.Group.Model.Mesher,enumOrient.Vertical); % is this supposed to be .Mesh instead of .Mesher ???
                             if isempty(x); return; end
                             deltas = diff(x);
                             if ~(all(sign(deltas) > 0) || all(sign(deltas) < 0))
