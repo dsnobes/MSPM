@@ -1870,6 +1870,31 @@ function ManualDiscretize_Callback(~, ~, h)
     h.Model.discretize(crun);
 end
 
+function ChangeAllGasBodies_Callback(~, ~, h)
+    % Make a temporary material
+    temp_matl = Material();
+
+    % Modify the material to set a material to change all gas nodes too
+    matl_string = temp_matl.ChooseGasType();
+
+    % Go through every body in the model and change the gas nodes to the selected material
+    for j = 1:length(h.Model.Groups)
+        iGroup = h.Model.Groups(j);
+        for i = 1:length(iGroup.Bodies)
+            iBody = h.Model.Groups.Bodies(i);
+            if iBody.matl.Phase == enumMaterial.Gas
+                iBody.matl.Configure(matl_string);
+            end
+        end
+    end
+
+    % Redraw the model
+    show_Model(h);
+
+end
+
+
+
 
 % --- Executes on button press in checkboxGasFaces.
 function checkboxGasFaces_Callback(hObject, eventdata, handles)

@@ -36,6 +36,21 @@ classdef Material < handle
             'SIL 180 oil (as solid)'
             'Perfect Insulator';
             'Constant Temperature'};
+
+
+        Gasses = {...
+            'AIR';
+            'N2 Gas';
+            'H2 Gas';
+            'OLD Helium Gas';
+            '100% Helium';  % Helium data aquired from NIST and interpolated with a 3rd degree polynomial
+            '99% Helium';   % from 100-600K. dT_du(1/Cv) was approximated as a constant
+            '95% Helium';
+            '90% Helium';
+            '85% Helium';
+            '80% Helium';
+            '50% Helium';};
+        
     end
 
     properties
@@ -77,6 +92,22 @@ classdef Material < handle
                 'InitialValue',index);
             if ~isempty(index); this.Configure(this.Source{index}); end
         end
+
+        function matl = ChooseGasType(this)
+            % Function for selecting from the list of materials without changing any bodies
+            for index = 1:length(this.Gasses)
+                if strcmp(this.Gasses{index},this.name)
+                    break;
+                end
+            end
+            index = listdlg('ListString',this.Gasses,...
+                'SelectionMode','single',...
+                'InitialValue',index);
+
+            matl = this.Gasses{index};
+        end
+
+
         function Configure(this,MaterialName)
             % Matthias: moved this to end of function to be able to customize name in GUI
             %       this.name = MaterialName;
