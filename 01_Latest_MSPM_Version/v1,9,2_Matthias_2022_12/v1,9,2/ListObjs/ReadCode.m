@@ -54,7 +54,7 @@ function [ newListObjs ] = ReadCode( Code, ListObjs )
                         % End of Recursion Layer
                         newListObjs = [newListObjs; Internals(2:end)];
                         return;
-                    case ','
+                    case (',')
                         % New expansion, add elements between expanded elements
                         newListObjs = [newListObjs; Internals(2:end)];
                 end
