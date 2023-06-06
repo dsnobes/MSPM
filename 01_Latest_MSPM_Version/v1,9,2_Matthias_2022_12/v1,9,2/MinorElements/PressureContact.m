@@ -11,8 +11,6 @@ classdef PressureContact
 
     methods
         function this = PressureContact(ConverterIndex,MechanismIndex,Area,Node)
-            %FORCECONTACT Construct an instance of this class
-            %   Detailed explanation goes here
             this.ConverterIndex = ConverterIndex;
             this.MechanismIndex = MechanismIndex;
             this.Area = Area;
