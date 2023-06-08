@@ -1893,6 +1893,56 @@ function ChangeAllGasBodies_Callback(~, ~, h)
 
 end
 
+function ScaleModel_Callback(~, ~, h)
+    % Get the scale value from the user
+    scale_value_cell = inputdlg('Scale the model by:');
+    scale_value = str2double(scale_value_cell{1});
+
+    % Scale motion
+    for j = 1:length(h.Model.Converters)
+        iConverter = h.Model.Converters(j);
+        % Get the original input
+        origin_in = iConverter.originalInput;
+        % Update the stroke in the input
+        origin_in{2,1} = num2str(str2double(origin_in{2,1}).*scale_value);
+        % Apply the change to the converter
+        iConverter.Populate(iConverter.Type, origin_in)
+    end
+
+    % Go through all the connections in the group and multiply their value by 2
+    for j = 1:length(h.Model.Groups)
+        iGroup = h.Model.Groups(j);
+        for i = 1:length(iGroup.Connections)
+            iConn = h.Model.Groups.Connections(i);
+            iConn.x =  (iConn.x).*scale_value;
+            for k = 1:length(iGroup.Bodies)
+                iBody = h.Model.Groups.Bodies(k);
+                iBody.update();
+            end
+        end
+
+        % Update each group
+        iGroup.update()
+    end
+
+    % Update all sensors
+    for j = 1:length(h.Model.Sensors)
+        iSensor = h.Model.Sensors(j);
+        iSensor.update()
+    end
+
+    % Update the model
+    h.Model.update()
+
+    % Redraw the model
+    cla;
+    show_Model(h);
+    drawnow(); pause(0.05);
+
+    disp("Done Scaling")
+
+end
+
 
 
 
