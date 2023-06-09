@@ -268,7 +268,7 @@ classdef Simulation < handle
                     case 'C'; ME.MoveCondition = 1;
                     case 'V'; ME.MoveCondition = 2;
                 end
-                ME.dA = options.rpm*2*pi/60; % radians/s
+                ME.dA = options.rpm*2*pi/60; % radians/sclose 
                 ME.dA_old = ME.dA;
                 ME.MAXdt = options.max_dt;
                 %

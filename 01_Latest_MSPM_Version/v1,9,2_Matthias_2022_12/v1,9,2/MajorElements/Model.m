@@ -3577,9 +3577,9 @@ classdef Model < handle
                             % Apply the snapshot if it is selected
                             if selectionMade && answer ~= length(names)
                                 %% Comment out below to disable Snapshots %
-                                %                                 SS = ME.SnapShots{answer};
-                                %                                 ME.assignSnapShot(SS);
-                                %                                 disp("Applied Snapshot no. "+answer+"/"+length(ME.SnapShots) +", named '" +SS.Name +"'")
+                                SS = ME.SnapShots{answer};
+                                ME.assignSnapShot(SS);
+                                disp("Applied Snapshot no. "+answer+"/"+length(ME.SnapShots) +", named '" +SS.Name +"'")
                                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                             end
                         end
