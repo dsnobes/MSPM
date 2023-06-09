@@ -1,4 +1,4 @@
-function [RunConditions] = Raphael_Helium_Testing_Full()
+function [RunConditions] = Raphael_Helium_Testing_Full_Pt4()
 % Written by Steven Middleton
 % Experimental data extraction added by Connor Speer, September 2021.
 % Debuged and finalized by Sara Eghbali, 24 Sep 2021
