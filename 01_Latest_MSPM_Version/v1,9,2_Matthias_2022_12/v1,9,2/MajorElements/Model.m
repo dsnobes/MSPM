@@ -4213,6 +4213,9 @@ classdef Model < handle
         end
 
         function saveME(Model)
+            % Surpress the recursion limit warning
+            warning('off', 'MATLAB:loadsave:saveRecursionLimit')
+            
             Model.Faces(:) = [];
             Model.Nodes(:) = [];
             Model.Simulations(:) = [];
@@ -4255,6 +4258,10 @@ classdef Model < handle
             save(['Saved Files\' Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
+
+            % Turn back on the recursion limit warning
+            warning('on', 'MATLAB:loadsave:saveRecursionLimit')
+
         end
 
         %% Interface / Find stuff
