@@ -9,38 +9,28 @@ function ParallelTestSet(sel, h)
 
     % Start timer
     tic
-
-    % Create temp cell output to store variables
-    temp_out(1:length(Test_Set)) = parallel.FevalFuture;
-
+    
+    % Preprocess the test cases
+    for i = 1:length(Test_Set)
+        Model = Test_Set(i).Model;
+        processed_model = load_sub(Model, h);
+        processed_models(i) = processed_model;
+        progressbar(i/length(Test_Set))
+    end
 
     % Parfor loop progress bar
     D = parallel.pool.DataQueue;
-    progressbar('Preprocessing Test Data');
+    progressbar('Simulating');
     afterEach(D, @UpdateProgressBar);
 
     success = 1;
 
     % Create parallel processing pool
-    pool = parpool("Processes", [4,16]);
-
-    % Preprocess the test cases
-    for i = 1:length(Test_Set)
-        temp_out(i) = parfeval(@load_sub, 1, Test_Set(i).Model, h);
-        send(D,i)
-    end
-
-    % Extract the values
-    processed_out = fetchOutputs(temp_out);
-    delete temp_out
-
-    % Reset progressbar
-    success = 1;
-    progressbar('Simulating')
+    parpool("Processes", [4,16])
 
     % Run the test sets
-    parfor model = 1:length(processed_out)
-        success = Run(processed_models(model),processed_out(model))
+    parfor model = 1:length(Test_Set)
+        success = Run(processed_models(model),Test_Set(model))
         send(D,i)
     end
 
