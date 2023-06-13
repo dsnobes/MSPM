@@ -1,4 +1,4 @@
-function [RunConditions] = Testing()
+function [RunConditions] = Copy_of_Testing()
 % Written by Steven Middleton
 % Experimental data extraction added by Connor Speer, September 2021.
 % Debuged and finalized by Sara Eghbali, 24 Sep 2021
@@ -12,10 +12,10 @@ model = {
     'Raphael New HX - Air',...
     }; % Name of MSPM model geometry.
 
-pressures = [300, 435, 570] .*1000; % [Pa]
-speeds = [100, 135, 170, 205, 240]; % [rpm]
+pressures = [300] .*1000; % [Pa]
+speeds = [100, 135]; % [rpm]
 simTime = 600; %(s) Simulation time.
-minCycles = 10; % minimum number of engine cycles to complete before turning to steady state.
+minCycles = 2; % minimum number of engine cycles to complete before turning to steady state.
 SS = true; % Steady state toggle.
 movement_option = 'C';
 max_dt = 0.1; %(s) Maximum time step.

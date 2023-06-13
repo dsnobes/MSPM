@@ -13,13 +13,13 @@ classdef Model < handle
         AnimationSpeed_rads = pi;
         MaxFourierNumber = 0.25;
     end
-
+    
     properties (Dependent)
         ActiveGroup;
         isDefaultModel;
         isDiscretized;
     end
-
+    
     properties
         isChanged logical = true;
         Selection = cell(0); % Various Objects
@@ -43,23 +43,23 @@ classdef Model < handle
         initConditions Environment;
         surroundings Environment;
         roughness double = 0.000045; % 0.045 mm - Commercial or welded steel
-
+        
         Faces Face;
         Nodes Node;
-
+        
         Simulations Simulation;
-
+        
         PressureContacts PressureContact;
         ShearContacts ShearContact;
-
+        
         Results Result;
         engineTemperature double = 298;
         enginePressure double = 101325;
         engineSpeed double = 1;
-
+        
         RelationOn = true;
     end
-
+    
     properties (Hidden)
         StaticGUIObjects = [];
         DynamicGUIObjects = [];
@@ -78,7 +78,7 @@ classdef Model < handle
         showSensors = true;
         showEnvironmentConnections = false;
         showRelations = false;
-
+        
         % Matthias: Advanced Node Display Options
         showInterConnections = false;
         showFacesGas = true;
@@ -87,7 +87,7 @@ classdef Model < handle
         showFacesLeak = false;
         showFacesMatrixTransition = false;
         showFacesEnvironment = false;
-
+        
         showNodes = false;
         showNodeBounds = false;
         showNodesSVGN = true;
@@ -96,7 +96,7 @@ classdef Model < handle
         showNodesSN = true;
         showNodesEN = false;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+        
         % Simulation Options
         showLivePV = true;
         showPressureAnimation = true;
@@ -114,26 +114,26 @@ classdef Model < handle
         %new
         showReynoldsAnimation = true;
         recordReynolds = true;
-
+        
         recordOnlyLastCycle = true;
         recordStatistics = true;
         outputPath = '';
         warmUpPhaseLength = 0;
         animationFrameTime = 0.05;
         deRefinementFactorInput = 1;
-
+        
         MaxCourantFinal = 0.025;
         MaxFourierFinal = 0.025;
         MaxCourantConverging = 0.025;
         MaxFourierConverging = 0.025;
-
+        
         % RunTime Options
         stopSimulation = false;
-
+        
         isStateDiscretized logical;
         isAnimating logical;
     end
-
+    
     methods
         %% Creating, Reseting, Debugging
         function this = Model(AxisReference)
@@ -212,7 +212,7 @@ classdef Model < handle
                 text(pnt.x,pnt.y,num2str(iNd.index));
             end
         end
-
+        
         %% GET/SET Interface
         function Item = get(this,PropertyName)
             switch PropertyName
@@ -315,7 +315,7 @@ classdef Model < handle
                     fprintf(['XXX Model SET Inteface for ' PropertyName ' is not found XXX\n']);
             end
         end
-
+        
         %% Adding Elements
         function addGroup(this,GroupToAdd)
             if isrow(GroupToAdd)
@@ -409,7 +409,7 @@ classdef Model < handle
             end
             this.CustomMinorLosses = unique(this.CustomMinorLosses);
         end
-
+        
         %% Update on Demand
         % verifies that the model parameters are still valid (hopefully after any modification is made)
         function update(this)
@@ -476,7 +476,7 @@ classdef Model < handle
             this.CurrentSim(:) = [];
             this.isStateDiscretized = false;
         end
-
+        
         %% Process nodes and faces
         function isit = get.isDiscretized(this)
             % why does a getter modify this???
@@ -489,13 +489,13 @@ classdef Model < handle
                 iLinRot.Populate(iLinRot.Type,iLinRot.originalInput);
             end
             if this.isChanged; this.update(); end
-
+            
             %% Initializing Meshing
             progressbar('Calculating Surroundings');
-
+            
             % Test if everything is discretized
             this.surroundings.discretize();
-
+            
             % Matthias: In this initial section of 'discretize' function
             % there are many expressions like "isfield('XXX',run)" which
             % are wrong (should be "isfield(run,'XXX')"). They always give
@@ -507,7 +507,7 @@ classdef Model < handle
             % which then aplies the parameters from 'crun'. The parameters
             % applied here from 'run' are never used.
             % Matthias: Fixed the wrong uses of 'isfield'. marked by %FIXED
-
+            
             if nargin > 1 && isfield(run,'rpm') %FIXED
                 % This line causes mesh in solid bodies discretized by the
                 % 'Wall_Smart_Discretize' function to vary depending on
@@ -515,7 +515,7 @@ classdef Model < handle
                 % speed)
                 % this.engineSpeed = run.rpm;
             end
-
+            
             if nargin > 1 && isfield(run,'NodeFactor') && run.NodeFactor ~= 1 %FIXED
                 backup_ODN = this.Mesher.oscillation_depth_N;
                 backup_MXT = this.Mesher.maximum_thickness;
@@ -546,7 +546,7 @@ classdef Model < handle
                     double(backup_gas_minimum_size)/double(run.NodeFactor);
                 %%
             end
-
+            
             % Matthias: Added code to apply "h_custom_Source/Sink" from test set here.
             % Criterium for body being a source/sink is it being 'Constant
             % Temperature' and its temperature being higher/lower than the
@@ -580,15 +580,15 @@ classdef Model < handle
                                 fprintf(['XXX When applying "h_custom_Source/Sink", a body could not be determined as Source or Sink because its temperature is equal to the engine temperature:\n' iBody.name ' XXX\n']);
                             end
                         end
-
+                        
                     end
                 end
             end
-
+            
             % Matthias: Calculation of conductances for faces begins in this step of
             % discretization! --> all modifications to conductance (e.g. 'h_custom')
             % must be applied prior.
-
+            
             progressbar('Discretizing Bridges');
             % Test and Discretize Bridges
             for iBridge = this.Bridges
@@ -614,7 +614,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             progressbar('Discretizing Groups');
             % Test and Discretize Groups
             for iGroup = this.Groups
@@ -646,7 +646,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             progressbar('Discretizing Leaks');
             LeakFaces = struct('Node1',Node(),'Node2',Node(),'LeakFunc',@CollapseVector);
             LeakFaces(:) = [];
@@ -667,7 +667,7 @@ classdef Model < handle
                 clear backup_HEFD;
                 clear backup_growth;
             end
-
+            
             progressbar('Counting Elements');
             % Count the Nodes and Faces
             ndequ = 1; % <-- Environment Node
@@ -682,15 +682,15 @@ classdef Model < handle
                 fcequ = fcequ + length(iGroup.Faces);
                 ndequ = ndequ + length(iGroup.Nodes);
             end
-
+            
             % Start Simulation Definition
             this.CurrentSim = Simulation();
             Sim = this.CurrentSim;
             Sim.Model = this;
-
+            
             %% Acquiring Nodes and Faces
             progressbar('Acquiring Nodes and Faces');
-
+            
             % Collect Nodes and Faces
             % Environment
             this.Nodes(ndequ) = this.surroundings.Node;
@@ -714,7 +714,7 @@ classdef Model < handle
                 this.Nodes(ndequ - length(iGroup.Nodes) + 1:ndequ) = iGroup.Nodes;
                 ndequ = ndequ - length(iGroup.Nodes);
             end
-
+            
             % Exclude invalid nodes
             keep = true(size(this.Nodes));
             for i = 1:length(this.Nodes)
@@ -723,7 +723,7 @@ classdef Model < handle
                 end
             end
             this.Nodes = this.Nodes(keep);
-
+            
             % Exclude Faces with invalid nodes
             keep = true(size(this.Faces));
             for i = 1:length(this.Faces)
@@ -735,7 +735,7 @@ classdef Model < handle
                 end
             end
             this.Faces = this.Faces(keep);
-
+            
             % Assign Faces/Node Connections to Nodes
             for Nd = this.Nodes
                 Nd.Faces = Face.empty;
@@ -746,7 +746,7 @@ classdef Model < handle
                 Fc.Nodes(1).addFace(Fc);
                 Fc.Nodes(2).addFace(Fc);
             end
-
+            
             % Remove faces that are not allowed
             keep2 = true(size(this.NonConnections));
             i = 1; % multiple definitions of the same variable "i" in nested for loops?
@@ -770,7 +770,7 @@ classdef Model < handle
                                 end
                                 i = i + 1;
                             end
-
+                            
                             if any(~keep)
                                 for i = 1:length(keep)
                                     if ~keep(i)
@@ -793,7 +793,7 @@ classdef Model < handle
                                 end
                                 i = i + 1;
                             end
-
+                            
                             if any(~keep)
                                 for i = 1:length(keep)
                                     if ~keep(i)
@@ -810,10 +810,10 @@ classdef Model < handle
             if any(~keep2)
                 this.NonConnections = this.NonConnections(keep2);
             end
-
+            
             %% Cleaning up solid connections that are too small
             progressbar('Cleaning up solid connections that are too small');
-
+            
             % Clean up small nodes near bigger nodes
             keep = true(size(this.Faces));
             nds2del = Node.empty;
@@ -834,7 +834,7 @@ classdef Model < handle
             end
             fprintf([num2str(count) ' Node pairs collapsed\n']);
             this.Faces = this.Faces(keep);
-
+            
             % Remove these nodes from were they came
             for nd = nds2del
                 if ~isempty(nd.Body) && isa(nd.Body,'Body')
@@ -847,7 +847,7 @@ classdef Model < handle
                     nd.Body.Nodes = nd.Body.Nodes(keep2);
                 end
             end
-
+            
             % Remove the nodes from the bulk list
             keep = true(size(this.Nodes));
             for nd = nds2del
@@ -855,10 +855,10 @@ classdef Model < handle
             end
             this.Nodes = this.Nodes(keep);
             clear nds2del;
-
+            
             %% Assigning Node and Face Indexes
             progressbar('Assigning Node and Face Indexes');
-
+            
             % Assign Face/Node indexs to Faces and Nodes
             % Determine the amount of Solid, Wall, Environment and Gas Nodes
             S_count = 0;
@@ -875,20 +875,20 @@ classdef Model < handle
             fprintf(['Found: ' num2str(G_count) ' Gas Nodes, ' ...
                 num2str(E_count) ' Environment Nodes, ' ...
                 num2str(S_count) ' Solid Nodes\n']);
-
+            
             % Matthias: Record Node counts to include in TestSetStatictics
             % output
             MeshCounts.SN = S_count;
             MeshCounts.EN = E_count;
             MeshCounts.GN = G_count;
-
+            
             E_count = G_count + E_count;
             S_count = length(this.Nodes);
-
+            
             S_count_backup = S_count;
             E_count_backup = E_count;
             G_count_backup = G_count;
-
+            
             for Nd = this.Nodes
                 if Nd.Type == enumNType.SN
                     Nd.index = S_count;
@@ -901,7 +901,7 @@ classdef Model < handle
                     G_count = G_count - 1;
                 end
             end
-
+            
             % Exclude faces with nodes with no index
             keep = true(size(this.Faces));
             for i = 1:length(this.Faces)
@@ -912,11 +912,11 @@ classdef Model < handle
                 end
             end
             this.Faces = this.Faces(keep);
-
-
+            
+            
             %% Assessing Connections
             progressbar('Assessing Connections');
-
+            
             % Orient them such that the node closer to 0,0 is
             % ... listed first
             for Fc = this.Faces
@@ -944,7 +944,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % For Gas-Gas Faces that have a connection (from node contacts), determine K
             % Determine if applicable
             isSubject = false(length(this.Faces),1);
@@ -956,7 +956,7 @@ classdef Model < handle
                     ~isempty(this.Faces(fcequ).Connection)) && ...
                     ~isfield(this.Faces(fcequ).data,'K12');
             end
-
+            
             % Group based on common connection & body
             subSet = this.Faces(isSubject);
             isExcluded = false(length(subSet),1);
@@ -976,11 +976,11 @@ classdef Model < handle
                     % Mark off Exclusion
                     isExcluded(isSubject) = true;
                     subsubSet = subSet(isSubject);
-
+                    
                     % So we have grabbed a subset of the select nodes that share a
                     % ... connection with element i
                     index = zeros(length(subsubSet),1);
-
+                    
                     % Determine if they are part of some adjacent chain by going
                     % ... through each combination and passing a index between
                     % ... connected elements.
@@ -1014,7 +1014,7 @@ classdef Model < handle
                             end
                         end
                     end
-
+                    
                     % Pick out groups that have the same index (i.e. part of the same
                     % ... chain)
                     issubExcluded = false(length(subsubSet),1);
@@ -1116,7 +1116,7 @@ classdef Model < handle
                                     end
                                     Fc.data.fFunc_l = @(Re) C./Re;
                                     Fc.data.fFunc_t = @(Re) 0.11*(this.roughness/Fc.data.Dh+68./Re).^0.25;
-
+                                    
                                     % Streamwise conduction enhancement
                                     Fc.data.NkFunc_l = @(Re) 1;
                                     Fc.data.NkFunc_t = @(Re,Pr) 0.022*(Re.^0.75).*(Pr);
@@ -1131,7 +1131,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % Overwrite K of Custom Minor Losses
             for CustomK = this.CustomMinorLosses
                 if this.CustomMinorLosses.isValid()
@@ -1151,7 +1151,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             %% Decimating Loops
             progressbar('Decimating Extra Loops');
             % debug_loopPlot(this,false);
@@ -1174,7 +1174,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % Look at Triads
             Scores = cell(size(Triads));
             Tri_Nodes = Scores;
@@ -1227,15 +1227,15 @@ classdef Model < handle
                 end
                 % Rearrange the Tri so that the faces correspond to the correct
                 % ... score
-
+                
             end
-
+            
             while ~isempty(Triads)
                 Best_Tri = 0;
                 Open_Triads = true(length(Triads),1);
                 Best_Score = 0;
                 Best_Index = 0;
-
+                
                 % Find Best Possible Face to close
                 finding_best = true;
                 while finding_best
@@ -1259,10 +1259,10 @@ classdef Model < handle
                         Best_Score = 0;
                     end
                 end
-
+                
                 % Collapse the face, closing the triad
                 if Best_Score > 0
-
+                    
                     % Adjust the area and minor loss coefficients of the other two faces
                     for fc = Triads{Best_Tri}
                         if fc ~= closing_face
@@ -1279,14 +1279,14 @@ classdef Model < handle
                             fc.data.Area = fc.data.Area + closing_face.data.Area;
                         end
                     end
-
+                    
                     % Delete the face from the list
                     closing_face.data.Area = 0;
                     for nd = closing_face.Nodes
                         nd.Faces(nd.Faces == closing_face) = [];
                     end
                     this.Faces(this.Faces == closing_face) = [];
-
+                    
                     for k = 1:length(Triads)
                         if any(Triads{k} == closing_face)
                             Open_Triads(k) = false;
@@ -1316,7 +1316,7 @@ classdef Model < handle
                 end
                 end
             %}
-
+            
             % Starting at the node with maximum area, test if the opposite face
             % can be closed
             %{
@@ -1372,7 +1372,7 @@ classdef Model < handle
                 this.Faces(this.Faces == closing_face) = [];
                 end
             %}
-
+            
             % Faces
             % Determine the amount of Solid, Environment, Mix and Gas Faces
             S_count = 0;
@@ -1393,14 +1393,14 @@ classdef Model < handle
                 num2str(E_count) ' Environment Faces, ' ...
                 num2str(M_count) ' Mixed Faces, ' ...
                 num2str(S_count) ' Solid Faces\n']);
-
+            
             % Matthias: Record Face counts to include in TestSetStatictics
             % output
             MeshCounts.SF = S_count;
             MeshCounts.EF = E_count;
             MeshCounts.GF = G_count;
             MeshCounts.MF = M_count;
-
+            
             M_count = G_count + M_count;
             E_count = M_count + E_count;
             S_count = length(this.Faces);
@@ -1419,13 +1419,13 @@ classdef Model < handle
                         Fc.index = E_count;
                         E_count = E_count - 1;
                         %                     case enumFType.Leak
-
+                        
                     otherwise % Gas
                         Fc.index = G_count;
                         G_count = G_count - 1;
                 end
             end
-
+            
             % Remove Nodal Faces that have been deleted
             for iNd = this.Nodes
                 keep = true(size(iNd.Faces));
@@ -1438,7 +1438,7 @@ classdef Model < handle
                 end
                 iNd.Faces = iNd.Faces(keep);
             end
-
+            
             % Deal with input options
             % 1. NodeFactor -> Already handled in initial discretization
             
@@ -1627,8 +1627,8 @@ classdef Model < handle
                     end
                 end
             end
-
-
+            
+            
             %% Vectorizing Nodes
             progressbar('Vectorizing Nodes');
             % Generic Properties
@@ -1636,7 +1636,7 @@ classdef Model < handle
             Sim.u = Sim.dT_dU;
             Sim.T = Sim.dT_dU;
             Sim.CondFlux = Sim.dT_dU;
-
+            
             % Environment Additional Properties
             Sim.P = zeros(E_count_backup,1);
             Sim.dP = Sim.P;
@@ -1645,7 +1645,7 @@ classdef Model < handle
             Sim.m = Sim.dT_dU;
             Sim.vol = Sim.T;
             Sim.dV_dt = Sim.P;
-
+            
             % Gas Node Additional Properties
             Sim.k = Sim.P;
             Sim.mu = Sim.P;
@@ -1666,7 +1666,7 @@ classdef Model < handle
             Sim.Area = zeros(2,length(Sim.Dh));
             Sim.Va = Sim.Dh;
             Sim.to = Sim.Dh;
-
+            
             % Gas Regions
             % Growth algorithm propegating through gas faces that are always open
             region = zeros(length(Sim.P),1);
@@ -1678,7 +1678,7 @@ classdef Model < handle
                     if all(region > 0); break; end
                 end
             end
-
+            
             % Define Functions
             DynVol_n = 1;
             DynDh_n = 1;
@@ -1709,7 +1709,7 @@ classdef Model < handle
                         Sim.T(Nd.index) = Nd.data.T;
                         Sim.u(Nd.index) = matl.initialInternalEnergy(Nd.data.T);
                         Sim.vol(Nd.index) = Nd.vol();
-
+                        
                         % Static Volume Gas Node %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     case {enumNType.SVGN, enumNType.VVGN, enumNType.SAGN}
                         V = Nd.vol();
@@ -1723,7 +1723,7 @@ classdef Model < handle
                         else
                             Sim.useTurbulenceNd(Nd.index) = true;
                         end
-
+                        
                         if isscalar(V)
                             Sim.vol(Nd.index) = V;
                         else
@@ -1754,16 +1754,16 @@ classdef Model < handle
                         end
                         Sim.u2T{region(Nd.index)} = matl.u2T;
                         Sim.T(Nd.index) = Nd.data.T;
-
+                        
                         Sim.P(Nd.index) = Nd.data.P;
                         Sim.rho(Nd.index) = Nd.data.P/(matl.R*Nd.data.T);
                         Sim.u(Nd.index) = matl.initialInternalEnergy(Nd.data.T);% + Nd.data.P/Sim.rho(Nd.index);
                         Sim.m(Nd.index) = Sim.rho(Nd.index)*Sim.vol(Nd.index);
-
+                        
                         Sim.kFunc{region(Nd.index)} = matl.kFunc;
                         Sim.muFunc{region(Nd.index)} = matl.muFunc;
                         Rs(Nd.index) = matl.R;
-
+                        
                         if isfield(Nd.data,'NuoFunc_l')
                             Sim.NuFunc_l{Nd.index} = Nd.data.NuoFunc_l;
                         else
@@ -1795,10 +1795,10 @@ classdef Model < handle
                         Sim.turb(Nd.index) = 0;
                 end
             end
-
+            
             %% Vectorizing Faces
             progressbar('Vectorizing Faces');
-
+            
             Sim.Fc_Nd = zeros(length(this.Faces),2);
             Sim.Fc_U = zeros(G_count_backup_faces,1);
             Sim.Fc_PR = Sim.Fc_U;
@@ -1822,7 +1822,7 @@ classdef Model < handle
             Sim.Fc_dP = Sim.Fc_U;
             Sim.Fc_V_backup = Sim.Fc_U;
             Sim.Fc_W = Sim.Fc_U;
-
+            
             % For gas-gas, mix and environment faces
             Sim.Fc_Area = zeros(E_count_backup_faces,1);
             Sim.Fc_Dh = Sim.Fc_U;
@@ -1833,19 +1833,19 @@ classdef Model < handle
             Sim.Fc_rho = Sim.Fc_U;
             Sim.Fc_Vel_Factor = Sim.Fc_U;
             Sim.Fc_Shear_Factor = Sim.Fc_U;
-
+            
             % Turbulence
             Sim.Fc_turb = Sim.Fc_U;
             Sim.Fc_to = Sim.Fc_U;
             Sim.useTurbulenceFc = true(G_count_backup_faces,1);
-
+            
             % Flux Limiters
             Sim.Fc_Nd03 = Sim.Fc_Nd;
             Sim.Fc_A = Sim.Fc_U;
             Sim.Fc_B = Sim.Fc_U;
             Sim.Fc_C = Sim.Fc_U;
             Sim.Fc_D = Sim.Fc_U;
-
+            
             % Find V and S for the faces
             for Fc = this.Faces
                 [V, S, SContact] = FaceMotion(Fc);
@@ -1857,10 +1857,10 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             %% Creating Shear/Pressure Contacts
             progressbar('Creating Shear/Pressure Contacts');
-
+            
             % For all Faces, attempt to make a PressureContact
             for Fc = this.Faces
                 if Fc.Type == enumFType.Mix
@@ -1878,7 +1878,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % For all Faces, distribute the friction length to neighbours if
             % ... K enabled.
             for Fc = this.Faces
@@ -1889,10 +1889,10 @@ classdef Model < handle
                             % Will only run this code if:
                             % ... It is a gas face
                             % ... It has a minor loss coefficient
-
+                            
                             % This face will not utilize the value of Dist
                             Fc.data.Dist = 0;
-
+                            
                             % Get the location of the center of this face
                             x = getCenterOfOverlapRegion(...
                                 Fc.Nodes(1).xmin, Fc.Nodes(2).xmin,...
@@ -1900,7 +1900,7 @@ classdef Model < handle
                             y = getCenterOfOverlapRegion(...
                                 Fc.Nodes(1).ymin, Fc.Nodes(2).ymin,...
                                 Fc.Nodes(1).ymax, Fc.Nodes(2).ymax);
-
+                            
                             % Find all neighbours
                             for nd = Fc.Nodes
                                 ndx = (nd.xmin + nd.xmax)/2;
@@ -1970,7 +1970,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % Vectorize all Faces
             MF_n = 1;
             Fc_DynCond_n = 1;
@@ -1991,7 +1991,7 @@ classdef Model < handle
                 N2 = Fc.Nodes(2);
                 Sim.Fc_Nd(Fc.index,1) = N1.index;
                 Sim.Fc_Nd(Fc.index,2) = N2.index;
-
+                
                 % Solid Faces
                 switch Fc.Type
                     case enumFType.Solid % Solid and Solid-Environment Faces
@@ -2099,7 +2099,7 @@ classdef Model < handle
                         Fc.recalc_Area_Dh();
                         % Create Fc_Fcs array
                         [A,B,C,D] = populate_Fc_ABCD(Sim, Fc);
-
+                        
                         % Create Fc_A array
                         if isscalar(A)
                             Sim.Fc_A(Fc.index) = A;
@@ -2140,7 +2140,7 @@ classdef Model < handle
                             Fc_DynD_n = Fc_DynD_n + 1;
                             Sim.Dyn = Sim.Dyn + 1;
                         end
-
+                        
                         % Area
                         if isscalar(Fc.data.Area)
                             Sim.Fc_Area(Fc.index) = Fc.data.Area;
@@ -2236,12 +2236,12 @@ classdef Model < handle
                         % Do nothing, this is handled elsewhere
                 end
             end
-
+            
             Sim.Dynamic = Sim.Dynamic';
-
+            
             %% Creating Face - Use Turbulence
             progressbar('Creating Face - Use Turbulence');
-
+            
             L = G_count_backup_faces + 1;
             for Fc = this.Faces
                 if Fc.index < L
@@ -2267,10 +2267,10 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             %% Defining Max Time Step
             progressbar('Defining Max Time Step');
-
+            
             BoundaryNodes = [];
             NGas = length(Sim.P);
             NGas = NGas - 1;
@@ -2278,7 +2278,7 @@ classdef Model < handle
             MixFcs = cell(NSolid,1);
             ACond = zeros(NSolid,NSolid);
             bCond = zeros(NSolid,1);
-
+            
             for nd = this.Nodes
                 if nd.Type == enumNType.SN
                     if (isfield(nd.data,'matl') && nd.data.matl.dT_du < 0) || ...
@@ -2299,9 +2299,9 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             fprintf(['Number of Solid Nodes + 1 Env node: ' num2str(NSolid) '\n']);
-
+            
             for nd = this.Nodes
                 if nd.index > NGas
                     row = nd.index-NGas;
@@ -2335,7 +2335,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             Sim.ACond = ACond;
             Sim.bCond = bCond;
             Sim.CondEff = zeros(M_count_backup_faces,1);
@@ -2343,7 +2343,7 @@ classdef Model < handle
             Sim.BoundaryNodes = BoundaryNodes';
             Sim.MixFcs = MixFcs;
             Sim.CycleTime = 0;
-
+            
             a = 1000;
             Sim.Solid_dt_max = a(ones(1,Frame.NTheta));
             Sim.Nd_Solid_dt = a(ones(size(Sim.T)));
@@ -2373,10 +2373,10 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             %% Defining Conduction/Transport Network
             progressbar('Defining Conduction/Transport Network');
-
+            
             % SolidNds
             % Sim.Cond_Nds = all nodes except the environment, which is
             % ... automatically excluded
@@ -2448,7 +2448,7 @@ classdef Model < handle
                 end
             end
             Sim.CondNet = Temp;
-
+            
             % GasNds
             Sim.Trans_Fcs = 1:length(Sim.Fc_U);
             Nds1 = Sim.Fc_Nd(Sim.Trans_Fcs,1);
@@ -2511,12 +2511,12 @@ classdef Model < handle
                 end
             end
             Sim.TransNet = Temp;
-
+            
             %% Creating Lookup Tables, Regions and Loops For Solver
             progressbar('Creating Regions and Loops For Solver');
-
+            
             % the four sections of code below could probably be made into a single function
-
+            
             %% Group functions
             % Laminar Nusselt
             novel = true(size(Sim.P));
@@ -2550,7 +2550,7 @@ classdef Model < handle
             end
             if novel(end); Sim.NuFunc_l_el{x} = length(novel); end
             Sim.NuFunc_l(~novel) = [];
-
+            
             % Turbulent Nusselt
             novel(:) = true;
             nodes = zeros(size(Sim.P));
@@ -2582,7 +2582,7 @@ classdef Model < handle
             end
             if novel(end); Sim.NuFunc_t_el{x} = length(novel); end
             Sim.NuFunc_t(~novel) = [];
-
+            
             % Laminar Conduction
             novel = true(size(Sim.Fc_U));
             nodes = zeros(size(Sim.Fc_U));
@@ -2616,7 +2616,7 @@ classdef Model < handle
                 if novel(end); Sim.Fc_NkFunc_l_el{x} = length(novel); end
                 Sim.Fc_NkFunc_l(~novel) = [];
             end
-
+            
             % Turbulent Conduction
             novel(:) = true;
             nodes = zeros(size(Sim.Fc_U));
@@ -2650,7 +2650,7 @@ classdef Model < handle
                 if novel(end); Sim.Fc_NkFunc_t_el{x} = length(novel); end
                 Sim.Fc_NkFunc_t(~novel) = [];
             end
-
+            
             % region now represents how the engine is divided up
             regions = cell(region_count,1);
             isEnvironmentRegion = false(region_count,1);
@@ -2661,7 +2661,7 @@ classdef Model < handle
             regionFcs = cell(region_count,1);
             Sim.ActiveRegionFcs = cell(region_count,1);
             Sim.A_Press = cell(region_count,1);
-
+            
             for i = 1:region_count
                 % loop_ind = [ start end condition ]
                 %            [ ...   ... ind or 0  ]
@@ -2682,11 +2682,11 @@ classdef Model < handle
                 end
                 if c <= length(region); regions{i}(c:end) = []; end
             end
-
+            
             % Take a count of faces that are under this region
             % ... This will tell us how many loops we need to define
             % ... May not be necassary
-
+            
             %       extfc = cell(n,2);
             for Fc = this.Faces
                 if isfield(Fc.data,'dx')
@@ -2698,12 +2698,12 @@ classdef Model < handle
                 end
             end
             %       Sim.extfc = extfc;
-
+            
             % Find Loops in each region
             LEN = length(Sim.Fc_U);
             % Make visited/closed any string who goes to a dead end
             Closed_Edge = TrimFaces(this,region,false(LEN,1));
-
+            
             % What is left is all the nodes that could possibly be a part of a
             % ... loop.
             % Create Loops using the available faces and nodes
@@ -2725,7 +2725,7 @@ classdef Model < handle
                         Closed_Edge(Fc.index) = true;
                     end
                 end
-
+                
                 % We have defined all the "holes", the first n loops will be
                 % ... dedicated to covering those holes.
                 % NIndependent_Equations = # of Nodes - 1
@@ -2756,7 +2756,7 @@ classdef Model < handle
                     target = Fc.Nodes(1);
                     open = LoopNode(closed(1), Fc, Fc.Nodes(2));
                     % EdgeClosed = Fc;
-
+                    
                     % Use open as a starting point and path to the closed
                     % ... "target" is the end node
                     % ... Do not path though Closed_Edge's
@@ -2788,7 +2788,7 @@ classdef Model < handle
                         end
                         if ~done; open = open(len+1:end); end
                     end
-
+                    
                     % The loop should of reached its target.
                     if done
                         % Backtrace the loop
@@ -2816,19 +2816,19 @@ classdef Model < handle
                             % This one is unnconnected to a hole
                             loop_ind_cell{i}(3,lcount) = 0;
                         end
-
+                        
                         % Close all edges that run into the "EdgeClosed"
                         if k >= length(holes)
                             Closed_Edge = TrimFaces(this, region, Closed_Edge);
                         end
-
+                        
                     else
                         fprintf(['XXX Failed to complete a loop. Loop: ' num2str(k) ' XXX\n']);
                     end
                 end
-
+                
             end
-
+            
             % Find ActiveFaces
             Vis_Node = false(length(region),1);
             for i = 1:region_count
@@ -2845,7 +2845,7 @@ classdef Model < handle
                 Temp(k+1:end) = [];
                 Sim.ActiveRegionFcs{i} = Temp;
             end
-
+            
             % Find A-PressureLoss
             for i = 1:region_count
                 Sim.A_Press{i} = zeros(length(regions{i}));
@@ -2869,7 +2869,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % Calculate what the gas constant would be
             % We have Rs
             for i = 1:region_count
@@ -2889,13 +2889,13 @@ classdef Model < handle
                 end
             end
             Sim.Rs = Rs;
-
+            
             % loops_cell
             % loop_ind_cell
             % regions (cell array containing all nodes separated by a region)
             Sim.Regions = regions;
             Sim.isEnvironmentRegion = isEnvironmentRegion;
-
+            
             Sim.RegionFcs = regionFcs;
             for i = 1:length(regionFcs)
                 Sim.Fc2Col(regionFcs{i}(:)) = 1:length(regionFcs{i});
@@ -2907,7 +2907,7 @@ classdef Model < handle
                 count = count + size(list{1},2);
             end
             fprintf(['Found ' num2str(count) ' loops. \n']);
-
+            
             % Collapse F2C for the limited set
             %       Sim.isLoopRegionFcs = cell(size(Sim.RegionFcs));
             %       Sim.Fc2Col_loop = zeros(size(Sim.Fc_V));
@@ -2919,9 +2919,9 @@ classdef Model < handle
             %           end
             %         end
             %       end
-
+            
             Sim.Faces = cell(length(Sim.Dh),1);
-
+            
             % Define "Sim.Faces"
             for Nd = this.Nodes
                 if Nd.index <= length(Sim.Dh)
@@ -2950,13 +2950,13 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             % So we have faces, which has an entry for each node
             % ... List of Face Indexes
             % ... List of BValues
             % ... List of signs (-1 for outlet, 1 for inlet)
             % ... List of 0 = implicit, 1 = explicit
-
+            
             % Need to make a list of implicit velocities that need to be
             % ... calculated, use region pressure
             Sim.LeakFaces = LeakFaces;
@@ -2979,10 +2979,10 @@ classdef Model < handle
             % ... implicit faces
             % ... ... Internal to region,
             % NEED FACES AND NODES ORGANIZED BY REGION
-
+            
             %% Pressure/Shear Contacts, Sensors, PVoutputs
             progressbar('Pressure/Shear Contacts, Sensors, PVoutputs');
-
+            
             % Pressure Contacts
             PC_n = 1;
             for PC = this.PressureContacts
@@ -3003,7 +3003,7 @@ classdef Model < handle
                 end
             end
             this.PressureContacts = PressureContact.empty;
-
+            
             % Shear Contacts
             SC_n = 1;
             SC_Active_n = 1;
@@ -3040,7 +3040,7 @@ classdef Model < handle
                 end
             end
             this.ShearContacts = ShearContact.empty;
-
+            
             % Sensors
             for i = length(this.Sensors):-1:1
                 if ~isValid(this.Sensors(i))
@@ -3061,10 +3061,10 @@ classdef Model < handle
             end
             Sim.PRegion = zeros(length(Sim.Regions),1);
             Sim.PRegionTime = 0;
-
+            
             progressbar(12/13);
             progressbar('Defining Area for Turbulence');
-
+            
             % Node Faces For Turbulent Decay and Generation
             Len = 1 + size(Sim.Area,2);
             for Nd = this.Nodes
@@ -3073,7 +3073,7 @@ classdef Model < handle
                         % It is divides along by cylindrical shells
                         % Look for two dynamic Dh faces that have the same motion
                         % ... Pattern
-
+                        
                         % 1 and 2 dynamic face pairs within body
                         if (~isscalar(Nd.ymax) || ~isscalar(Nd.ymin)) && ...
                                 ~all(Nd.ymax-Nd.ymin == Nd.ymax(1)-Nd.ymin(1))
@@ -3125,7 +3125,7 @@ classdef Model < handle
                                 end
                             end
                         end
-
+                        
                         % 1 and 2 static face pairs within body
                         if ~Sim.Area(2,Nd.index)
                             % No two faces were found
@@ -3156,7 +3156,7 @@ classdef Model < handle
                                 end
                             end
                         end
-
+                        
                         %
                         if ~Sim.Area(2,Nd.index)
                             fprintf('XXX Deficiency in Node Face Calculation in Model XXX');
@@ -3169,7 +3169,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             if isempty(this.MechanicalSystem)
                 Sim.MechanicalSystem = ...
                     MechanicalSystem(this,this.Converters,[],...
@@ -3179,10 +3179,10 @@ classdef Model < handle
                     MechanicalSystem(this,this.Converters,[],...
                     this.MechanicalSystem.Inertia,this.MechanicalSystem.LoadFunction);
             end
-
+            
             %% Defining Energy Statistics Handlers
             progressbar('Defining Energy Statistics Handlers');
-
+            
             % Statistics
             % Find all Solid Faces that go to the Environment
             Sim.ToEnvironmentSolid = zeros(2,length(this.surroundings.Node.Faces));
@@ -3223,7 +3223,7 @@ classdef Model < handle
             end
             Sim.ToEnvironmentSolid = Sim.ToEnvironmentSolid(:,1:nS-1);
             Sim.ToEnvironmentGas = Sim.ToEnvironmentGas(:,1:nG-1);
-
+            
             % Find all Faces that go to a Source
             isToSourceOrSink = false(1, length(this.Faces));
             isSourceOrSink = false(1, length(this.Nodes));
@@ -3239,12 +3239,12 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             temp = 1:length(this.Faces);
             Subject_Faces = temp(isToSourceOrSink);
             temp = 1:length(this.Nodes);
             Subject_Nodes = temp(isSourceOrSink);
-
+            
             % Get Average Temperatures
             T = mean(Sim.T(isSourceOrSink));
             Sim.ToSource = zeros(2,length(this.Faces));
@@ -3287,7 +3287,7 @@ classdef Model < handle
             Sim.ToSink = Sim.ToSink(:,1:nSi-1);
             Sim.Sources = temp(IsSource);
             Sim.Sinks = temp(and(isSourceOrSink, ~IsSource));
-
+            
             % identify shearing faces
             % All Mixed Faces, All Solid Faces
             if ~isempty(Sim.Fc_DynArea)
@@ -3300,24 +3300,24 @@ classdef Model < handle
             end
             % Exclude Gas Faces
             Sim.ShuttleFaces = ShuttleFaces(ShuttleFaces>length(Sim.Fc_U));
-
+            
             % idenfity static faces
             % All Mixed Faces, All Solid Faces
             % Exclude Gas Faces
             Sim.StaticFaces = 1:length(Sim.Fc_Cond);
             Sim.StaticFaces(Sim.ShuttleFaces) = [];
-
+            
             Sim.ExergyLossShuttle = 0;
             Sim.ExergyLossStatic = 0;
-
+            
             this.Simulations = Sim;
-
+            
             this.isStateDiscretized = true;
-
+            
             Sim.Fc_K12(isnan(Sim.Fc_K12)) = 1;
             Sim.Fc_K21(isnan(Sim.Fc_K21)) = 1;
             Sim.Dynamic(isnan(Sim.Dynamic)) = 0;
-
+            
             progressbar(1);
         end
         %%
@@ -3343,7 +3343,7 @@ classdef Model < handle
                 %new
                 ME.recordReynolds = true;
                 ME.showReynoldsAnimation = true;
-
+                
                 ME.recordOnlyLastCycle = true;
                 ME.recordStatistics = true;
                 for i = 1:tests
@@ -3358,7 +3358,7 @@ classdef Model < handle
                     'title',[ME.name ' Test- ' date], ...
                     'NodeFactor',ME.deRefinementFactorInput);
             end
-
+            
             for Nt = 1:tests
                 if nargin > 1
                     % crun = current run
@@ -3369,20 +3369,20 @@ classdef Model < handle
                 % ... important then use the Multi-Grid Formulation.
                 useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
                 ntrials = 1;
-
+                
                 [status] = mkdir('../Runs',crun.title);
                 if status
                     ME.outputPath = ['../Runs/' crun.title];
                 else
                     msgbox(['Please create file: ../Runs/' crun.title])
                 end
-
+                
                 for trial = 1:ntrials
                     % Only do warmup when starting from scratch
                     do_warmup = (Nt == 1 && trial == 1);
-
+                    
                     ME.resetDiscretization();
-
+                    
                     %% Apply Geometry Modifications
                     if nargin > 1
                         % Uniform Scale Modification
@@ -3396,24 +3396,24 @@ classdef Model < handle
                                 iGroup.Position.x = iGroup.Position.x*crun.Uniform_Scale;
                                 iGroup.Position.y = iGroup.Position.y*crun.Uniform_Scale;
                             end
-
+                            
                             % Scale the bridge offsets
                             for iBridge = ME.Bridges
                                 iBridge.x = iBridge.x*crun.Uniform_Scale;
                             end
-
+                            
                             % Scale the mechanisms
                             for iLRM = ME.Converters
                                 iLRM.Uniform_Scale(crun.Uniform_Scale);
                             end
-
+                            
                             % Scale the view window
                             XL = get(ME.AxisReference, 'XLim');
                             YL = get(ME.AxisReference, 'YLim');
                             set(ME.AxisReference,'XLim', XL*crun.Uniform_Scale);
                             set(ME.AxisReference,'YLim', YL*crun.Uniform_Scale);
-
-
+                            
+                            
                             % X_Scale Modification (Diameter only)
                         elseif isfield(crun,'X_Scale')
                             % Scale the connections
@@ -3426,7 +3426,7 @@ classdef Model < handle
                                 % Scale the positions
                                 iGroup.Position.x = iGroup.Position.x*crun.X_Scale;
                             end
-
+                            
                             % Scale the bridge offsets, for bridges with
                             % horizontal (X) offset
                             for iBridge = ME.Bridges
@@ -3435,9 +3435,9 @@ classdef Model < handle
                                     iBridge.x = iBridge.x*crun.X_Scale;
                                 end
                             end
-
+                            
                             %                             % Don't Scale the mechanisms so strokes remain same
-
+                            
                             % For 'Tube Bank' heat exchangers: Scale the
                             % number of tubes with the square of the
                             % diameter.
@@ -3448,15 +3448,15 @@ classdef Model < handle
                                     end
                                 end
                             end
-
-
+                            
+                            
                             % Scale the view window
                             %                             XL = get(ME.AxisReference, 'XLim');
                             %                             set(ME.AxisReference,'XLim', XL*crun.X_Scale);
                         end
-
+                        
                     end
-
+                    
                     %% Modify Working Gas (Matthias)
                     if nargin > 1
                         if isfield(crun,'Gas')
@@ -3470,7 +3470,7 @@ classdef Model < handle
                             end
                         end
                     end
-
+                    
                     %% Matthias: Modify Regenerator (Woven Screen or Random Fiber)
                     if nargin > 1
                         run_dw_por = isfield(crun,{'Reg_dw','Reg_Porosity'});
@@ -3478,7 +3478,7 @@ classdef Model < handle
                             for iGroup = ME.Groups
                                 for iBody = iGroup.Bodies
                                     if ~isempty(iBody.Matrix)
-
+                                        
                                         switch iBody.Matrix.Geometry
                                             case {enumMatrix.WovenScreen, enumMatrix.RandomFiber}
                                                 if run_dw_por(1); iBody.Matrix.data.dw = crun.Reg_dw; end
@@ -3489,10 +3489,10 @@ classdef Model < handle
                             end
                         end
                     end
-
+                    
                     %% Run
                     ME.update();
-
+                    
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % This is the tolerance used to detect steady state. To
                     % be considered steady state, the RSS (root sum square)
@@ -3504,11 +3504,11 @@ classdef Model < handle
                     % increases propoertionally with power.
                     % Only sst1 is relevant unless using 'trials'
                     % (Multigrid Optimization).
-
+                    
                     sst1 = 0.005; %smaller value for ss_tolerance (default 0.01)
                     sst2 = 0.025; %larger value for ss_tolerance (default 0.025)
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+                    
                     % Discretize according to the Multigrid Optimization
                     % To use this, must set 'ntrials' to > 1 above
                     if useTrials
@@ -3534,10 +3534,10 @@ classdef Model < handle
                         islast = true;
                         ss_tolerance = sst1;
                     end
-
+                    
                     %Matthias: added MeshCounts
                     MeshCounts = ME.discretize(crun);
-
+                    
                     % If discretization was successful
                     if ME.isStateDiscretized
                         % Apply Snapshot
@@ -3566,14 +3566,14 @@ classdef Model < handle
                                         break;
                                     end
                                 end
-
+                                
                                 % If it did not find a match then take the last one listed
                                 if ~found
                                     answer = length(ME.SnapShots);
                                 end
-
+                                
                             end
-
+                            
                             % Apply the snapshot if it is selected
                             if selectionMade && answer ~= length(names)
                                 %% Comment out below to disable Snapshots %
@@ -3583,7 +3583,7 @@ classdef Model < handle
                                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                             end
                         end
-
+                        
                         % Comment Matthias: If set to variable speed and SS-convergence is enabled,
                         % this is a 'dynamic' case. The code below sets speed to constant for a
                         % first run that is used to calculate a load and a snapshot. Then a second
@@ -3608,7 +3608,7 @@ classdef Model < handle
                         else
                             dynamic = false;
                         end
-
+                        
                         tic; % starts simulation timer
                         % 'crun' contains run options from test set
                         % 'RunConditions' structure
@@ -3621,7 +3621,7 @@ classdef Model < handle
                             ME.resetDiscretization();
                             return;
                         end
-
+                        
                         % 2nd run (final transient cycle) for 'dynamic' cases
                         if dynamic
                             % Reset Settings
@@ -3638,10 +3638,10 @@ classdef Model < handle
                             [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
                                 islast, do_warmup, ss_tolerance, crun);
                         end
-
+                        
                         runtime = toc; % reads simulation timer
                         fprintf(['Elapsed time: ' num2str(runtime) 's\n']);
-
+                        
                         % write test set statistics file
                         % Matthias: For test sets, record runtime (s), number of
                         % simulated cycles and speed (Hz) at finish in struct
@@ -3666,9 +3666,9 @@ classdef Model < handle
                         TestSetStatistics(end).MF = MeshCounts.MF;
                         TestSetStatistics(end).EF = MeshCounts.EF;
                         save('../Runs/TestSetStatistics', 'TestSetStatistics');
-
+                        
                         if ~success || isempty(ME.Results); return; end
-
+                        
                         % If it is a recording set then ready the display matricies and
                         %    record everything
                         if islast
@@ -3699,7 +3699,7 @@ classdef Model < handle
                                         nodesleft = nodesleft - 1;
                                     end
                                     % Corner points
-
+                                    
                                     % Type 1 (static) ,4 (dynamic): Translation Only
                                     % ... [Type d1x d2x d3x cx ... ]
                                     % ... [ --  d1y d2y d3y cy ... ]
@@ -3707,7 +3707,7 @@ classdef Model < handle
                                     % ... d1 is the diagonal between the center and top right corner
                                     % ... d2 is the diagonal between the center and the bottom right corner
                                     % ... d3 is the vector between centers of the ring, (0,0) if node is centered
-
+                                    
                                     % Type 2: Stretching in One Direction
                                     % ... [Type cx d1x d2x d3x ... ]
                                     % ... [ --  cy d1y d2y d3y ... ]
@@ -3716,7 +3716,7 @@ classdef Model < handle
                                     % ... d2 is the vector to the bottom right corner of the other side
                                     % ... ... (0,0) if the node is centered
                                     % ... d3 is the vector to the top left corner
-
+                                    
                                     % Type 3: Movement of both ybounds
                                     % ... [Type d1x cx  ... ]
                                     % ... [ --  d1y cy  ... ]
@@ -3727,7 +3727,7 @@ classdef Model < handle
                                     % ... d2 is the vector to the bottom right corner of the other side
                                     % ... ... (0,0) if the node is centered
                                     % ... d3 is the vector to the top left corner
-
+                                    
                                     if isscalar(Nd.ymin)
                                         if isscalar(Nd.ymax)
                                             Type = 1;
@@ -3831,7 +3831,7 @@ classdef Model < handle
                                     cpnts{Nd.index} = pnts;
                                 end
                             end
-
+                            
                             % Calculate Face Locations and directions
                             if isfield(ME.Results.Data,'U') && ME.showPressureDropAnimation
                                 if isfield(ME.Results.Data,'U')
@@ -3940,7 +3940,7 @@ classdef Model < handle
                                     end
                                 end
                             end
-
+                            
                             % Calculate Solid Body Boundaries
                             n = 0;
                             for iGroup = ME.Groups
@@ -3991,7 +3991,7 @@ classdef Model < handle
                                     end
                                 end
                             end
-
+                            
                             % Animate
                             frate = ME.animationFrameTime;
                             if isfield(ME.Results.Data,'P') && ME.showPressureAnimation
@@ -4016,9 +4016,9 @@ classdef Model < handle
                             if isfield(ME.Results.Data,'RE') && ME.showReynoldsAnimation
                                 ME.Results.animateNode('RE',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
                             end
-
+                            
                         end
-
+                        
                         % Ask if the user would like to save a snapshot
                         if nargin > 1
                             if ~ME.Simulations(1).stop
@@ -4029,18 +4029,18 @@ classdef Model < handle
                                         break;
                                     end
                                 end
-                                ME.Results.getSnapShot(ME,crun.title);
+                                ME.Results.getSnapShot(ME,crun.title, Temperatures);
                                 saveME(ME);
                             end
                         else
                             response = questdlg('Would you like to save a SnapShot?', ...
                                 'Save SnapShot','Yes','No','Yes');
                             if strcmp(response,'Yes')
-                                ME.Results.getSnapShot(ME,getProperName('SnapShot'));
+                                ME.Results.getSnapShot(ME,getProperName('SnapShot'), true);
                             end
                         end
                     end
-
+                    
                     %% Undo Geometry Modifications
                     if nargin > 1
                         % Uniform Scale Modification
@@ -4054,24 +4054,24 @@ classdef Model < handle
                                 iGroup.Position.x = iGroup.Position.x/crun.Uniform_Scale;
                                 iGroup.Position.y = iGroup.Position.y/crun.Uniform_Scale;
                             end
-
+                            
                             % Scale the bridge offsets
                             for iBridge = ME.Bridges
                                 iBridge.x = iBridge.x/crun.Uniform_Scale;
                             end
-
+                            
                             % Scale the mechanisms
                             for iLRM = ME.Converters
                                 iLRM.Uniform_Scale(1/crun.Uniform_Scale);
                             end
-
+                            
                             % Scale the view window
                             set(ME.AxisReference, ...
                                 'XLim',get(ME.AxisReference, 'XLim')/crun.Uniform_Scale);
                             set(ME.AxisReference, ...
                                 'YLim',get(ME.AxisReference, 'YLim')/crun.Uniform_Scale);
-
-
+                            
+                            
                             % Undo X_Scale Modification
                         elseif isfield(crun,'X_Scale')
                             % Scale the connections
@@ -4084,7 +4084,7 @@ classdef Model < handle
                                 % Scale the positions
                                 iGroup.Position.x = iGroup.Position.x/crun.X_Scale;
                             end
-
+                            
                             % Scale the bridge offsets, for bridges with
                             % horizontal (X) offset
                             for iBridge = ME.Bridges
@@ -4093,7 +4093,7 @@ classdef Model < handle
                                     iBridge.x = iBridge.x/crun.X_Scale;
                                 end
                             end
-
+                            
                             % For 'Tube Bank' heat exchangers: Scale the
                             % number of tubes with the square of the
                             % diameter.
@@ -4104,12 +4104,12 @@ classdef Model < handle
                                     end
                                 end
                             end
-
+                            
                             % Scale the view window
                             %                             XL = get(ME.AxisReference, 'XLim');
                             %                             set(ME.AxisReference,'XLim', XL/crun.X_Scale);
                         end
-
+                        
                         % Undo Gas modification
                         if isfield(crun,'Gas')
                             for iGroup = ME.Groups
@@ -4120,8 +4120,8 @@ classdef Model < handle
                                 end
                             end
                         end
-
-
+                        
+                        
                         % To save the modified geometry
                         saveME(ME);
                     end
@@ -4133,6 +4133,802 @@ classdef Model < handle
             ME.resetDiscretization();
         end
         %%
+        %{
+            Function for running simulations for parallel processing ONLY
+        %}
+        function [snapshot] = RunHeadless(ME, runs)
+            success = false;
+            backup_path = ME.outputPath;
+            % Always record all outputs
+            
+            tests = length(runs);
+            ME.showLivePV = true;
+            ME.showPressureAnimation = true;
+            ME.recordPressure = true;
+            ME.showTemperatureAnimation = true;
+            ME.recordTemperature = true;
+            ME.showVelocityAnimation = true;
+            ME.recordVelocity = true;
+            ME.showTurbulenceAnimation = true;
+            ME.recordTurbulence = true;
+            ME.showConductionAnimation = true;
+            ME.recordConductionFlux = true;
+            ME.showPressureDropAnimation = true;
+            ME.recordPressureDrop = true;
+            %new
+            ME.recordReynolds = true;
+            ME.showReynoldsAnimation = true;
+            
+            ME.recordOnlyLastCycle = true;
+            ME.recordStatistics = true;
+            for i = 1:tests
+                runs(i).isManual = false;
+            end
+            
+            % There will only be one test for parallel running
+            
+            % crun = current run
+            crun = runs(1);
+            
+            % If it has a steady state end condition and only the last cycle is
+            % ... important then use the Multi-Grid Formulation.
+            useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
+            ntrials = 1;
+            
+            [status] = mkdir('../Runs',crun.title);
+            if status
+                ME.outputPath = ['../Runs/' crun.title];
+            else
+                msgbox(['Please create file: ../Runs/' crun.title])
+            end
+            
+            for trial = 1:ntrials
+                % Only do warmup when starting from scratch
+                do_warmup = (trial == 1);
+                
+                ME.resetDiscretization();
+                
+                %% Apply Geometry Modifications
+                if nargin > 1
+                    % Uniform Scale Modification
+                    if isfield(crun,'Uniform_Scale')
+                        % Scale the connections
+                        for iGroup = ME.Groups
+                            for iCon = iGroup.Connections
+                                iCon.x = iCon.x*crun.Uniform_Scale;
+                            end
+                            % Scale the positions
+                            iGroup.Position.x = iGroup.Position.x*crun.Uniform_Scale;
+                            iGroup.Position.y = iGroup.Position.y*crun.Uniform_Scale;
+                        end
+                        
+                        % Scale the bridge offsets
+                        for iBridge = ME.Bridges
+                            iBridge.x = iBridge.x*crun.Uniform_Scale;
+                        end
+                        
+                        % Scale the mechanisms
+                        for iLRM = ME.Converters
+                            iLRM.Uniform_Scale(crun.Uniform_Scale);
+                        end
+                        
+                        % Scale the view window
+                        XL = get(ME.AxisReference, 'XLim');
+                        YL = get(ME.AxisReference, 'YLim');
+                        set(ME.AxisReference,'XLim', XL*crun.Uniform_Scale);
+                        set(ME.AxisReference,'YLim', YL*crun.Uniform_Scale);
+                        
+                        
+                        % X_Scale Modification (Diameter only)
+                    elseif isfield(crun,'X_Scale')
+                        % Scale the connections
+                        for iGroup = ME.Groups
+                            for iCon = iGroup.Connections
+                                if iCon.Orient == enumOrient.Vertical
+                                    iCon.x = iCon.x*crun.X_Scale;
+                                end
+                            end
+                            % Scale the positions
+                            iGroup.Position.x = iGroup.Position.x*crun.X_Scale;
+                        end
+                        
+                        % Scale the bridge offsets, for bridges with
+                        % horizontal (X) offset
+                        for iBridge = ME.Bridges
+                            if iBridge.Connection1.Orient == enumOrient.Horizontal...
+                                    && iBridge.Connection2.Orient == enumOrient.Horizontal
+                                iBridge.x = iBridge.x*crun.X_Scale;
+                            end
+                        end
+                        
+                        %                             % Don't Scale the mechanisms so strokes remain same
+                        
+                        % For 'Tube Bank' heat exchangers: Scale the
+                        % number of tubes with the square of the
+                        % diameter.
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if ~isempty(iBody.Matrix) && isfield(iBody.Matrix.data,'Classification') && strcmp(iBody.Matrix.data.Classification, 'Tube Bank Internal')
+                                    iBody.Matrix.data.Number = iBody.Matrix.data.Number*crun.X_Scale^2;
+                                end
+                            end
+                        end
+                        
+                        
+                        % Scale the view window
+                        %                             XL = get(ME.AxisReference, 'XLim');
+                        %                             set(ME.AxisReference,'XLim', XL*crun.X_Scale);
+                    end
+                    
+                end
+                
+                %% Modify Working Gas (Matthias)
+                if nargin > 1
+                    if isfield(crun,'Gas')
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if iBody.matl.Phase == enumMaterial.Gas
+                                    GasBAK = iBody.matl.name;
+                                    iBody.matl.Configure(crun.Gas);
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                %% Matthias: Modify Regenerator (Woven Screen or Random Fiber)
+                if nargin > 1
+                    run_dw_por = isfield(crun,{'Reg_dw','Reg_Porosity'});
+                    if any(run_dw_por)
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if ~isempty(iBody.Matrix)
+                                    
+                                    switch iBody.Matrix.Geometry
+                                        case {enumMatrix.WovenScreen, enumMatrix.RandomFiber}
+                                            if run_dw_por(1); iBody.Matrix.data.dw = crun.Reg_dw; end
+                                            if run_dw_por(2); iBody.Matrix.data.Porosity = crun.Reg_Porosity; end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                %% Run
+                ME.update();
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % This is the tolerance used to detect steady state. To
+                % be considered steady state, the RSS (root sum square)
+                % of the changes/increments in calculated power (as
+                % displayed after each cycle) over the last 5 cycles
+                % (specified by 'ss_cycles') must be smaller than
+                % (ss_tolerance * latest power) or (ss_tolerance),
+                % whatever is larger. This gives a tolerance that
+                % increases propoertionally with power.
+                % Only sst1 is relevant unless using 'trials'
+                % (Multigrid Optimization).
+                
+                sst1 = 0.005; %smaller value for ss_tolerance (default 0.01)
+                sst2 = 0.025; %larger value for ss_tolerance (default 0.025)
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+                % Discretize according to the Multigrid Optimization
+                % To use this, must set 'ntrials' to > 1 above
+                if useTrials
+                    if isfield(crun,'NodeFactor') && crun.NodeFactor ~= 1
+                        islast = true;
+                        ss_tolerance = sst1;
+                    else
+                        if trial == ntrials % 3/3 or 2/2 or 1/1
+                            islast = true;
+                            ss_tolerance = sst1;
+                        else
+                            islast = false;
+                            if ntrials - trial == 1 % 2/3 or 1/2
+                                crun.NodeFactor = crun.NodeFactor*0.1;
+                                ss_tolerance = sst1;
+                            else % 1/3
+                                crun.NodeFactor = crun.NodeFactor*0.001;
+                                ss_tolerance = sst2;
+                            end
+                        end
+                    end
+                else
+                    islast = true;
+                    ss_tolerance = sst1;
+                end
+                
+                %Matthias: added MeshCounts
+                MeshCounts = ME.discretize(crun);
+                
+                % If discretization was successful
+                if ME.isStateDiscretized
+                    % Apply Snapshot
+                    % ... Which Snapshot would the user like to use?
+                    if ~isempty(ME.SnapShots)
+                        names = cell(length(ME.SnapShots)+1,1);
+                        if nargin < 2
+                            % Have the user pick a starting Snap-Shot
+                            for i = 1:length(ME.SnapShots)
+                                names{i} = ME.SnapShots{i}.Name;
+                            end
+                            names{end} = '... From Scratch';
+                            [answer, selectionMade] = listdlg(...
+                                'PromptString','Select a SnapShot',...
+                                'ListString',names,...
+                                'SelectionMode','single',...
+                                'ListSize',[1000 800]); % [W H] Default: [160 300]
+                        else
+                            % Try to find a snapshot with matching name
+                            selectionMade = true;
+                            found = false;
+                            for i = 1:length(ME.SnapShots)
+                                if strcmp(ME.SnapShots{i}.Name, crun.title)
+                                    found = true;
+                                    answer = i;
+                                    break;
+                                end
+                            end
+                            
+                            % If it did not find a match then take the last one listed
+                            if ~found
+                                answer = length(ME.SnapShots);
+                            end
+                            
+                        end
+                        
+                        % Apply the snapshot if it is selected
+                        if selectionMade && answer ~= length(names)
+                            %% Comment out below to disable Snapshots %
+                            SS = ME.SnapShots{answer};
+                            ME.assignSnapShot(SS);
+                            disp("Applied Snapshot no. "+answer+"/"+length(ME.SnapShots) +", named '" +SS.Name +"'")
+                            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        end
+                    end
+                    
+                    % Comment Matthias: If set to variable speed and SS-convergence is enabled,
+                    % this is a 'dynamic' case. The code below sets speed to constant for a
+                    % first run that is used to calculate a load and a snapshot. Then a second
+                    % run (further below) with variable speed uses the calculated load &
+                    % snapshot to produce a 'cyclic steady state' result with in-cycle speed
+                    % variations.
+                    % Only works when running from a Test Set!
+                    if nargin > 1 && ...
+                            crun.movement_option == 'V' && ...
+                            crun.SS && ...
+                            ME.recordStatistics && ...
+                            ME.recordOnlyLastCycle
+                        dynamic = true;
+                        record_P_backup = ME.recordPressure;
+                        record_T_backup = ME.recordTemperature;
+                        record_t_backup = ME.recordTurbulence;
+                        ME.recordPressure = true;
+                        ME.recordTemperature = true;
+                        ME.recordTurbulence = true;
+                        crun.movement_option = 'C';
+                        ss_tolerance = sst1;
+                    else
+                        dynamic = false;
+                    end
+                    
+                    tic; % starts simulation timer
+                    % 'crun' contains run options from test set
+                    % 'RunConditions' structure
+                    % Matthias: Added cycle_count and final_speed output
+                    [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                        islast, do_warmup, ss_tolerance, crun);
+                    if isempty(ME.Results)
+                        ME.CurrentSim(:) = [];
+                        ME.Results(:) = [];
+                        ME.resetDiscretization();
+                        return;
+                    end
+                    
+                    % 2nd run (final transient cycle) for 'dynamic' cases
+                    if dynamic
+                        % Reset Settings
+                        crun.movement_option = 'V';
+                        crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
+                        % Save and Reload Snapshot
+                        ME.Results.getSnapShot(ME,'Temp');
+                        ME.assignSnapShot(ME.SnapShots{end});
+                        ME.SnapShots(end) = [];
+                        ME.recordPressure = record_P_backup;
+                        ME.recordTemperature = record_T_backup;
+                        ME.recordTurbulence = record_t_backup;
+                        % Run
+                        [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                            islast, do_warmup, ss_tolerance, crun);
+                    end
+                    
+                    runtime = toc; % reads simulation timer
+                    fprintf(['Elapsed time: ' num2str(runtime) 's\n']);
+                    
+                    % write test set statistics file
+                    % Matthias: For test sets, record runtime (s), number of
+                    % simulated cycles and speed (Hz) at finish in struct
+                    % (In future, may want to save to CSV file to work with more
+                    % easily)
+                    if isfile('../Runs/TestSetStatistics.mat')
+                        load('../Runs/TestSetStatistics.mat');
+                    else
+                        TestSetStatistics = struct([]);
+                    end
+                    TestSetStatistics(end+1).Name = crun.title;
+                    TestSetStatistics(end).Runtime = runtime;
+                    TestSetStatistics(end).Cycle_Count = cycle_count;
+                    TestSetStatistics(end).Final_Speed = final_speed;
+                    TestSetStatistics(end).Final_Power = final_power;
+                    TestSetStatistics(end).Charge_Pressure = ME.enginePressure;
+                    TestSetStatistics(end).GN = MeshCounts.GN;
+                    TestSetStatistics(end).SN = MeshCounts.SN;
+                    TestSetStatistics(end).EN = MeshCounts.EN;
+                    TestSetStatistics(end).GF = MeshCounts.GF;
+                    TestSetStatistics(end).SF = MeshCounts.SF;
+                    TestSetStatistics(end).MF = MeshCounts.MF;
+                    TestSetStatistics(end).EF = MeshCounts.EF;
+                    save('../Runs/TestSetStatistics', 'TestSetStatistics');
+                    
+                    if ~success || isempty(ME.Results); return; end
+                    
+                    % If it is a recording set then ready the display matricies and
+                    %    record everything
+                    if islast
+                        % Calculate Node Locations
+                        if ME.showPressureAnimation || ...
+                                ME.showTemperatureAnimation || ...
+                                ME.showTurbulenceAnimation || ...
+                                ME.showConductionAnimation || ...
+                                ME.showPressureDropAnimation || ...
+                                ME.showReynoldsAnimation
+                            cpnts = cell(1,length(ME.Nodes));
+                            nodesleft = 0;
+                            for Nd = ME.Nodes
+                                if nodesleft == 0
+                                    if isa(Nd.Body,'Body')
+                                        iGroup = Nd.Body.Group;
+                                        Rot = RotMatrix(iGroup.Position.Rot - pi/2);
+                                        Trans = [iGroup.Position.x; iGroup.Position.y];
+                                        AxisAligned = (iGroup.Position.Rot == pi/2);
+                                        nodesleft = length(iGroup.Nodes)-1;
+                                    else
+                                        Rot = [1 0; 0 1];
+                                        Trans = [0; 0];
+                                        AxisAligned = true;
+                                        % nodesleft = 0;
+                                    end
+                                else
+                                    nodesleft = nodesleft - 1;
+                                end
+                                % Corner points
+                                
+                                % Type 1 (static) ,4 (dynamic): Translation Only
+                                % ... [Type d1x d2x d3x cx ... ]
+                                % ... [ --  d1y d2y d3y cy ... ]
+                                % ... c is the center of the node
+                                % ... d1 is the diagonal between the center and top right corner
+                                % ... d2 is the diagonal between the center and the bottom right corner
+                                % ... d3 is the vector between centers of the ring, (0,0) if node is centered
+                                
+                                % Type 2: Stretching in One Direction
+                                % ... [Type cx d1x d2x d3x ... ]
+                                % ... [ --  cy d1y d2y d3y ... ]
+                                % ... c is the bottom left corner
+                                % ... d1 is the vector to the bottom right corner from c
+                                % ... d2 is the vector to the bottom right corner of the other side
+                                % ... ... (0,0) if the node is centered
+                                % ... d3 is the vector to the top left corner
+                                
+                                % Type 3: Movement of both ybounds
+                                % ... [Type d1x cx  ... ]
+                                % ... [ --  d1y cy  ... ]
+                                % ... [ --  d2x d3x ... ]
+                                % ... [ --  d2y d3y ... ]
+                                % ... c is the bottom left corner
+                                % ... d1 is the vector to the bottom right corner from c
+                                % ... d2 is the vector to the bottom right corner of the other side
+                                % ... ... (0,0) if the node is centered
+                                % ... d3 is the vector to the top left corner
+                                
+                                if isscalar(Nd.ymin)
+                                    if isscalar(Nd.ymax)
+                                        Type = 1;
+                                        if Nd.xmin == 0
+                                            pnts = [Type Nd.xmax              Nd.xmax             0  0                 ; ...
+                                                0    (Nd.ymax-Nd.ymin)/2 -(Nd.ymax-Nd.ymin)/2 0 (Nd.ymax+Nd.ymin)/2];
+                                        else
+                                            pnts = [Type (Nd.xmax-Nd.xmin)/2 (Nd.xmax-Nd.xmin)/2  -(Nd.xmin+Nd.xmax) (Nd.xmax+Nd.xmin)/2; ...
+                                                0    (Nd.ymax-Nd.ymin)/2 -(Nd.ymax-Nd.ymin)/2 0                  (Nd.ymax+Nd.ymin)/2];
+                                        end
+                                        % Rotate
+                                        if ~AxisAligned; pnts(:,2:5) = Rot*pnts(:,2:5); end
+                                        pnts(:,5) = pnts(:,5) + Trans;
+                                    else
+                                        Type = 2;
+                                        pnts = zeros(2,4+length(Nd.ymax));
+                                        % Nd.ymax is dynamic
+                                        if Nd.xmin == 0
+                                            pnts(:,1:4) = [Type -Nd.xmax 2*Nd.xmax 0; ...
+                                                0    Nd.ymin  0         0];
+                                        else
+                                            pnts(:,1:4) = [Type Nd.xmin Nd.xmax-Nd.xmin -Nd.xmax-Nd.xmin; ...
+                                                0    Nd.ymin 0               0               ];
+                                        end
+                                        pnts(1,5:end) = 0;
+                                        pnts(2,5:end) = Nd.ymax - pnts(2,2);
+                                        % Rotate
+                                        if ~AxisAligned; pnts(:,2:end) = Rot*pnts(:,2:end); end
+                                        pnts(:,2) = pnts(:,2) + Trans;
+                                    end
+                                else
+                                    if isscalar(Nd.ymax)
+                                        Type = 2;
+                                        pnts = zeros(2,4+length(Nd.ymin));
+                                        % Nd.ymin is dynamic
+                                        if Nd.xmin == 0
+                                            pnts(:,1:4) = [Type -Nd.xmax 2*Nd.xmax 0; ...
+                                                0    Nd.ymax  0         0];
+                                        else
+                                            pnts(:,1:4) = [Type Nd.xmin Nd.xmax-Nd.xmin -Nd.xmax-Nd.xmin; ...
+                                                0    Nd.ymax 0               0               ];
+                                        end
+                                        pnts(1,5:end) = 0;
+                                        pnts(2,5:end) = Nd.ymin - pnts(2,2);
+                                        % Rotate
+                                        if ~AxisAligned; pnts(:,2:end) = Rot*pnts(:,2:end); end
+                                        pnts(:,2) = pnts(:,2) + Trans;
+                                    else
+                                        if isfield(Nd.data,'matl'); matl = Nd.data.matl;
+                                        else; matl = Nd.Body.matl;
+                                        end
+                                        if matl.Phase == enumMaterial.Solid
+                                            % ... [Type d1x d2x d3x cx ... ]
+                                            % ... [ --  d1y d2y d3y cy ... ]
+                                            Type = 4; % Stretching is impossible
+                                            pnts = zeros(2,4+length(Nd.ymax));
+                                            if Nd.xmin == 0
+                                                pnts(:,1:4) = [Type Nd.xmax                    Nd.xmax                   0; ...
+                                                    0    (Nd.ymax(1)-Nd.ymin(1))/2 -(Nd.ymax(1)-Nd.ymin(1))/2 0];
+                                                x = 0;
+                                            else
+                                                pnts(:,1:4) = [Type (Nd.xmax-Nd.xmin)/2       (Nd.xmax-Nd.xmin)/2        -(Nd.xmin+Nd.xmax); ... (Nd.xmax+Nd.xmin)/2       ; ...
+                                                    0    (Nd.ymax(1)-Nd.ymin(1))/2 -(Nd.ymax(1)-Nd.ymin(1))/2 0                 ];% (Nd.ymax+Nd.ymin)/2];
+                                                x = (Nd.xmax+Nd.xmin)/2;
+                                            end
+                                            pnts(1,5:end) = x;
+                                            pnts(2,5:end) = (Nd.ymax+Nd.ymin)/2;
+                                            % Rotate
+                                            if ~AxisAligned; pnts(:,2:end) = Rot*pnts(:,2:end); end
+                                            pnts(:,5:end) = pnts(:,5:end) + Trans;
+                                        else
+                                            Type = 3; % Stretching is very probable
+                                            pnts = zeros(4,2+length(Nd.ymax));
+                                            if Nd.xmin == 0
+                                                pnts(:,1:2) = [Type 2*Nd.xmax; ...
+                                                    0    0        ; ...
+                                                    0    0        ; ...
+                                                    0    0        ];
+                                                x = -Nd.xmax;
+                                            else
+                                                pnts(:,1:2) = [Type Nd.xmax-Nd.xmin   ; ...
+                                                    0    0                 ; ...
+                                                    0    -(Nd.xmax+Nd.xmin); ...
+                                                    0    0                 ];
+                                                x = Nd.xmin;
+                                            end
+                                            pnts(1,3:end) = x;
+                                            pnts(2,3:end) = Nd.ymin;
+                                            pnts(3,3:end) = 0;
+                                            pnts(4,3:end) = (Nd.ymax-Nd.ymin);
+                                            % Rotate
+                                            if ~AxisAligned
+                                                pnts(1:2,2:end) = Rot*pnts(1:2,2:end);
+                                                pnts(3:4,2:end) = Rot*pnts(3:4,2:end);
+                                            end
+                                            % Translate
+                                            pnts(1:2,3:end) = pnts(1:2,3:end) + Trans;
+                                        end
+                                    end
+                                end
+                                cpnts{Nd.index} = pnts;
+                            end
+                        end
+                        
+                        % Calculate Face Locations and directions
+                        if isfield(ME.Results.Data,'U') && ME.showPressureDropAnimation
+                            if isfield(ME.Results.Data,'U')
+                                fpnts = cell(1,size(ME.Results.Data.U,1));
+                            end
+                            % Define X,Y,Nx,Ny
+                            maxIndex = length(ME.Simulations.Fc_U);
+                            if ~isempty(ME.Faces)
+                                if isa(ME.Faces(1).Nodes(1).Body,'Body')
+                                    iGroup = ME.Faces(1).Nodes(1).Body.Group;
+                                else
+                                    iGroup = ME.Faces(1).Nodes(2).Body.Group;
+                                end
+                                Rot = RotMatrix(iGroup.Position.Rot - pi/2);
+                                Trans = [iGroup.Position.x; iGroup.Position.y];
+                                for Fc = ME.Faces
+                                    if Fc.index <= maxIndex
+                                        if isa(Fc.Nodes(1).Body,'Environment')
+                                            Rot = RotMatrix(0);
+                                            Trans = [0; 0];
+                                        else
+                                            if iGroup ~= Fc.Nodes(1).Body.Group
+                                                iGroup = Fc.Nodes(1).Body.Group;
+                                                Rot = RotMatrix(iGroup.Position.Rot - pi/2);
+                                                Trans = [iGroup.Position.x; iGroup.Position.y];
+                                            end
+                                        end
+                                        i = Fc.index;
+                                        if Fc.Nodes(1).Body == Fc.Nodes(2).Body
+                                            if Fc.Nodes(1).xmax == Fc.Nodes(2).xmin
+                                                % Aligned horizontally
+                                                x = Fc.Nodes(1).xmax;
+                                                y = (Fc.Nodes(1).ymin + Fc.Nodes(1).ymax)/2;
+                                                Nx = 1;
+                                                Ny = 0;
+                                            elseif Fc.Nodes(1).xmin == Fc.Nodes(2).xmax
+                                                % Aligned horizontally
+                                                x = Fc.Nodes(1).xmin;
+                                                y = (Fc.Nodes(1).ymin + Fc.Nodes(1).ymax)/2;
+                                                Nx = -1;
+                                                Ny = 0;
+                                            elseif abs(Fc.Nodes(1).ymax(1) - Fc.Nodes(2).ymin(1)) < ...
+                                                    abs(Fc.Nodes(1).ymin(1) - Fc.Nodes(2).ymax(1))
+                                                % Aligned Vertically
+                                                x = (Fc.Nodes(1).xmin + Fc.Nodes(1).xmax)/2;
+                                                y = Fc.Nodes.ymax;
+                                                Nx = 0;
+                                                Ny = 1;
+                                            else
+                                                % Aligned Vertically
+                                                x = (Fc.Nodes(1).xmin + Fc.Nodes(1).xmax)/2;
+                                                y = Fc.Nodes.ymin;
+                                                Nx = 0;
+                                                Ny = -1;
+                                            end
+                                        else
+                                            if Fc.Nodes(1).xmax == Fc.Nodes(2).xmin
+                                                % Aligned horizontally
+                                                x = Fc.Nodes(1).xmax; % Done
+                                                y = getCenterOfOverlapRegion(...
+                                                    Fc.Nodes(1).ymin,...
+                                                    Fc.Nodes(2).ymin,...
+                                                    Fc.Nodes(1).ymax,...
+                                                    Fc.Nodes(2).ymax);
+                                                Nx = 1; % Done
+                                                Ny = 0; % Done
+                                            elseif Fc.Nodes(1).xmin == Fc.Nodes(2).xmax
+                                                % Aligned horizontally
+                                                x = Fc.Nodes(1).xmin; % Done
+                                                y = getCenterOfOverlapRegion(...
+                                                    Fc.Nodes(1).ymin,...
+                                                    Fc.Nodes(2).ymin,...
+                                                    Fc.Nodes(1).ymax,...
+                                                    Fc.Nodes(2).ymax);
+                                                Nx = -1; % Done
+                                                Ny = 0; % Done
+                                            elseif abs(Fc.Nodes(1).ymax(1) - Fc.Nodes(2).ymin(1)) < ...
+                                                    abs(Fc.Nodes(1).ymin(1) - Fc.Nodes(2).ymax(1))
+                                                % Aligned Vertically
+                                                x = getCenterOfOverlapRegion(...
+                                                    Fc.Nodes(1).xmin,...
+                                                    Fc.Nodes(2).xmin,...
+                                                    Fc.Nodes(1).xmax,...
+                                                    Fc.Nodes(2).xmax);
+                                                y = Fc.Nodes(1).ymax; % Done
+                                                Nx = 0; % Done
+                                                Ny = 1; % Done
+                                            else
+                                                % Aligned Vertically
+                                                x = getCenterOfOverlapRegion(...
+                                                    Fc.Nodes(1).xmin,...
+                                                    Fc.Nodes(2).xmin,...
+                                                    Fc.Nodes(1).xmax,...
+                                                    Fc.Nodes(2).xmax);
+                                                y = Fc.Nodes(1).ymin; % Done
+                                                Nx = 0; % Done
+                                                Ny = -1; % Done
+                                            end
+                                        end
+                                        if isscalar(y)
+                                            fpnts{i} = Rot*[Nx x; Ny y] + [[0;0] Trans];
+                                        else
+                                            fpnts{i} = [Rot*[Nx; Ny] Rot*[x(ones(1,length(y))); y]+Trans];
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        % Calculate Solid Body Boundaries
+                        n = 0;
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if iBody.matl.Phase == enumMaterial.Solid
+                                    n = n + 1;
+                                end
+                            end
+                        end
+                        bpnts = cell(1,n);
+                        n = 1;
+                        for iGroup = ME.Groups
+                            Rot = RotMatrix(iGroup.Position.Rot - pi/2);
+                            Trans = [iGroup.Position.x; iGroup.Position.y];
+                            for iBody = iGroup.Bodies
+                                if iBody.matl.Phase == enumMaterial.Solid
+                                    [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
+                                    [y1,y2,~,~] = iBody.limits(enumOrient.Horizontal);
+                                    if isscalar(y1) %&& isscalar(y2)
+                                        if x1 == 0
+                                            bpnts{n} = Rot*[-x2 x2 x2 -x2; y1 y1 y2 y2] + Trans;
+                                        else
+                                            bpnts{n} = Rot*[x1 x2 x2 x1; y1 y1 y2 y2] + Trans;
+                                            n = n + 1;
+                                            bpnts{n} = Rot*[-x1 -x2 -x2 -x1; y1 y1 y2 y2] + Trans;
+                                        end
+                                    else
+                                        bpnts{n} = zeros(2,4,length(y1));
+                                        if x1 == 0
+                                            for i = 1:length(y1)
+                                                bpnts{n}(:,:,i) = ...
+                                                    Rot*[-x2 x2 x2 -x2; y1(i) y1(i) y2(i) y2(i)] + Trans;
+                                            end
+                                        else
+                                            for i = 1:length(y1)
+                                                bpnts{n}(:,:,i) = ...
+                                                    Rot*[x1 x2 x2 x1; y1(i) y1(i) y2(i) y2(i)] + Trans;
+                                            end
+                                            n = n + 1;
+                                            bpnts{n} = zeros(2,4,length(y1));
+                                            for i = 1:length(y1)
+                                                bpnts{n}(:,:,i) = ...
+                                                    Rot*[-x1 -x2 -x2 -x1; y1(i) y1(i) y2(i) y2(i)] + Trans;
+                                            end
+                                        end
+                                    end
+                                    n = n + 1;
+                                end
+                            end
+                        end
+                        
+                        % Animate
+                        frate = ME.animationFrameTime;
+                        if isfield(ME.Results.Data,'P') && ME.showPressureAnimation
+                            ME.Results.animateNode('P',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        if isfield(ME.Results.Data,'T') && ME.showTemperatureAnimation
+                            ME.Results.animateNode('T',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        if isfield(ME.Results.Data,'U') && ME.showVelocityAnimation
+                            ME.Results.animateFace('U',fpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        if isfield(ME.Results.Data,'turb') && ME.showTurbulenceAnimation
+                            ME.Results.animateNode('turb',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        if isfield(ME.Results.Data,'cond') && ME.showConductionAnimation
+                            ME.Results.animateNode('cond',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        if isfield(ME.Results.Data,'dP') && ME.showPressureDropAnimation
+                            ME.Results.animateNode('dP',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        %new
+                        if isfield(ME.Results.Data,'RE') && ME.showReynoldsAnimation
+                            ME.Results.animateNode('RE',cpnts,bpnts,frate,[],[],crun.title,ME.AxisReference);
+                        end
+                        
+                    end
+                    
+                    if ~ME.Simulations(1).stop
+                        % Remove the snapshot as it will be replaced now
+                        for i = 1:length(ME.SnapShots)
+                            if strcmp(ME.SnapShots{i}.Name, crun.title)
+                                ME.SnapShots(i) = [];
+                                break;
+                            end
+                        end
+                        snapshot = ME.Results.getSnapShot(ME,crun.title, false);
+                        saveME(ME);
+                    end
+                    
+                    
+                end
+                %% Undo Geometry Modifications
+                if nargin > 1
+                    % Uniform Scale Modification
+                    if isfield(crun,'Uniform_Scale')
+                        % Scale the connections
+                        for iGroup = ME.Groups
+                            for iCon = iGroup.Connections
+                                iCon.x = iCon.x/crun.Uniform_Scale;
+                            end
+                            % Scale the positions
+                            iGroup.Position.x = iGroup.Position.x/crun.Uniform_Scale;
+                            iGroup.Position.y = iGroup.Position.y/crun.Uniform_Scale;
+                        end
+                        
+                        % Scale the bridge offsets
+                        for iBridge = ME.Bridges
+                            iBridge.x = iBridge.x/crun.Uniform_Scale;
+                        end
+                        
+                        % Scale the mechanisms
+                        for iLRM = ME.Converters
+                            iLRM.Uniform_Scale(1/crun.Uniform_Scale);
+                        end
+                        
+                        % Scale the view window
+                        set(ME.AxisReference, ...
+                            'XLim',get(ME.AxisReference, 'XLim')/crun.Uniform_Scale);
+                        set(ME.AxisReference, ...
+                            'YLim',get(ME.AxisReference, 'YLim')/crun.Uniform_Scale);
+                        
+                        
+                        % Undo X_Scale Modification
+                    elseif isfield(crun,'X_Scale')
+                        % Scale the connections
+                        for iGroup = ME.Groups
+                            for iCon = iGroup.Connections
+                                if iCon.Orient == enumOrient.Vertical
+                                    iCon.x = iCon.x/crun.X_Scale;
+                                end
+                            end
+                            % Scale the positions
+                            iGroup.Position.x = iGroup.Position.x/crun.X_Scale;
+                        end
+                        
+                        % Scale the bridge offsets, for bridges with
+                        % horizontal (X) offset
+                        for iBridge = ME.Bridges
+                            if iBridge.Connection1.Orient == enumOrient.Horizontal...
+                                    && iBridge.Connection2.Orient == enumOrient.Horizontal
+                                iBridge.x = iBridge.x/crun.X_Scale;
+                            end
+                        end
+                        
+                        % For 'Tube Bank' heat exchangers: Scale the
+                        % number of tubes with the square of the
+                        % diameter.
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if ~isempty(iBody.Matrix) && isfield(iBody.Matrix.data,'Classification') && strcmp(iBody.Matrix.data.Classification, 'Tube Bank Internal')
+                                    iBody.Matrix.data.Number = iBody.Matrix.data.Number/crun.X_Scale^2;
+                                end
+                            end
+                        end
+                        
+                        % Scale the view window
+                        %                             XL = get(ME.AxisReference, 'XLim');
+                        %                             set(ME.AxisReference,'XLim', XL/crun.X_Scale);
+                    end
+                    
+                    % Undo Gas modification
+                    if isfield(crun,'Gas')
+                        for iGroup = ME.Groups
+                            for iBody = iGroup.Bodies
+                                if iBody.matl.Phase == enumMaterial.Gas
+                                    iBody.matl.Configure(GasBAK);
+                                end
+                            end
+                        end
+                    end
+                    
+                    
+                    % To save the modified geometry
+                    saveME(ME);
+                end
+                
+            end
+            ME.outputPath = backup_path;
+            ME.CurrentSim(:) = [];
+            ME.Results(:) = [];
+            ME.resetDiscretization();
+        end
         function assignSnapShot(ME, SS)
             Sim = ME.Simulations;
             for iGroup = ME.Groups
@@ -4211,7 +5007,7 @@ classdef Model < handle
                 end
             end
         end
-
+        
         function saveME(Model)
             % Surpress the recursion limit warning
             warning('off', 'MATLAB:loadsave:saveRecursionLimit')
@@ -4258,12 +5054,12 @@ classdef Model < handle
             save(['Saved Files\' Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
-
+            
             % Turn back on the recursion limit warning
             warning('on', 'MATLAB:loadsave:saveRecursionLimit')
-
+            
         end
-
+        
         %% Interface / Find stuff
         function FindGroup(this,Pos)
             TheGroup = this.findNearestGroup(Pos,inf);
@@ -4310,7 +5106,7 @@ classdef Model < handle
                 names{index} = TheGroup.name;
                 index = index + 1;
             end
-
+            
             %% Body
             mindist = Tolerance;
             Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
@@ -4319,7 +5115,7 @@ classdef Model < handle
                 % Establish Rectangle of iBody
                 [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
                 [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
-
+                
                 R.Width = x2-x1;
                 R.Height = y2-y1;
                 R.Cx = (x1+x2)/2;
@@ -4342,15 +5138,15 @@ classdef Model < handle
                 objects{index} = TheBody;
                 names{index} = TheBody.name;
                 index = index + 1;
-
+                
                 for iSensor = TheBody.Sensors
                     objects{index} = iSensor;
                     names{index} = iSensor.name;
                     index = index + 1;
                 end
-
+                
             end
-
+            
             %% Connection
             mindist = Tolerance;
             Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
@@ -4414,7 +5210,7 @@ classdef Model < handle
                     % Establish Rectangle of iBody
                     [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
                     [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
-
+                    
                     R.Width = x2-x1;
                     R.Height = y2-y1;
                     R.Cx = (x1+x2)/2;
@@ -4441,7 +5237,7 @@ classdef Model < handle
                 objects{i} = this.RefFrames(i);
             end
         end
-
+        
         %% Graphics
         % Tests
         function isInWindow = inWindow(this,pnt1,pnt2)
@@ -4521,7 +5317,7 @@ classdef Model < handle
                 showOptions(9) = this.showNodes;
             end
         end
-
+        
         % Highlighting and Selecting
         function ActiveGroup = get.ActiveGroup(this)
             ActiveGroup = [];
@@ -4573,7 +5369,7 @@ classdef Model < handle
             else; this.Selection = cell(0);
             end
         end
-
+        
         % Bulk Display
         function XLim = getXLim(this)
             XLim = [inf -inf];
@@ -4667,7 +5463,7 @@ classdef Model < handle
                 end
             end
         end
-
+        
         %% For showing elements in GUI. Edited by Matthias.
         function show(this,showOptions)
             if this.isChanged; this.update(); end
@@ -4687,7 +5483,7 @@ classdef Model < handle
                 iGroup.show('all',this.AxisReference,0,showOptions);
                 % showGroups showBodies showConnections showLeaks showBridges showInterConnections showEnvironmentConnections]
             end
-
+            
             if this.showInterConnections || this.showNodes || this.showNodeBounds
                 % if condition below added by Matthias to prevent wait for discretization each time view is changed.
                 if ~this.isDiscretized()
@@ -4722,7 +5518,7 @@ classdef Model < handle
                     end
                 end
             end
-
+            
             if this.showInterConnections % Show Inter-Node Connections
                 if this.isDiscretized()
                     % Make array of Node Centers
@@ -4752,7 +5548,7 @@ classdef Model < handle
                                 if this.showFacesLeak; facetypes{end+1} = enumFType.Leak; end
                                 if this.showFacesMatrixTransition; facetypes{end+1} = enumFType.MatrixTransition; end
                                 if this.showFacesEnvironment; facetypes{end+1} = enumFType.Environment; end
-
+                                
                                 switch iFace.Type
                                     case facetypes
                                         if isVis(iFace.Nodes(1).index) && ...
@@ -4767,7 +5563,7 @@ classdef Model < handle
                             end
                         end
                         n = n - 1;
-
+                        
                         % Plot
                         nT = 3*n;
                         xData = NaN(nT,1);
@@ -4787,7 +5583,7 @@ classdef Model < handle
                 end
                 clear xData yData
             end
-
+            
             % Prepare for showing node centerpoints and outlines
             if this.showNodes || this.showNodeBounds
                 if this.isDiscretized()
@@ -4804,7 +5600,7 @@ classdef Model < handle
                         yData = xData;
                         xBoundsData = xData;
                         yBoundsData = xData;
-
+                        
                         % Define colors for node circles and outlines
                         colors = struct(...
                             'SN',[1 0 0],...
@@ -4812,7 +5608,7 @@ classdef Model < handle
                             'VVGN',[1 0 1],... % magenta
                             'SAGN',[0 1 1],... % light blue
                             'EN',[0 1 0]);
-
+                        
                         % Define circle sizes
                         sizes = struct(...
                             'SN', 2,...
@@ -4820,7 +5616,7 @@ classdef Model < handle
                             'VVGN', 5,...
                             'SAGN', 5,...
                             'EN', 10);
-
+                        
                         % Matthias: Added functionality to plot nodes in different colors based on node type.
                         j = 1;
                         for nd = this.Nodes
@@ -4855,18 +5651,18 @@ classdef Model < handle
                                 j = j + 1;
                             end
                         end
-
-
+                        
+                        
                     end
                 end
             end
-
+            
             if this.isDiscretized() && ~isempty(this.Nodes)
-
+                
                 if this.showNodes && ~isempty(xData)
                     % Plot node center points
                     % cannot plot all points individually as that takes ages
-
+                    
                     % plot solid nodes first as there will never be none of these
                     if any([xData.SN]) && this.showNodesSN
                         if isempty(this.StaticGUIObjects)
@@ -4907,7 +5703,7 @@ classdef Model < handle
                             'MarkerEdgeColor',colors.EN);
                     end
                 end
-
+                
                 if this.showNodeBounds && ~isempty(xData)
                     % Matthias: Initial approach to draw node outlines using 'rectangle'. Slow.
                     %                         if this.showNodeBounds
@@ -4919,7 +5715,7 @@ classdef Model < handle
                     %                                     rectangle('Position',bound, 'EdgeColor',colors.SN);
                     %                             end
                     %                         end
-
+                    
                     % Matthias: Another approach to plot node bounds using 'fill'. Does not work faster than 'rectangle'.
                     %                         if this.showNodeBounds
                     %                                   bounds_fill = [BoundsData.SN];
@@ -4940,14 +5736,14 @@ classdef Model < handle
                     %                         'FaceAlpha',0,... % transparent
                     %                         'HitTest','off')];
                     %                         end
-
+                    
                     % Matthias: Another approach to plot node bounds using 'line(x,y)'.
                     % If x and y have size [4, nRectangles]: Draws separate lines --> takes
                     % long time.
                     % If x and y have size [1, nRectangles*(4+1)] and after every 4 values
                     % there is a 'NaN' before the next 4: Draws one line with breaks where
                     % there is 'NaN' --> Fast!
-
+                    
                     % Plot solid nodes first
                     if any([xData.SN]) && this.showNodesSN
                         Xs = reshape([xBoundsData.SN],[],1);
@@ -4986,10 +5782,10 @@ classdef Model < handle
                             'Color',colors.EN, 'LineWidth',0.5, 'LineStyle','--');
                     end
                 end
-
+                
             end
-
-
+            
+            
             if this.showBridges
                 for iBridge = this.Bridges
                     iBridge.show(this.AxisReference);
@@ -5035,10 +5831,10 @@ classdef Model < handle
             else
                 showOptions = this.produceShowOptions();
             end
-
+            
             % Don't show connections in annimation
             showOptions(3) = false;
-
+            
             cla;
             % Set Screen to be constant dimensions
             ReferenceAxis = gca;
@@ -5046,7 +5842,7 @@ classdef Model < handle
             set(ReferenceAxis,'XLimMode','manual');
             set(ReferenceAxis,'YLimMode','manual');
             set(ReferenceAxis,'ZLimMode','manual');
-
+            
             % Initialize
             t = cputime;
             FrameTime = ((2*pi)/(this.AnimationSpeed_rads*Frame.NTheta));
@@ -5057,17 +5853,17 @@ classdef Model < handle
             for iGroup = this.Groups
                 iGroup.show('Static',this.AxisReference,0,showOptions);
             end
-
+            
             k = 1;
             i_ani = 1;
             while this.isAnimating && cputime-t < this.AnimationLength_s
-
+                
                 %Matthias: For pausing animation with a breakpoint at a
                 %specified time
                 i_ani = i_ani+1;
-
+                
                 nexttime = cputime + FrameTime;
-
+                
                 % Go down through the hierarchy
                 for iGroup = this.Groups
                     iGroup.show('Dynamic',this.AxisReference,Inc,showOptions);
@@ -5095,13 +5891,13 @@ classdef Model < handle
                             for iNode = this.Nodes
                                 nodeCenter(iNode.index) = iNode.CenterCoords(Inc);
                             end
-
+                            
                             % Make array of face coords
                             % Count faces, stored in Model
                             n = 1;
                             xData = NaN(3*length(this.Faces),1);
                             yData = NaN(3*length(this.Faces),1);
-
+                            
                             % Take each face, assess whether it is active, then record
                             for iFace = this.Faces
                                 %if iFace.isDynamic && ...
@@ -5122,7 +5918,7 @@ classdef Model < handle
                             n = n-1;
                             xData = xData(1:n);
                             yData = yData(1:n);
-
+                            
                             if isempty(this.StaticGUIObjects)
                                 this.DynamicGUIObjects = line(xData,yData,'Color',[0 1 0]);
                             else
@@ -5139,155 +5935,155 @@ classdef Model < handle
                 % Wait
                 pause(10*max([0 nexttime-cputime]));
             end
-
+            
             % Reset Screen to previous settings
             set(ReferenceAxis,'XLimMode',mode);
             set(ReferenceAxis,'YLimMode',mode);
             set(ReferenceAxis,'ZLimMode',mode);
         end
-
+        
     end
-
+    
 end
 
 function [Closed_Edge] = TrimFaces(this, region, Closed_Edge)
-    LEN = length(Closed_Edge);
-    for Nd = this.Nodes
-        if Nd.index <= length(region)
-            from = Nd;
-            c = 1;
-            while c == 1
-                c = 0;
-                % Determine the number of access points for the node
-                for Fc = from.Faces
-                    if Fc.index <= LEN && ~Closed_Edge(Fc.index) && ...
-                            region(Fc.Nodes(1).index) == region(Fc.Nodes(2).index)
-                        c = c + 1; if c > 1; break; end; edge = Fc;
-                    end
+LEN = length(Closed_Edge);
+for Nd = this.Nodes
+    if Nd.index <= length(region)
+        from = Nd;
+        c = 1;
+        while c == 1
+            c = 0;
+            % Determine the number of access points for the node
+            for Fc = from.Faces
+                if Fc.index <= LEN && ~Closed_Edge(Fc.index) && ...
+                        region(Fc.Nodes(1).index) == region(Fc.Nodes(2).index)
+                    c = c + 1; if c > 1; break; end; edge = Fc;
                 end
-                if c == 1
-                    % This Node has only one access point (withing a region),
-                    % ... therefore it cannot be a part of a loop.
-                    % Any nodes that are chain to this node with only two total
-                    % ... access points must also not be part of a loop.
-                    Closed_Edge(edge.index) = true;
-                    if from == edge.Nodes(1)
-                        from = edge.Nodes(2);
-                    else
-                        from = edge.Nodes(1);
-                    end
+            end
+            if c == 1
+                % This Node has only one access point (withing a region),
+                % ... therefore it cannot be a part of a loop.
+                % Any nodes that are chain to this node with only two total
+                % ... access points must also not be part of a loop.
+                Closed_Edge(edge.index) = true;
+                if from == edge.Nodes(1)
+                    from = edge.Nodes(2);
+                else
+                    from = edge.Nodes(1);
                 end
             end
         end
     end
 end
+end
 
 function [A,B,C,D] = populate_Fc_ABCD(Sim, Fc)
-    fcb = Face.empty;
-    fcf = Face.empty;
-    count = 0;
-    for fc = Fc.Nodes(1).Faces
-        if fc.Type == enumFType.Gas && fc ~= Fc
-            if count == 0
+fcb = Face.empty;
+fcf = Face.empty;
+count = 0;
+for fc = Fc.Nodes(1).Faces
+    if fc.Type == enumFType.Gas && fc ~= Fc
+        if count == 0
+            fcb = fc;
+            count = 1;
+        else
+            % pick the larger face
+            if mean(fcb.data.Area) < mean(fc.data.Area)
                 fcb = fc;
-                count = 1;
-            else
-                % pick the larger face
-                if mean(fcb.data.Area) < mean(fc.data.Area)
-                    fcb = fc;
-                end
             end
         end
     end
-    if count == 1
-        % Reference that backwards face
-        if fcb.Nodes(2) == Fc.Nodes(1)
-            Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(1).index;
-        else
-            Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(2).index;
-        end
+end
+if count == 1
+    % Reference that backwards face
+    if fcb.Nodes(2) == Fc.Nodes(1)
+        Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(1).index;
     else
-        % Reference itself
-        Sim.Fc_Nd03(Fc.index,1) = Fc.Nodes(1).index;
-        fcb = Fc;
+        Sim.Fc_Nd03(Fc.index,1) = fcb.Nodes(2).index;
     end
-    count = 0;
-    for fc = Fc.Nodes(2).Faces
-        if fc.Type == enumFType.Gas && ...
-                fc ~= Fc
-            if count == 0
+else
+    % Reference itself
+    Sim.Fc_Nd03(Fc.index,1) = Fc.Nodes(1).index;
+    fcb = Fc;
+end
+count = 0;
+for fc = Fc.Nodes(2).Faces
+    if fc.Type == enumFType.Gas && ...
+            fc ~= Fc
+        if count == 0
+            fcf = fc;
+            count = 1;
+        else
+            % pick the larger face
+            if mean(fcf.data.Area) < mean(fc.data.Area)
                 fcf = fc;
-                count = 1;
-            else
-                % pick the larger face
-                if mean(fcf.data.Area) < mean(fc.data.Area)
-                    fcf = fc;
-                end
             end
         end
     end
-    if count == 1
-        % Reference that backwards face
-        if fcb.Nodes(1) == Fc.Nodes(2)
-            Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(2).index;
-        else
-            Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(1).index;
-        end
+end
+if count == 1
+    % Reference that backwards face
+    if fcb.Nodes(1) == Fc.Nodes(2)
+        Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(2).index;
     else
-        % Reference itself
-        Sim.Fc_Nd03(Fc.index,2) = Fc.Nodes(2).index;
-        fcf = Fc;
+        Sim.Fc_Nd03(Fc.index,2) = fcb.Nodes(1).index;
     end
-    
-    x1 = -0.5*Fc.data.Dist;
-    x0 = x1 - fcb.data.Dist;
-    x2 = -x1;
-    x3 = x2 + fcf.data.Dist;
-    if fcb ~= Fc && all(fcb.data.Area > 0) % Fc i - 1 exists
-        if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
-            % can fill xi, xi-1, xi+1 and xi+2, as well as A, B, C and D
-            A = -((x1.*x2.*x3)./(x0-x1)./(x0-x2)./(x0-x3));
-            B = -((x0.*x2.*x3)./(x1-x0)./(x1-x2)./(x1-x3));
-            C = -((x0.*x1.*x3)./(x2-x0)./(x2-x1)./(x2-x3));
-            D = -((x0.*x1.*x2)./(x3-x0)./(x3-x1)./(x3-x2));
-        else
-            A = -((x1.*x2)./(x0-x1)./(x0-x2));
-            B = -((x0.*x2)./(x1-x0)./(x1-x2));
-            C = -((x0.*x1)./(x2-x0)./(x2-x1));
-            D = 0;
-        end
+else
+    % Reference itself
+    Sim.Fc_Nd03(Fc.index,2) = Fc.Nodes(2).index;
+    fcf = Fc;
+end
+
+x1 = -0.5*Fc.data.Dist;
+x0 = x1 - fcb.data.Dist;
+x2 = -x1;
+x3 = x2 + fcf.data.Dist;
+if fcb ~= Fc && all(fcb.data.Area > 0) % Fc i - 1 exists
+    if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
+        % can fill xi, xi-1, xi+1 and xi+2, as well as A, B, C and D
+        A = -((x1.*x2.*x3)./(x0-x1)./(x0-x2)./(x0-x3));
+        B = -((x0.*x2.*x3)./(x1-x0)./(x1-x2)./(x1-x3));
+        C = -((x0.*x1.*x3)./(x2-x0)./(x2-x1)./(x2-x3));
+        D = -((x0.*x1.*x2)./(x3-x0)./(x3-x1)./(x3-x2));
     else
-        if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
-            A = 0;
-            B = -((x2.*x3)./(x1-x2)./(x1-x3));
-            C = -((x1.*x3)./(x2-x1)./(x2-x3));
-            D = -((x1.*x2)./(x3-x1)./(x3-x2));
-        else
-            A = 0.0;
-            B = 0.5;
-            C = 0.5;
-            D = 0.0;
-        end
+        A = -((x1.*x2)./(x0-x1)./(x0-x2));
+        B = -((x0.*x2)./(x1-x0)./(x1-x2));
+        C = -((x0.*x1)./(x2-x0)./(x2-x1));
+        D = 0;
     end
-    sum = A+B+C+D;
-    for i = 1:length(sum)
-        roundsum = round(sum);
-        if roundsum == 1
-            % No change
-        elseif roundsum == -1
-            A(min(i,length(A))) = -A(min(i,length(A)));
-            B(min(i,length(B))) = -B(min(i,length(B)));
-            C(min(i,length(C))) = -C(min(i,length(C)));
-            D(min(i,length(D))) = -D(min(i,length(D)));
-        else
-            A(min(i,length(A))) = 0;
-            B(min(i,length(B))) = 0.5;
-            C(min(i,length(C))) = 0.5;
-            D(min(i,length(D))) = 0;
-        end
+else
+    if fcf ~= Fc && all(fcf.data.Area > 0) % Fc i + 1 exists
+        A = 0;
+        B = -((x2.*x3)./(x1-x2)./(x1-x3));
+        C = -((x1.*x3)./(x2-x1)./(x2-x3));
+        D = -((x1.*x2)./(x3-x1)./(x3-x2));
+    else
+        A = 0.0;
+        B = 0.5;
+        C = 0.5;
+        D = 0.0;
     end
-    A = CollapseVector(A);
-    B = CollapseVector(B);
-    C = CollapseVector(C);
-    D = CollapseVector(D);
+end
+sum = A+B+C+D;
+for i = 1:length(sum)
+    roundsum = round(sum);
+    if roundsum == 1
+        % No change
+    elseif roundsum == -1
+        A(min(i,length(A))) = -A(min(i,length(A)));
+        B(min(i,length(B))) = -B(min(i,length(B)));
+        C(min(i,length(C))) = -C(min(i,length(C)));
+        D(min(i,length(D))) = -D(min(i,length(D)));
+    else
+        A(min(i,length(A))) = 0;
+        B(min(i,length(B))) = 0.5;
+        C(min(i,length(C))) = 0.5;
+        D(min(i,length(D))) = 0;
+    end
+end
+A = CollapseVector(A);
+B = CollapseVector(B);
+C = CollapseVector(C);
+D = CollapseVector(D);
 end

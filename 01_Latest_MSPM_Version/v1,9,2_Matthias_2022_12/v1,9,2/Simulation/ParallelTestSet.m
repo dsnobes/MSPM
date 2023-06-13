@@ -30,16 +30,31 @@ function ParallelTestSet(sel, h)
 
     % Run the test sets
     parfor model = 1:length(Test_Set)
-        success = Run(processed_models(model),Test_Set(model))
+        [snapshots(model)] = RunHeadless(processed_models(model),Test_Set(model));
         send(D,i)
     end
 
     % Delete the parallel processing pool
     delete(gcp('nocreate'))
 
+    % Progress bar for saving models
+    progressbar('Saving Snapshots')
+
+    % Save all the model snapshots to the single output file
+    for i = 1:length(Test_Set)
+        % Get the original file
+        File = load(Test_Set(i).Model,'Model');
+        ME = File.Model;
+  
+        % Save the new snapshot
+        ME.addSnapShot(snapshots(i));
+        saveME(ME)
+        progressbar(i/length(Test_Set));
+    end
+
     disp("Done!!!!")
 
-    fprintf(['Elapsed time: ' sec2timestr(runtime) '\n']);
+    fprintf(['Elapsed time: ' sec2timestr(toc) '\n']);
 
     % Turn on the recursion limit warning
     warning('on', 'MATLAB:loadsave:saveRecursionLimit')
