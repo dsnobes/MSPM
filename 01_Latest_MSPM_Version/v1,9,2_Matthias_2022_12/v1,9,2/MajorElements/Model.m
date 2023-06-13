@@ -4447,31 +4447,6 @@ classdef Model < handle
                     runtime = toc; % reads simulation timer
                     fprintf(['Elapsed time: ' num2str(runtime) 's\n']);
                     
-                    % write test set statistics file
-                    % Matthias: For test sets, record runtime (s), number of
-                    % simulated cycles and speed (Hz) at finish in struct
-                    % (In future, may want to save to CSV file to work with more
-                    % easily)
-                    if isfile('../Runs/TestSetStatistics.mat')
-                        load('../Runs/TestSetStatistics.mat');
-                    else
-                        TestSetStatistics = struct([]);
-                    end
-                    TestSetStatistics(end+1).Name = crun.title;
-                    TestSetStatistics(end).Runtime = runtime;
-                    TestSetStatistics(end).Cycle_Count = cycle_count;
-                    TestSetStatistics(end).Final_Speed = final_speed;
-                    TestSetStatistics(end).Final_Power = final_power;
-                    TestSetStatistics(end).Charge_Pressure = ME.enginePressure;
-                    TestSetStatistics(end).GN = MeshCounts.GN;
-                    TestSetStatistics(end).SN = MeshCounts.SN;
-                    TestSetStatistics(end).EN = MeshCounts.EN;
-                    TestSetStatistics(end).GF = MeshCounts.GF;
-                    TestSetStatistics(end).SF = MeshCounts.SF;
-                    TestSetStatistics(end).MF = MeshCounts.MF;
-                    TestSetStatistics(end).EF = MeshCounts.EF;
-                    save('../Runs/TestSetStatistics', 'TestSetStatistics');
-                    
                     if ~success || isempty(ME.Results); return; end
                     
                     % If it is a recording set then ready the display matricies and
