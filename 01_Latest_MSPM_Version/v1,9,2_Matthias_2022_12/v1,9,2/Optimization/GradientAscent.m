@@ -526,7 +526,7 @@ end
 
 function [Parameter, success, ShaftPower, statistics] = RunSubFunction(Model, RunConditions, options)
     [success] = Model.Run(RunConditions);
-    addpath(['..\runs\' RunConditions.title]);
+    addpath(['..\runs\' RunConditions.title]); % another issue #32
     try
         load([RunConditions.title '_Statistics'],'statistics');
     catch
