@@ -1852,6 +1852,8 @@ if sel
         end
         group_end = group_end - 1;
         h = load_sub(Model, h);
+        h.Model.run_location = h.run_location;
+        h.Model.save_location = h.save_location;
         h.Model.Run(Test_Set(group_start:group_end));
         group_start = group_end + 1;
         group_end = group_start;

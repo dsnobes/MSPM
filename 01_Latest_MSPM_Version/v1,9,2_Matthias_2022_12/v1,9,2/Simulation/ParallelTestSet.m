@@ -50,7 +50,7 @@ function ParallelTestSet(sel, h)
     % Save all the model snapshots to the single output file
     for i = 1:length(Test_Set)
         % Get the original file
-        File = load(Test_Set(i).Model,'Model');
+        File = load([processed_models(i).save_location, Test_Set(i).Model],'Model');
         ME = File.Model;
   
         % Save the new snapshot

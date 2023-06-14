@@ -18,7 +18,7 @@ function [RunConditions] = Model_Tuning_200kPa()
     load(extract_folder, "extract_table");
 
     
-    pressures = extract_table.p_atm; % [Pa]
+    pressures = extract_table.p_abs; % [Pa]
     speeds = extract_table.encoder_speed; % [rpm]
     heater_temps = extract_table.avg_heater;
     cooler_temps = extract_table.avg_cooler;
@@ -31,7 +31,6 @@ function [RunConditions] = Model_Tuning_200kPa()
     
     
     %% Create MSPM Test Structure
-    
     RunConditions_temp = struct(... %Default values
         'Model', model{1},...
         'title', 'Raphael_New_HX',...
@@ -56,7 +55,7 @@ function [RunConditions] = Model_Tuning_200kPa()
             RunConditions(n).EnginePressure = pressures(cond);
             RunConditions(n).SourceTemp = heater_temps(cond) + 273.15;
             RunConditions(n).SinkTemp = cooler_temps(cond) + 273.15;
-            RunConditions(n).title = convertStringsToChars(strcat(model{i}, "_RPM-", num2str(round(speeds(cond)),0), "_P-", num2str(round(pressures(cond)),0)));
+            RunConditions(n).title = convertStringsToChars(strcat(model{i}, "_RPM-", num2str(floor(speeds(cond))), "_P-", num2str(floor(pressures(cond)))));
             n = n+1;
 
         end
