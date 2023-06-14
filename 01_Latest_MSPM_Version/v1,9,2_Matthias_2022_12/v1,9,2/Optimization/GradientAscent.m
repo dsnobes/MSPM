@@ -243,7 +243,7 @@ function [History] = GradientAscent(...
             maxiterations = maxiterations + 1;
             for i = 1:length(History.Names)
                 for j = 1:length(Study.History.Names)
-                    if strcmp(History.Names{i},Study.History.Names{j})
+                    if strcmp(History.Names{i},Study.History.Names{j}) % two for loops and if that do nothing? #33
                         %         EPara2(i) = Study.History.EPara2(j);
                         %         EGrad2(i) = Study.History.EGrad2(j);
                         %         gradient(i) = Study.History.gradient(j);
