@@ -122,19 +122,19 @@ function [History] = GradientAscent(...
         addpath(cd);
     
         found = false;
-        for i = 1:length(Model.OptimizationSchemes)
-            if Model.OptimizationSchemes(i).ID == OptimizationSchemeID
-                Study = Model.OptimizationSchemes(i);
-                Names = cell(1,length(Model.OptimizationSchemes(i).IDs));
-                Objects = cell(1,length(Model.OptimizationSchemes(i).IDs));
+        for optimization_scheme = Model.OptimizationSchemes
+            if optimization_scheme.ID == OptimizationSchemeID
+                Study = optimization_scheme;
+                Names = cell(1,length(optimization_scheme.IDs));
+                Objects = cell(1,length(optimization_scheme.IDs));
                 found = true;
-                for k = 1:length(Model.OptimizationSchemes(i).IDs)
-                    Names{k} = Model.OptimizationSchemes(i).Names{k};
-                    switch Model.OptimizationSchemes(i).Classes{k}
+                for k = 1:length(optimization_scheme.IDs)
+                    Names{k} = optimization_scheme.Names{k};
+                    switch optimization_scheme.Classes{k}
                         case 'Connection'
                             for iGroup = Model.Groups
                                 for iCon = iGroup.Connections
-                                    if iCon.ID == Model.OptimizationSchemes(i).IDs{k}
+                                    if iCon.ID == optimization_scheme.IDs{k}
                                         Objects{k} = iCon;
                                         break;
                                     end
@@ -143,14 +143,14 @@ function [History] = GradientAscent(...
                             end
                         case 'LinRotMechanism'
                             for iLRM = Model.Converters
-                                if iLRM.ID == Model.OptimizationSchemes(i).IDs{k}
+                                if iLRM.ID == optimization_scheme.IDs{k}
                                     Objects{k} = iLRM;
                                     break;
                                 end
                             end
                     end
                 end
-                Fields = Model.OptimizationSchemes(i).Fields;
+                Fields = optimization_scheme.Fields;
                 break;
             end
         end
