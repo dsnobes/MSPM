@@ -899,6 +899,16 @@ classdef Group < handle
                     end
             end
         end
+        function UpdateWidth(this, new_width)
+            % Update the width
+            this.Width = new_width;
+            this.update()
+        end
+        function UpdateHeight(this, new_height)
+            % Update the width
+            this.Height = new_height;
+            this.update()
+        end
     end
 end
 

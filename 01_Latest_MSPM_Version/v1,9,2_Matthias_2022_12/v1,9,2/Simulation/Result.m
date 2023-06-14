@@ -625,7 +625,7 @@ classdef Result < handle
             delete(this.Axes);
         end
 
-        function getSnapShot(this,Model,name)
+        function SnapShot = getSnapShot(this,Model,name, doSave)
             if isempty(name); return; end
             if ~isfield(this.Data,'T'); return; end
             % Find Snapshot position
@@ -759,7 +759,9 @@ classdef Result < handle
                     index = index + 1;
                 end
             end
-            this.Model.addSnapShot(SnapShot);
+            if doSave
+                this.Model.addSnapShot(SnapShot);
+            end
         end
 
     end

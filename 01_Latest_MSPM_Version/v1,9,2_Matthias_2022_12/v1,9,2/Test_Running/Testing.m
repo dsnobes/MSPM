@@ -9,7 +9,7 @@ function [RunConditions] = Testing()
 %% Input Parameters
 % Name of experimental data files.
 model = {
-    'Raphael New HX - No Disp Heater - Helium 99',...
+    'Raphael New HX - Air',...
     }; % Name of MSPM model geometry.
 
 pressures = [300, 435, 570] .*1000; % [Pa]

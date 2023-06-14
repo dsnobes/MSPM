@@ -1,6 +1,6 @@
 classdef Sensor < handle
     %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    %   Detailed explanation goes herePlotCoordinates
 
     properties (Constant)
         ActiveColor = [0 1 0];

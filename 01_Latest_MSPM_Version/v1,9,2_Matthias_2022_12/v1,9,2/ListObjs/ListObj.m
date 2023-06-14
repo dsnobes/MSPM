@@ -148,7 +148,7 @@ classdef ListObj < handle
                     if ~isempty(names)
                         [indx, tf] = listdlg(...
                             'PromptString',['Select ' this.Child ' to Remove'],...
-                            'ListString',names);
+                            'ListString',names,'ListSize',[1000 800]);
                         if tf
                             answers = false(length(names),1);
                             answers(indx) = true;
