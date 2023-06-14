@@ -275,7 +275,7 @@ classdef Sensor < handle
             this.Data = [];
         end
 
-        function getData(this,Simulation)
+        function getData(this,Simulation) % getter that doesn't return anything? #28
             property = this.DataType;
             switch property
                 case 'T'
