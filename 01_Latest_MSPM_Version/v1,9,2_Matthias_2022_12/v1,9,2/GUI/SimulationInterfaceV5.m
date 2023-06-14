@@ -93,6 +93,7 @@ function SimulationInterfaceV5_OpeningFcn(hObject, ~, handles, varargin)
         end
 
     else
+        disp("Parameters file not found!! Creating new file")
         % Set default locations
         handles.save_location = 'Saved Files\';
         handles.run_location = '..\Runs\';
@@ -100,7 +101,18 @@ function SimulationInterfaceV5_OpeningFcn(hObject, ~, handles, varargin)
         % Create config file
         parameters.savelocation = handles.save_location;
         parameters.runlocation = handles.run_location;
+
+        % Make the directory if it does not exist
+        if ~isfolder('Config Files\')
+            disp("Config Files folder not found!! Creating folder")
+            mkdir('Config Files\')
+        end
+
+        % Save new file
         save('Config Files\parameters.mat','parameters');
+
+        % Add folder to path (if not already on path)
+        addpath('Config Files');
 
     end
 
