@@ -5,6 +5,9 @@ function ParallelTestSet(sel, h)
     % Prep the Test Set file
     func = str2func(sel(1:end-2)); % cut off '.m' file ending
     Test_Set = func();
+
+    % Create parallel processing pool
+    parpool("Processes", [4,16]);
     
     % Start a progress for preprocessing
     progressbar('Preprocessing for Parallel Execution')
@@ -12,14 +15,18 @@ function ParallelTestSet(sel, h)
     % Start timer
     tic
 
-    % Create parallel processing pool
-    parpool("Processes", [4,16]);
-    
     % Preprocess the test cases
     for i = 1:length(Test_Set)
         processed_models(i)  = load_sub(Test_Set(i).Model, h);
+
+        % Add the save locations to the model
+        processed_models(i).save_location = h.save_location;
+        processed_models(i).run_location = h.run_location;
+
         progressbar(i/length(Test_Set));
     end
+
+    
 
     % Parfor loop progress bar
     D = parallel.pool.DataQueue;

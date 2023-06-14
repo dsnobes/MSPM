@@ -466,7 +466,7 @@ classdef Sensor < handle
                     str = [this.Body.Group.Model.outputPath '\' ...
                         ModelName '_' titleStr];
                 end
-                str = replace(str,':',' -');
+                str = [str(1:3), replace(str(4:end),':',' -')];
                 save([str '.mat'],'data');
                 imwrite(imind,cm,[str '.jpg']);
             end

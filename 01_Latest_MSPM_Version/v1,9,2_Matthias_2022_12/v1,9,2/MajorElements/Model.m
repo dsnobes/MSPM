@@ -58,6 +58,9 @@ classdef Model < handle
         engineSpeed double = 1;
         
         RelationOn = true;
+
+        save_location;
+        run_location;
     end
     
     properties (Hidden)
@@ -3370,11 +3373,11 @@ classdef Model < handle
                 useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
                 ntrials = 1;
                 
-                [status] = mkdir('../Runs',crun.title);
+                [status] = mkdir(ME.run_location, crun.title);
                 if status
-                    ME.outputPath = ['../Runs/' crun.title];
+                    ME.outputPath = [ME.run_location, crun.title];
                 else
-                    msgbox(['Please create file: ../Runs/' crun.title])
+                    msgbox(['Please create file:', ME.run_location, crun.title])
                 end
                 
                 for trial = 1:ntrials
@@ -3647,8 +3650,8 @@ classdef Model < handle
                         % simulated cycles and speed (Hz) at finish in struct
                         % (In future, may want to save to CSV file to work with more
                         % easily)
-                        if isfile('../Runs/TestSetStatistics.mat')
-                            load('../Runs/TestSetStatistics.mat');
+                        if isfile([ME.run_location, 'TestSetStatistics.mat'])
+                            load([ME.run_location, 'TestSetStatistics.mat']);
                         else
                             TestSetStatistics = struct([]);
                         end
@@ -3665,7 +3668,7 @@ classdef Model < handle
                         TestSetStatistics(end).SF = MeshCounts.SF;
                         TestSetStatistics(end).MF = MeshCounts.MF;
                         TestSetStatistics(end).EF = MeshCounts.EF;
-                        save('../Runs/TestSetStatistics', 'TestSetStatistics');
+                        save([ME.run_location, 'TestSetStatistics.mat'], 'TestSetStatistics');
                         
                         if ~success || isempty(ME.Results); return; end
                         
@@ -4175,11 +4178,11 @@ classdef Model < handle
             useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
             ntrials = 1;
             
-            [status] = mkdir('../Runs',crun.title);
+            [status] = mkdir(ME.run_location,crun.title);
             if status
-                ME.outputPath = ['../Runs/' crun.title];
+                ME.outputPath = [ME.run_location, crun.title];
             else
-                msgbox(['Please create file: ../Runs/' crun.title])
+                msgbox(['Please create file:', ME.run_location, crun.title])
             end
             
             for trial = 1:ntrials
@@ -5026,7 +5029,7 @@ classdef Model < handle
                 iBridge.GUIObjects(:) = [];
                 iBridge.Faces(:) = [];
             end
-            save(['Saved Files\' Model.name '.mat'],'Model');
+            save([Model.save_location, Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
             

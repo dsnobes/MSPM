@@ -71,6 +71,42 @@ function SimulationInterfaceV5_OpeningFcn(hObject, ~, handles, varargin)
     handles.InterGroupDistance = 0.05;
     handles.ClickTolerance = 0.1;
 
+
+    % Load/Create default save config
+    if isfile('Config Files\parameters.mat')
+        load('Config Files\parameters.mat')
+
+
+        % Check if the save locations are valid and set locations
+        if isfolder(parameters.savelocation)
+            handles.save_location = parameters.savelocation;
+        else
+            disp("Model save location is invalid, reset to default location (Saved Files\)")
+            handles.save_location = 'Saved Files\';
+        end
+
+        if isfolder(parameters.runlocation)
+            handles.run_location = parameters.runlocation;
+        else
+            disp("Run save location is invalid, reset to default location (..\Runs\)")
+            handles.run_location = '..\Runs\';
+        end
+
+    else
+        % Set default locations
+        handles.save_location = 'Saved Files\';
+        handles.run_location = '..\Runs\';
+
+        % Create config file
+        parameters.savelocation = handles.save_location;
+        parameters.runlocation = handles.run_location;
+        save('Config Files\parameters.mat','parameters');
+
+    end
+
+    % Delete the loaded/saved variable
+    clear parameters
+
     %% Generate Default Model
     handles.Model = Model();
     handles.Model.AxisReference = handles.GUI;
@@ -1099,7 +1135,7 @@ function saveModel(savenew,h)
     end
     % If the name is already an existing file, it asks to overwrite, if false,
     % then asks for a new name, suggesting a variation.
-    SavedModels = dir('Saved Files');
+    SavedModels = dir(h.save_location);
     start = 3;
     dupfound = false;
     notdone = true;
@@ -1169,8 +1205,13 @@ function saveModel(savenew,h)
     h.Model.name = name;
     backupAxis = h.Model.AxisReference;
     h.Model.AxisReference(:) = [];
-    newfile = ['Saved Files\' name '.mat'];
+    newfile = [h.save_location, name, '.mat'];
     Model = h.Model; %#ok<NASGU>
+
+    % Apply save locations to the model
+    Model.save_location = h.save_location;
+    Model.run_location = h.run_location;
+
     Model.saveME();
     h.Model.AxisReference = backupAxis;
     fprintf('Model Saved\n');
@@ -1244,7 +1285,7 @@ function load_Callback(hObject, ~, h)
     % Then provide the user with a list of saved models in the Saved Files
     % folder.
     % NOV26 2021: updated by Matthias to use uigetfile for convenience
-    [file, path] = uigetfile('Saved Files\*.mat');
+    [file, path] = uigetfile([h.save_location, '*.mat']);
     if file
         name = fullfile(path,file);
     else
@@ -1532,6 +1573,8 @@ function stopSimulation_Callback(~, ~, h)
 end
 
 function Run_Callback(~, ~, h)
+    h.Model.save_location = h.save_location;
+    h.Model.run_location = h.run_location;
     h.Model.Run();
 end
 
@@ -1940,6 +1983,42 @@ function ScaleModel_Callback(~, ~, h)
     drawnow(); pause(0.05);
 
     disp("Done Scaling")
+
+end
+
+function ChangeModelLocation_Callback(hObject,~,h)
+    % Get the user to select a new save folder (start from original save folder)
+    selpath = uigetdir(h.save_location, 'Select a location to save model files');
+
+    % Update the location in the currently running gui
+    h.save_location = [selpath, '\'];
+
+    % Update the config file
+    load("Config Files\parameters.mat")
+    parameters.savelocation = [selpath, '\'];
+    save('Config Files\parameters.mat', 'parameters')
+    clear parameters
+
+    %% Update handles structure
+    guidata(hObject, h);
+    
+end
+
+function ChangeRunLocation_Callback(hObject,~,h)
+    % Get the user to select a new save folder (start from original save folder)
+    selpath = uigetdir(h.run_location, 'Select a location to save model files');
+
+    % Update the location in the currently running gui
+    h.run_location = [selpath, '\'];
+
+    % Update the config file
+    load("Config Files\parameters.mat")
+    parameters.runlocation = [selpath, '\'];
+    save('Config Files\parameters.mat', 'parameters')
+    clear parameters
+
+    %% Update handles structure
+    guidata(hObject, h);
 
 end
 
