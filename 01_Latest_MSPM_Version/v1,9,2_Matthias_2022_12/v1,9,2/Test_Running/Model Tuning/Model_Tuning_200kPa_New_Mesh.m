@@ -1,4 +1,4 @@
-function [RunConditions] = Model_Tuning_200kPa()
+function [RunConditions] = Model_Tuning_200kPa_New_Mesh()
     % Written by Steven Middleton
     % Experimental data extraction added by Connor Speer, September 2021.
     % Debuged and finalized by Sara Eghbali, 24 Sep 2021
@@ -9,7 +9,7 @@ function [RunConditions] = Model_Tuning_200kPa()
     %% Input Parameters
     % Name of experimental data files.
     model = {
-        'Raphael New HX - No Disp Heater - Air',...
+        'Raphael New HX - No Disp Heater - Air - Changed Mesh',...
         }; % Name of MSPM model geometry.
     
     
@@ -28,6 +28,8 @@ function [RunConditions] = Model_Tuning_200kPa()
     movement_option = 'C';
     max_dt = 0.1; %(s) Maximum time step.
     NodeFactor = 1;
+    h_sink = [];
+    h_source = [];
     
     
     %% Create MSPM Test Structure
@@ -41,6 +43,8 @@ function [RunConditions] = Model_Tuning_200kPa()
         'rpm', 60,... [rpm]
         'max_dt', max_dt,... [s]
         'EnginePressure',101325*10,...
+        'h_custom_Source', NaN,...
+        'h_custom_Sink', NaN,... 
         'SourceTemp',150 + 273.15,... [K]
         'SinkTemp',5 + 273.15,... [K]
         'NodeFactor', NodeFactor); %,...
