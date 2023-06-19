@@ -14,7 +14,7 @@ function [RunConditions] = Model_Tuning_200kPa_New_Mesh()
     
     
     % Load in extract file
-    extract_folder = "X:\04_Stirling_Engine\16_Terrapin Engine (Raphael)\01_Experimental Data & Plots\03_Summer_2023\New Engine Data\Processed Data\June 7_RD_Extract.mat";
+    extract_folder = "X:\04_Stirling_Engine\16_Terrapin Engine (Raphael)\01_Experimental Data & Plots\03_Summer_2023\New Engine Data\Processed Data\June 7 - 200kPa_RD_Extract";
     load(extract_folder, "extract_table");
 
     
