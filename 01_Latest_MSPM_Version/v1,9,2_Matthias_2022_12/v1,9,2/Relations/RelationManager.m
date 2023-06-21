@@ -279,7 +279,7 @@ classdef RelationManager < handle
                         iBody2.update();
                     end
                     fprintf(['XXX Connection shift failed because ' ...
-                        'it caused overlaping bodies XXX\n']);
+                        'it caused overlapping bodies XXX\n']);
                     success = false;
                     return;
                 end
