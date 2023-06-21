@@ -232,54 +232,56 @@ classdef RelationManager < handle
             end
             success = true;
 
+            if ~(nargin < 4)
+                return;
+            end
+
             %% Apply all those shifts and test each body
-            if nargin < 4
-                for i = 1:length(this.Group.Connections)
-                    this.Group.Connections(i).x = ...
-                        this.Group.Connections(i).x + shifts(i);
-                end
-                if isfield(data,'frames') && isfield(data,'frameshift')
-                    for i = 1:length(data.frames)
-                        for iLRM = this.Group.Model.Converters
-                            for RefFrame = iLRM.Frames
-                                if RefFrame == data.frames(i)
-                                    Mech = RefFrame.Mechanism;
-                                    Mech.dont_propegate = true;
-                                    Mech.set('Stroke',...
-                                        Mech.get('Stroke')+data.frameshift(i));
-                                end
+            for i = 1:length(this.Group.Connections)
+                this.Group.Connections(i).x = ...
+                    this.Group.Connections(i).x + shifts(i);
+            end
+            if isfield(data,'frames') && isfield(data,'frameshift')
+                for i = 1:length(data.frames)
+                    for iLRM = this.Group.Model.Converters
+                        for RefFrame = iLRM.Frames
+                            if RefFrame == data.frames(i)
+                                Mech = RefFrame.Mechanism;
+                                Mech.dont_propegate = true;
+                                Mech.set('Stroke',...
+                                    Mech.get('Stroke')+data.frameshift(i));
                             end
                         end
                     end
                 end
-                for iBody = this.Group.Bodies; iBody.update(); end
-                for iBody = this.Group.Bodies
-                    if ~iBody.isValid
-                        for i = 1:length(this.Group.Connections)
-                            this.Group.Connections(i).x = ...
-                                this.Group.Connections(i).x - shifts(i);
-                        end
-                        if isfield(data,'frames') && isfield(data,'frameshift')
-                            for i = 1:length(data.frames)
-                                for iLRM = this.Group.Model.Converters
-                                    for RefFrame = iLRM.Frames
-                                        if RefFrame == data.frames(i)
-                                            Mech = RefFrame.Mechanism;
-                                            Mech.dont_propegate = true;
-                                            Mech.set('Stroke',Mech.get('Stroke')-data.frameshift(i));
-                                        end
+            end
+            for iBody = this.Group.Bodies; iBody.update(); end
+            for iBody = this.Group.Bodies
+                if ~iBody.isValid
+                    for i = 1:length(this.Group.Connections)
+                        this.Group.Connections(i).x = ...
+                            this.Group.Connections(i).x - shifts(i);
+                    end
+                    if isfield(data,'frames') && isfield(data,'frameshift')
+                        for i = 1:length(data.frames)
+                            for iLRM = this.Group.Model.Converters
+                                for RefFrame = iLRM.Frames
+                                    if RefFrame == data.frames(i)
+                                        Mech = RefFrame.Mechanism;
+                                        Mech.dont_propegate = true;
+                                        Mech.set('Stroke',Mech.get('Stroke')-data.frameshift(i));
                                     end
                                 end
                             end
                         end
-                        for iBody2 = this.Group.Bodies
-                            iBody2.update();
-                        end
-                        fprintf(['XXX Connection shift failed because ' ...
-                            'it caused overlaping bodies XXX\n']);
-                        success = false;
-                        return;
                     end
+                    for iBody2 = this.Group.Bodies
+                        iBody2.update();
+                    end
+                    fprintf(['XXX Connection shift failed because ' ...
+                        'it caused overlaping bodies XXX\n']);
+                    success = false;
+                    return;
                 end
             end
         end
