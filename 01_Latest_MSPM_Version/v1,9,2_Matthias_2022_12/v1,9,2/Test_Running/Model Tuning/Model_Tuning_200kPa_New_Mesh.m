@@ -9,7 +9,7 @@ function [RunConditions] = Model_Tuning_200kPa_New_Mesh()
     %% Input Parameters
     % Name of experimental data files.
     model = {
-        'Raphael New HX - No Disp Heater - Air - Changed Mesh',...
+        'Raphael New HX - No Disp Heater - Air - Little PV',...
         }; % Name of MSPM model geometry.
     
     
