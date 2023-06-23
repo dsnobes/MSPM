@@ -3508,8 +3508,8 @@ classdef Model < handle
                     % Only sst1 is relevant unless using 'trials'
                     % (Multigrid Optimization).
                     
-                    sst1 = 0.005; %smaller value for ss_tolerance (default 0.01)
-                    sst2 = 0.025; %larger value for ss_tolerance (default 0.025)
+                    sst1 = 0.001; %smaller value for ss_tolerance (default 0.01)
+                    sst2 = 0.005; %larger value for ss_tolerance (default 0.025)
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     
                     % Discretize according to the Multigrid Optimization
@@ -4313,8 +4313,8 @@ classdef Model < handle
                 % Only sst1 is relevant unless using 'trials'
                 % (Multigrid Optimization).
                 
-                sst1 = 0.005; %smaller value for ss_tolerance (default 0.01)
-                sst2 = 0.025; %larger value for ss_tolerance (default 0.025)
+                sst1 = 0.001; %smaller value for ss_tolerance (default 0.01)
+                sst2 = 0.005; %larger value for ss_tolerance (default 0.025)
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % Discretize according to the Multigrid Optimization
