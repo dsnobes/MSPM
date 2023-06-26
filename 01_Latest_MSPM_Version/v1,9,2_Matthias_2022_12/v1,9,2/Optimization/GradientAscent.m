@@ -118,7 +118,7 @@ function [History] = GradientAscent(...
     
         RunConditions.title = NewModel;
         RunConditions.Model = NewModel;
-        addpath('..\runs\'); % carriage return "uns"??? #32
+        addpath('..\runs\'); % Weird vs code sytax highliting, code runs as expected #32
         addpath(cd);
     
         found = false;
@@ -526,7 +526,7 @@ end
 
 function [Parameter, success, ShaftPower, statistics] = RunSubFunction(Model, RunConditions, options)
     [success] = Model.Run(RunConditions);
-    addpath(['..\runs\' RunConditions.title]); % another issue #32
+    addpath(['..\runs\' RunConditions.title]); % Weird vs code sytax highliting, code runs as expected #32
     try
         load([RunConditions.title '_Statistics'],'statistics');
     catch
