@@ -378,10 +378,8 @@ classdef Model < handle
         end
         function addNonConnection(this,NonConnectionToAdd)
             LEN = length(this.NonConnections);
-            for i = length(NonConnectionToAdd):-1:1
-                this.NonConnections(LEN+i) = NonConnectionToAdd(i);
-                this.resetDiscretization(); % why is this being done inside a for loop?
-            end
+            this.NonConnections(LEN+1) = NonConnectionToAdd(1);
+            this.resetDiscretization(); % Issue #10  - Removed for loop
             keep = true(size(this.NonConnections));
             for i = 1:length(this.NonConnections)
                 if keep(i)
@@ -408,10 +406,10 @@ classdef Model < handle
         end
         function addCustomMinorLoss(this,CustomMinorLossToAdd)
             LEN = length(this.CustomMinorLosses);
-            for i = length(CustomMinorLossToAdd):-1:1
-                this.CustomMinorLosses(LEN+i) = CustomMinorLossToAdd(i);
-                this.resetDiscretization(); % why is this being done inside a for loop?
-            end
+
+            this.CustomMinorLosses(LEN+1) = CustomMinorLossToAdd(1);
+
+            this.resetDiscretization(); % Issue #10  - Removed for loop
             this.CustomMinorLosses = unique(this.CustomMinorLosses);
         end
         
