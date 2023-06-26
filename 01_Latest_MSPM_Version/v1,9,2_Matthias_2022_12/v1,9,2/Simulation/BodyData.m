@@ -65,6 +65,9 @@ classdef BodyData < handle
                             %It appears that this means two points of the interpolation grid are
                             %identical, which is not valid for 'griddedInterpolant'.
                             % Solution: disable use of Snapshots (call to 'assignSnapShot') in Model.m
+                            % Matteo: This function is only used for creating and assigning snapshots
+                            % Issue has not come up again during either a single run or a running a test set
+                            % Snapshots have been re-enabled
                             FAltT = griddedInterpolant(...
                                 AltXs',AltYs',PaddedAltT','linear','linear');
                         end
