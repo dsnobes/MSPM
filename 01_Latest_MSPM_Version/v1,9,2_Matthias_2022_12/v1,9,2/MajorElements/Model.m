@@ -263,7 +263,9 @@ classdef Model < handle
                 case 'Mesher'
                     Item = this.Mesher;
                 case 'Mechanical System'
-                    % why does this GETTER modify this??????
+                    % Getting the mechanical system must return something
+                    % If there is no mechanical system already associated with the model,
+                    % an empty one is created and returned
                     if isempty(this.MechanicalSystem)
                         this.MechanicalSystem = MechanicalSystem(this,...
                             LinRotMechanism.empty,[],1,function_handle.empty);
