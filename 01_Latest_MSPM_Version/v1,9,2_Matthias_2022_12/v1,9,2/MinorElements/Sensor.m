@@ -275,7 +275,7 @@ classdef Sensor < handle
             this.Data = [];
         end
 
-        function getData(this,Simulation) % getter that doesn't return anything? #28
+        function SourceData = getData(this,Simulation) % Changed the getter to return SourceData based off the structure, function is only used if a model has no sensors
             property = this.DataType;
             switch property
                 case 'T'
