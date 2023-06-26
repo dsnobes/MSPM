@@ -752,7 +752,8 @@ classdef Model < handle
             
             % Remove faces that are not allowed
             keep2 = true(size(this.NonConnections));
-            i = 1; % multiple definitions of the same variable "i" in nested for loops?
+            i = 1; % Changed so there are no multiple definitions of i.
+                    % This would have prevented some non-connections from being checked
             for nonCon = this.NonConnections
                 iBody = nonCon.Body1;
                 if ~isvalid(iBody)
@@ -761,7 +762,7 @@ classdef Model < handle
                     if isa(nonCon.Body2,'Environment')
                         for nd = iBody.Nodes
                             keep = true(size(nd.Faces));
-                            i = 1;
+                            j = 1;
                             for fc = nd.Faces
                                 if (fc.Nodes(1).Body == iBody && ...
                                         (isa(fc.Nodes(2).Body,'Environment') && ...
@@ -769,15 +770,15 @@ classdef Model < handle
                                         ((isa(fc.Nodes(1).Body,'Environment') && ...
                                         fc.Nodes(1).Body == nonCon.Body2) && ...
                                         fc.Nodes(2).Body == iBody)
-                                    keep(i) = false;
+                                    keep(j) = false;
                                 end
-                                i = i + 1;
+                                j = j + 1;
                             end
                             
                             if any(~keep)
-                                for i = 1:length(keep)
-                                    if ~keep(i)
-                                        this.Faces(this.Faces==nd.Faces(i)) = [];
+                                for j = 1:length(keep)
+                                    if ~keep(j)
+                                        this.Faces(this.Faces==nd.Faces(j)) = [];
                                     end
                                 end
                                 nd.Faces = nd.Faces(keep);
@@ -786,21 +787,21 @@ classdef Model < handle
                     else % if nonCon.Body2 is not Environment
                         for nd = iBody.Nodes
                             keep = true(size(nd.Faces));
-                            i = 1;
+                            j = 1;
                             for fc = nd.Faces
                                 if (fc.Nodes(1).Body == iBody && ...
                                         fc.Nodes(2).Body == nonCon.Body2) || ...
                                         (fc.Nodes(1).Body == nonCon.Body2 && ...
                                         fc.Nodes(2).Body == iBody)
-                                    keep(i) = false;
+                                    keep(j) = false;
                                 end
-                                i = i + 1;
+                                j = j + 1;
                             end
                             
                             if any(~keep)
-                                for i = 1:length(keep)
-                                    if ~keep(i)
-                                        this.Faces(this.Faces==nd.Faces(i)) = [];
+                                for j = 1:length(keep)
+                                    if ~keep(j)
+                                        this.Faces(this.Faces==nd.Faces(j)) = [];
                                     end
                                 end
                                 nd.Faces = nd.Faces(keep);
