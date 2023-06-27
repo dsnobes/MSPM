@@ -118,7 +118,10 @@ function [History] = GradientAscent(...
     
         RunConditions.title = NewModel;
         RunConditions.Model = NewModel;
-        addpath('..\runs\'); % Weird vs code sytax highliting, code runs as expected #32
+
+        % Add the runs folder to the path
+        load('Config Files\parameters.mat', 'parameters')
+        addpath(parameters.runlocation);
         addpath(cd);
     
         found = false;
@@ -520,13 +523,17 @@ function [History] = GradientAscent(...
         sets(optrial).HistoryScore = History.Score;
         sets(optrial).HistoryDOF = History.data;
         sets(optrial).HistoryNames = History.Names;
-        save(['..\Runs\Optimization_set_' replace(replace(date,' ','_'),':','-')], 'sets');
+
+        % Save the run to the runs output
+        load('Config Files\parameters.mat', 'parameters')
+        save([parameters.runlocation,'Optimization_set_', replace(replace(date,' ','_'),':','-')], 'sets');
     end
 end
 
 function [Parameter, success, ShaftPower, statistics] = RunSubFunction(Model, RunConditions, options)
     [success] = Model.Run(RunConditions);
-    addpath(['..\runs\' RunConditions.title]); % Weird vs code sytax highliting, code runs as expected #32
+    load('Config Files\parameters.mat', 'parameters')
+    addpath([parameters.runlocation, RunConditions.title]);
     try
         load([RunConditions.title '_Statistics'],'statistics');
     catch
