@@ -546,119 +546,131 @@ end
 function h = InsertRelation(h, C)
 % Find, within a radius of confidence, the nearest connection
 C = C(1,1:2);
-[~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-if ~isempty(objects)
-    for objcll = objects
-        obj = objcll{1};
-        if isa(obj,'Connection')
-            if h.IndexC == 1 || ...
-                    (obj.Orient == h.SelectCon(1).Orient && ...
-                    obj.Group == h.SelectCon(1).Group)
-                h.SelectCon(h.IndexC) = obj;
-                if (h.IndexC == 2)
-                    % Finalize the new relation
-                    % Ask the user about the type
-                    names = {
-                        'Constant Offset', ...
-                        'Cross-Section Maintaining', ...
-                        'Zero x Based Scale', ...
-                        'Smallest x Based Scale', ...
-                        'Width Set'};
-                    if obj.Orient == enumOrient.Horizontal
-                        names{end+1} = 'Defines Stroke Length';
-                        names{end+1} = 'Defines Piston Length';
+% Find the nearest connection
+[names, objects] = h.Model.FindNearestConnecton(C,h.ClickTolerance);
+
+% Get the user to select a connection
+if ~isempty(names)
+    [index,tf] = listdlg(...
+        'PromptString','Which Object did you select?',...
+        'ListString',names,...
+        'SelectionMode','single',...
+        'ListSize',[1000 800]);
+
+end
+
+if tf
+    % Get the selected connection
+    obj = objects{index};
+    
+    % Create the relation
+    if h.IndexC == 1 || ...
+            (obj.Orient == h.SelectCon(1).Orient && ...
+            obj.Group == h.SelectCon(1).Group)
+        h.SelectCon(h.IndexC) = obj;
+        if (h.IndexC == 2)
+            % Finalize the new relation
+            % Ask the user about the type
+            names = {
+                'Constant Offset', ...
+                'Cross-Section Maintaining', ...
+                'Zero x Based Scale', ...
+                'Smallest x Based Scale', ...
+                'Width Set'};
+            if obj.Orient == enumOrient.Horizontal
+                names{end+1} = 'Defines Stroke Length';
+                names{end+1} = 'Defines Piston Length';
+            end
+            for RMan = obj.Group.RelationManagers
+                if RMan.Orient == obj.Orient; break; end
+            end
+            if ~isempty(RMan)
+                [Type, tf] = listdlg(...
+                    'PromptString','What type of relationship?',...
+                    'ListString',names,...
+                    'SelectionMode','single',...
+                    'ListSize',[400 250]);
+                switch names{Type}
+                    case 'Constant Offset'
+                        EnumType = enumRelation.Constant;
+                    case 'Cross-Section Maintaining'
+                        EnumType = enumRelation.AreaConstant;
+                    case 'Zero x Based Scale'
+                        EnumType = enumRelation.Scaled;
+                    case 'Smallest x Based Scale'
+                        EnumType = enumRelation.LowestScaled;
+                    case 'Width Set'
+                        EnumType = enumRelation.Width;
+                    case 'Defines Stroke Length'
+                        EnumType = enumRelation.Stroke;
+                    case 'Defines Piston Length'
+                        EnumType = enumRelation.Piston;
+                end
+                if tf
+                    Label = RMan.getLabel(EnumType, ...
+                        h.SelectCon(1), h.SelectCon(2));
+                    if isempty(Label)
+                        Label = getProperName([names{Type} ' Relation']);
                     end
-                    for RMan = obj.Group.RelationManagers
-                        if RMan.Orient == obj.Orient; break; end
-                    end
-                    if ~isempty(RMan)
-                        [Type, tf] = listdlg(...
-                            'PromptString','What type of relationship?',...
-                            'ListString',names,...
-                            'SelectionMode','single',...
-                            'ListSize',[400 250]);
-                        switch names{Type}
-                            case 'Constant Offset'
-                                EnumType = enumRelation.Constant;
-                            case 'Cross-Section Maintaining'
-                                EnumType = enumRelation.AreaConstant;
-                            case 'Zero x Based Scale'
-                                EnumType = enumRelation.Scaled;
-                            case 'Smallest x Based Scale'
-                                EnumType = enumRelation.LowestScaled;
-                            case 'Width Set'
-                                EnumType = enumRelation.Width;
-                            case 'Defines Stroke Length'
-                                EnumType = enumRelation.Stroke;
-                            case 'Defines Piston Length'
-                                EnumType = enumRelation.Piston;
+                    if isempty(Label); return; end
+                    if EnumType == enumRelation.Stroke || ...
+                            EnumType == enumRelation.Piston
+                        % Ask which mechanism?
+                        objs = h.Model.Converters;
+                        mecs = cell(0);
+                        for index = length(objs):-1:1
+                            mecs{index} = objs(index).name;
                         end
-                        if tf
-                            Label = RMan.getLabel(EnumType, ...
-                                h.SelectCon(1), h.SelectCon(2));
-                            if isempty(Label)
-                                Label = getProperName([names{Type} ' Relation']);
-                            end
-                            if isempty(Label); return; end
-                            if EnumType == enumRelation.Stroke || ...
-                                    EnumType == enumRelation.Piston
-                                % Ask which mechanism?
-                                objs = h.Model.Converters;
-                                mecs = cell(0);
-                                for index = length(objs):-1:1
-                                    mecs{index} = objs(index).name;
-                                end
-                                index = listdlg(...
-                                    'ListString',mecs,...
-                                    'SelectionMode','single');
-                                if isempty(index)
-                                    break;
-                                else
-                                    Mech = objs(index).Frames(1);
-                                end
-                            end
-                            switch EnumType
-                                case {enumRelation.Constant, ...
-                                        enumRelation.AreaConstant, ...
-                                        enumRelation.Scaled, ...
-                                        enumRelation.LowestScaled, ...
-                                        enumRelation.Width}
-                                    success = RMan.addRelation(...
-                                        Label, ...
-                                        EnumType, ...
-                                        h.SelectCon(1), ...
-                                        h.SelectCon(2));
-                                case {enumRelation.Stroke, ...
-                                        enumRelation.Piston}
-                                    % Ask which mechanism?
-                                    success = RMan.addRelation(...
-                                        Label, ...
-                                        EnumType, ...
-                                        h.SelectCon(1), ...
-                                        h.SelectCon(2), ...
-                                        Mech);
-                                otherwise
-                                    msgbox(['Selected relation type' ...
-                                        ' is not implemented']);
-                                    h.IndexC = 1;
-                                    break;
-                            end
-                            if ~success
-                                msgbox(['Relationship was not ' ...
-                                    'added successfully']);
-                            end
+                        index = listdlg(...
+                            'ListString',mecs,...
+                            'SelectionMode','single');
+                        if isempty(index)
+                            error("No option selected!");
+                        else
+                            Mech = objs(index).Frames(1);
+                        end
+                    end
+                    switch EnumType
+                        case {enumRelation.Constant, ...
+                                enumRelation.AreaConstant, ...
+                                enumRelation.Scaled, ...
+                                enumRelation.LowestScaled, ...
+                                enumRelation.Width}
+                            success = RMan.addRelation(...
+                                Label, ...
+                                EnumType, ...
+                                h.SelectCon(1), ...
+                                h.SelectCon(2));
+                        case {enumRelation.Stroke, ...
+                                enumRelation.Piston}
+                            % Ask which mechanism?
+                            success = RMan.addRelation(...
+                                Label, ...
+                                EnumType, ...
+                                h.SelectCon(1), ...
+                                h.SelectCon(2), ...
+                                Mech);
+                        otherwise
+                            msgbox(['Selected relation type' ...
+                                ' is not implemented']);
                             h.IndexC = 1;
-                        end
+                            error("No option selected!");;
+                    end
+                    if ~success
+                        msgbox(['Relationship was not ' ...
+                            'added successfully']);
                     end
                     h.IndexC = 1;
                 end
-                h.IndexC = 2;
-            else
-                msgbox(['The two connections must have the ' ...
-                    'same orientation.']);
             end
+            h.IndexC = 1;
         end
+        h.IndexC = 2;
+    else
+        msgbox(['The two connections must have the ' ...
+            'same orientation.']);
     end
+    
 end
 end
 
@@ -924,10 +936,10 @@ switch h.DropDownMode
                         scheme.AddObj(obj,'x');
                     elseif isa(child,'LinRotMechanism')
                         scheme.AddObj(child,'Stroke');
-                        % dosn't work as child is not a Connection object
-                        % but the string 'Connection'
-                        %                     elseif isa(child,'Connection')
-                        %                         scheme.AddObj(child,'x');
+                        % Don't know why this was listed as not working
+                        % With this disabled an optimization study of a connection would not work at all
+                    elseif isa(child,'Connection')
+                        scheme.AddObj(child,'x');
                     end
                 end
             end
@@ -965,33 +977,41 @@ end
 
 % --- Executes on button press in SwitchOptimizationStudy.
 function SwitchOptimizationStudy_Callback(hObject, ~, h)
-% Find the optimization scheme after the current one
-% Find the current one
+% Find the next optimization scheme
+% If there is no current study selected
 if h.OptimizationStudyIndex == 0
+    % If there are any created studies, choose the first one
     if ~isempty(h.Model.OptimizationSchemes)
         h.OptimizationStudyIndex = h.Model.OptimizationSchemes(1).ID;
         set(h.OptStudyName,'String',h.Model.OptimizationSchemes(1).name);
+    % If no created studies, set to "Create New Study"
     else
         set(h.OptStudyName,'String','Create New Study');
     end
+    % Update the GUI
     guidata(hObject,h);
     return;
-end
-for i = 1:length(h.Model.OptimizationSchemes)
-    if h.Model.OptimizationSchemes(i).ID == ...
-            h.OptimizationStudyIndex
-        set(h.OptStudyName,'String',h.Model.OptimizationSchemes(i).name);
-    end
-end
-i = i + 1;
-if i > length(h.Model.OptimizationSchemes)
-    h.OptimizationStudyIndex = 0;
-    set(h.OptStudyName,'String','Create New Study');
+
+% If a study is selected, get the next one
 else
-    h.OptimizationStudyIndex = h.Model.OptimizationSchemes(i).ID;
+    newIndex = h.OptimizationStudyIndex + 1;
+
+    % Check if we have gone over the end of the list
+    % If we have, set to "Create New Study"
+    if newIndex > length(h.Model.OptimizationSchemes)
+        h.OptimizationStudyIndex = 0;
+        set(h.OptStudyName,'String','Create New Study');
+    % Otherwise, set to the new ID
+    else
+        h.OptimizationStudyIndex = h.Model.OptimizationSchemes(newIndex).ID;
+        set(h.OptStudyName,'String',h.Model.OptimizationSchemes(newIndex).name);
+    end
+
+    % Update the GUI
+    guidata(hObject,h);
 end
-guidata(hObject,h);
 end
+
 
 function RunStudy_Callback(~,~,h)
 if h.OptimizationStudyIndex ~= 0

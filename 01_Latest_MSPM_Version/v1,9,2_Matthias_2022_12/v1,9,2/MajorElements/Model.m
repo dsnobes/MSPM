@@ -58,7 +58,7 @@ classdef Model < handle
         engineSpeed double = 1;
         
         RelationOn = true;
-
+        
         save_location;
         run_location;
     end
@@ -165,8 +165,8 @@ classdef Model < handle
         end
         function ID = getOptimizationStudyID(this)
             % Creates a unique id when called
-            this.OptIDIndex = this.OptIDIndex + 1;
             ID = this.OptIDIndex;
+            this.OptIDIndex = this.OptIDIndex + 1;
         end
         function ID = getLRMID(this)
             % Creates a unique id when called
@@ -406,9 +406,9 @@ classdef Model < handle
         end
         function addCustomMinorLoss(this,CustomMinorLossToAdd)
             LEN = length(this.CustomMinorLosses);
-
+            
             this.CustomMinorLosses(LEN+1) = CustomMinorLossToAdd(1);
-
+            
             this.resetDiscretization(); % Issue #10  - Removed for loop
             this.CustomMinorLosses = unique(this.CustomMinorLosses);
         end
@@ -753,7 +753,7 @@ classdef Model < handle
             % Remove faces that are not allowed
             keep2 = true(size(this.NonConnections));
             i = 1; % Changed so there are no multiple definitions of i.
-                    % This would have prevented some non-connections from being checked
+            % This would have prevented some non-connections from being checked
             for nonCon = this.NonConnections
                 iBody = nonCon.Body1;
                 if ~isvalid(iBody)
@@ -4033,7 +4033,7 @@ classdef Model < handle
                                         break;
                                     end
                                 end
-                                ME.Results.getSnapShot(ME,crun.title, Temperatures);
+                                ME.Results.getSnapShot(ME,crun.title, true);
                                 saveME(ME);
                             end
                         else
@@ -4437,7 +4437,7 @@ classdef Model < handle
                         crun.movement_option = 'V';
                         crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
                         % Save and Reload Snapshot
-                        ME.Results.getSnapShot(ME,'Temp');
+                        ME.Results.getSnapShot(ME,'Temp', true);
                         ME.assignSnapShot(ME.SnapShots{end});
                         ME.SnapShots(end) = [];
                         ME.recordPressure = record_P_backup;
@@ -4811,7 +4811,7 @@ classdef Model < handle
                                 break;
                             end
                         end
-                        snapshot = ME.Results.getSnapShot(ME,crun.title, false);
+                        snapshot = ME.Results.getSnapShot(ME,crun.title, true);
                         saveME(ME);
                     end
                     
@@ -5157,6 +5157,60 @@ classdef Model < handle
                 index = index + 1;
             end
         end
+        
+        function [names, objects] = FindNearestConnecton(this,Pnt,Tolerance)
+            % Function finds the nearest connection to a click
+            objects = cell(0);
+            names = cell(0);
+            
+            Tolerance = Tolerance^2;
+            index = 1;
+            %% Group
+            if isempty(this.ActiveGroup)
+                obj = this.findNearestGroup(Pnt,Tolerance);
+                if ~isempty(obj)
+                    objects{index} = obj;
+                    names{index} = obj.name;
+                    index = index + 1;
+                end
+                TheGroup = obj;
+            else
+                TheGroup = this.ActiveGroup;
+            end
+            
+            %% Connection
+            mindist = Tolerance;
+            Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
+                [TheGroup.Position.x; TheGroup.Position.y];
+            for iConnection = TheGroup.Connections
+                % Find nearest Connection
+                switch iConnection.Orient
+                    case enumOrient.Vertical
+                        % Two lines to test
+                        if abs(Pntmod(1) - iConnection.x) < mindist
+                            mindist = abs(Pntmod(1) - iConnection.x);
+                            TheConnection = iConnection;
+                        end
+                        if abs(Pntmod(1) + iConnection.x) < mindist
+                            mindist = abs(Pntmod(1) + iConnection.x);
+                            TheConnection = iConnection;
+                        end
+                    case enumOrient.Horizontal
+                        % One line to test
+                        if abs(Pntmod(2) - iConnection.x) < mindist
+                            mindist = abs(Pntmod(2)-iConnection.x);
+                            TheConnection = iConnection;
+                        end
+                end
+            end
+            if mindist < Tolerance
+                objects{index} = TheConnection;
+                names{index} = TheConnection.name;
+                index = index + 1;
+            end
+        end
+        
+        
         function [TheGroup] = findNearestGroup(this,Pos,Tolerance)
             try Pnt = Pos(1,1:2);
             catch
