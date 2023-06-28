@@ -187,33 +187,33 @@ function EstablishWidths(handles)
     end
     set(handles.PropertiesTable,'ColumnWidth',Widths);
 
-    % Sum of widths
-    totalWidth = 0;
-    for i = 1:length(Widths)
-        totalWidth = totalWidth + Widths{i};
-    end
+    % % Sum of widths
+    % totalWidth = 0;
+    % for i = 1:length(Widths)
+    %     totalWidth = totalWidth + Widths{i};
+    % end
 
-    PosInst = get(handles.Instructions,'Position');
-    PosTable = get(handles.PropertiesTable,'Position');
-    PosFrame = get(handles.PropertiesFrame,'Position');
-    PosWin = get(handles.TheWindow,'Position');
+    % PosInst = get(handles.Instructions,'Position');
+    % PosTable = get(handles.PropertiesTable,'Position');
+    % PosFrame = get(handles.PropertiesFrame,'Position');
+    % PosWin = get(handles.TheWindow,'Position');
 
-    % Table Size
-    PosTable(3) = totalWidth+32;
-    set(handles.PropertiesTable,'Position',PosTable);
+    % % Table Size
+    % PosTable(3) = totalWidth+32;
+    % set(handles.PropertiesTable,'Position',PosTable);
 
-    % Instructions Size
-    PosInst(3) = min([400 PosTable(3)]);
-    set(handles.Instructions,'Position',PosInst);
+    % % Instructions Size
+    % PosInst(3) = min([400 PosTable(3)]);
+    % set(handles.Instructions,'Position',PosInst);
 
-    % Frame Size
-    PosFrame(3) = PosTable(3) + 2*PosTable(1);
-    set(handles.PropertiesFrame,'Position',PosFrame);
+    % % Frame Size
+    % PosFrame(3) = PosTable(3) + 2*PosTable(1);
+    % set(handles.PropertiesFrame,'Position',PosFrame);
 
-    % Window Size
-    PosWin(3) = PosTable(3) + 4*PosTable(1);
-    set(handles.TheWindow,'Position',PosWin);
-    guidata(handles.TheWindow, handles);
+    % % Window Size
+    % PosWin(3) = PosTable(3) + 4*PosTable(1);
+    % set(handles.TheWindow,'Position',PosWin);
+    % guidata(handles.TheWindow, handles);
 end
 
 function Ok_Callback(~, ~, handles)
