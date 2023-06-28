@@ -1623,6 +1623,15 @@ show_Model(h);
 end
 
 function DispNumbers_Callback(~, ~, h)
+% Check if the model is discritized
+if ~h.Model.isDiscretized
+    crun = struct('Model',h.Model.name,...
+    'title',[h.Model.name ' test: ' date],...
+    'rpm',h.Model.engineSpeed,...
+    'NodeFactor',h.Model.deRefinementFactorInput);
+    h.Model.discretize(crun);
+end
+
 h.Model.dispNodeIndexes();
 end
 
