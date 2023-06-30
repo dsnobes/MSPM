@@ -467,6 +467,8 @@ classdef Bridge < handle
                 %% Mix, Offset
                 % Move Node Contacts from Connection2 that are associated with
                 % Body 2 and add them to Connection1 in range of Body1
+
+                % Sets the horizontal connection to be the source and the vertical the destination
                 if this.Connection1.Orient == enumOrient.Horizontal
                     Source = this.Connection1;
                     SourceBody = this.Body1;
@@ -478,6 +480,8 @@ classdef Bridge < handle
                     Destination = this.Connection1;
                     DestinationBody = this.Body1;
                 end
+
+                % Finds the first and last node contacts that correspond with this body
                 max_r = 0;
                 min_r = 10000;
                 for NContact = Source.NodeContacts
@@ -488,7 +492,11 @@ classdef Bridge < handle
                         min_r = NContact.Start;
                     end
                 end
+
+                % Calculates the hydraulic diameter
                 Dh = 2*max_r - 2*min_r;
+
+                % Finds all of the node connections that are attahced to the source body from the source connection
                 DontKeep = false(size(Source.NodeContacts));
                 for i = 1:length(Source.NodeContacts)
                     if Source.NodeContacts(i).Node.Body == SourceBody
@@ -496,9 +504,15 @@ classdef Bridge < handle
                         DontKeep(i) = true;
                     end
                 end
+
+                % Removes those connections
                 Source.NodeContacts(DontKeep) = [];
+
+                
+                DontKeep = false(size(Destination.NodeContacts));
                 for i = 1:length(Destination.NodeContacts)
                     if Destination.NodeContacts(i).Node.Body == DestinationBody
+                        DontKeep(i) = true;
                         r = Destination.x;
                         DCont = Destination.NodeContacts(i);
                         s = DCont.Start;
@@ -536,6 +550,7 @@ classdef Bridge < handle
                             if ~isempty(DCont.data) && isfield(DCont.data,'Perc')
                                 DCont.data.Perc = DCont.data.Perc - P;
                             else
+                                DCont.data = struct();
                                 DCont.data.Perc = 1 - P;
                             end
                             if any(P > 0)
@@ -545,7 +560,7 @@ classdef Bridge < handle
                                 SCont.End = this.x + max_r;
                                 P1 = DCont.data.Perc;
                                 DCont.data.Perc = 1;
-                                NewFace = Face(SCont,DCont);
+                                NewFace = Face(SCont,DCont, true);
                                 % Recondition
                                 DCont.data.Perc = P1;
                                 if isfield(NewFace.data,'Area')
@@ -613,7 +628,7 @@ classdef Bridge < handle
             Ax = this.Connection2.Group;
             R = RotMatrix(Ax.Position.Rot - pi/2);
             d = this.Connection2.x;
-            switch this.Connection1.Orient
+            switch this.Connection2.Orient
                 case enumOrient.Vertical
                     [~,~,y1,y2] = this.Body2.limits(enumOrient.Horizontal);
                     C = [Ax.Position.x; Ax.Position.y] + R*[d; (y1+y2)/2];

@@ -58,7 +58,10 @@ classdef Face < handle
                                 this.data.Area = getArea(NC1,NC2,this.ActiveTimes);
                                 this.data.Dist = getDistance(NC1,NC2,this.ActiveTimes);
                                 this.data.dx = getStabilityDistance(NC1,NC2,this.ActiveTimes);
-                                this.data.Dh = getDh(NC1,NC2,this.ActiveTimes);
+                                if NC1.Connection.Orient == NC2.Connection.Orient
+                                    this.data.Dh = getDh(NC1,NC2,this.ActiveTimes);
+                                end
+
 
                                 if NC1.Node.Type ~= enumNType.EN && ...
                                         ~isempty(NC1.Node.Body.Matrix)
@@ -93,7 +96,9 @@ classdef Face < handle
                                 if ~isscalar(this.data.Area); this.data.Area = CollapseVector(this.data.Area); end
                                 if ~isscalar(this.data.Dist); this.data.Dist = CollapseVector(this.data.Dist); end
                                 if ~isscalar(this.data.dx); this.data.dx = CollapseVector(this.data.dx); end
-                                if ~isscalar(this.data.Dh); this.data.Dh = CollapseVector(this.data.Dh); end
+                                if NC1.Connection.Orient == NC2.Connection.Orient
+                                    if ~isscalar(this.data.Dh); this.data.Dh = CollapseVector(this.data.Dh); end
+                                end
 
                                 this.isDynamic = ~(isscalar(this.data.Area) && ...
                                     isscalar(this.data.Dist) && ...

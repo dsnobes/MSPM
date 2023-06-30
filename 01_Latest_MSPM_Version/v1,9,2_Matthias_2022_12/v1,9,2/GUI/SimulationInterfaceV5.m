@@ -299,7 +299,7 @@ h.Model.addGroup(Group(h.Model,Position(C(1),0,pi/2),[]));
 h.Model.distributeGroup(h.InterGroupDistance);
 end
 
-function h = InsertBridge(h, C)
+function h = InsertBridge(h, C, hObject)
 % Select 2 horizontal connections and 2 bodies
 if h.IndexC == 1
     if h.IndexB == 1
@@ -327,7 +327,7 @@ elseif h.IndexC == 2
         end
     else
         % Picking the second Connection
-        ChangeGroup_Callback(hObject, [], h);
+        % ChangeGroup_Callback(hObject, [], h);
         Con = h.Model.ActiveGroup.FindConnection(C);
         if ~isempty(Con)
             h.SelectCon(h.IndexC) = Con;
@@ -339,7 +339,8 @@ elseif h.IndexC == 2
 else
     if h.IndexB == 2
         % Picking the second Body
-        Bod = h.SelectCon(2).findConnectedBody(C);
+        Bod = h.SelectCon(1).findConnectedBody(C);
+        h.SelectBody(h.IndexB) = Bod;
         if ~isempty(Bod)
             % Finish and Create
             if h.SelectCon(1).Orient == h.SelectCon(2).Orient
@@ -689,7 +690,7 @@ switch h.MODE
     case 'InsertGroup'
         h = InsertGroup(h, C);
     case 'InsertBridge'
-        h = InsertBridge(h, C);
+        h = InsertBridge(h, C, hObject);
     case 'InsertLeakConnection'
         h = InsertLeakConnection(h, C);
     case 'InsertSensor'
