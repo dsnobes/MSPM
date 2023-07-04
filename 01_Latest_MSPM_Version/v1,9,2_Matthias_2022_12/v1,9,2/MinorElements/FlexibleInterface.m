@@ -1,6 +1,5 @@
 classdef FlexibleInterface < handle
-    %FLEXIBLEVOLUME Summary of this class goes here
-    %   Detailed explanation goes here
+    % holds data about a mobile interface between two bodies
 
     properties
         Body1 Body;
