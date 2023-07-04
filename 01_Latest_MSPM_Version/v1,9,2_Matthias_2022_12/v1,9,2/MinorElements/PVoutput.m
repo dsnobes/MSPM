@@ -1,6 +1,6 @@
 classdef PVoutput < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % contains the information about the PV loop,
+    % and plots the PV loop during and after simulation
 
     properties
         Body Body;
