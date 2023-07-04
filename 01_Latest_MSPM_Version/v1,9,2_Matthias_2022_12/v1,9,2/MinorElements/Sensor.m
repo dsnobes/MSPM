@@ -1,13 +1,13 @@
 classdef Sensor < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes herePlotCoordinates
+    % models a Sensor in the Model,
+    % which logs information throughout the cycle
 
     properties (Constant)
         ActiveColor = [0 1 0];
         NormalColor = [1 0 1]; % magenta
     end
-    
-    
+
+
     properties
         name;
         Body;
