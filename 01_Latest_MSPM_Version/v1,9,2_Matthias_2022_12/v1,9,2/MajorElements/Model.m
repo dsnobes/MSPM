@@ -1,6 +1,32 @@
 classdef Model < handle
-    %MODEL Summary of this class goes here
-    %   Detailed explanation goes here
+    %{
+    the big object that contains basically everything.
+    holds:
+        Groups
+        Mesher
+        Bridges
+        Leak Connections
+        Frames
+        Sensors
+        PV Outputs
+        Snapshots
+        Non Connections
+        Custom Minor Losses
+        Optimization Schemes
+        the current Simulation
+        Linear to Rotational Motion Mechanisms
+        Environment
+        Mechanical System
+        Faces
+        Nodes
+        Pressure Contacts
+        Shear Contacts
+        Results
+        Engine Pressure
+        Engine Speed
+    
+    it's a mess in here
+    %}
     properties (Constant)
         ProportionTolerance = 0.02; % 2% error is pretty reasonable
         dt = 0.01;          % Seconds              ???
