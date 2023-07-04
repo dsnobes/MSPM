@@ -162,6 +162,9 @@ varargout{1} = handles.output;
 end
 
 function h = InsertBody(h, C)
+%{
+runs if user clicks the insert body button in the GUI
+%}
 % Select 4 connections
 switch get(gcf,'SelectionType')
     case 'normal'
@@ -292,6 +295,9 @@ end
 end
 
 function h = InsertGroup(h, C)
+%{
+runs if the user clicks the insert group button in the GUI
+%}
 % Will simply define a vertical Group at the next slot
 % Determine where the user clicked
 C = get(gca,'Currentpoint'); C = C(1,1:2);
@@ -300,6 +306,9 @@ h.Model.distributeGroup(h.InterGroupDistance);
 end
 
 function h = InsertBridge(h, C, hObject)
+%{
+runs if the user clicks the insert bridge button in the GUI
+%}
 % Select 2 horizontal connections and 2 bodies
 if h.IndexC == 1
     if h.IndexB == 1
@@ -377,6 +386,9 @@ end
 end
 
 function h = InsertLeakConnection(h, C)
+%{
+runs if the user clicks the insert leak connection button in the GUI
+%}
 % Select 2 horizontal connections and 2 bodies/Environments
 Bod = Body.empty;
 if h.IndexB == 1
@@ -412,6 +424,9 @@ end
 end
 
 function h = InsertSensor(h, C)
+%{
+runs if the user clicks the insert sensor button in the GUI
+%}
 % Select a group
 C = C(1,1:2);
 % Select a body
@@ -427,6 +442,9 @@ end
 end
 
 function h = InsertPVoutput(h, C)
+%{
+runs if the user clicks the insert PVOutput button in the GUI
+%}
 % Find, within a radius of confidence, the nearest Body
 C = C(1,1:2);
 [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
@@ -445,6 +463,9 @@ end
 end
 
 function h = InsertNonConnection(h, C)
+%{
+runs if the user clicks the insert non connection button in the GUI
+%}
 % Select 2 horizontal connections and 2 bodies
 Bod = Body.empty;
 if h.IndexB == 1
@@ -479,6 +500,9 @@ end
 end
 
 function h = InsertCustomMinorLoss(h, C)
+%{
+runs if the user clicks the insert custom minor loss button in the GUI
+%}
 % Find, within a radius of confidence, the nearest body
 C = C(1,1:2);
 [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
@@ -501,6 +525,9 @@ end
 end
 
 function h = Select(h, C)
+%{
+runs if the user clicks the select button in the GUI
+%}
 % Find, within a radius of confidence, the nearest...
 %   Body, Group, Connection, Bridge and Leak Connection
 C = C(1,1:2);
@@ -523,6 +550,9 @@ end
 end
 
 function h = MultiSelect(h, C)
+%{
+runs if the user clicks the multiselect button in the GUI
+%}
 % Find, within a radius of confidence, the nearest...
 %   Body, Group, Connection, Bridge and Leak Connection
 C = C(1,1:2);
@@ -545,6 +575,9 @@ end
 end
 
 function h = InsertRelation(h, C)
+%{
+runs if the user clicks the insert relation button in the GUI
+%}
 % Find, within a radius of confidence, the nearest connection
 C = C(1,1:2);
 % Find the nearest connection
@@ -677,6 +710,9 @@ end
 
 %% General button codes
 function GUI_ButtonDownFcn(hObject, ~, h)
+%{
+runs if the user presses any button in the GUI
+%}
 C = get(hObject,'Currentpoint');
 C = C(1,1:2);
 if isempty(h.Model.ActiveGroup)
