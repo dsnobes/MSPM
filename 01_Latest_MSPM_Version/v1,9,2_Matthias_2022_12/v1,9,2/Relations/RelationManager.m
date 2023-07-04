@@ -1,5 +1,8 @@
 classdef RelationManager < handle
-
+    %{
+    handles relations, checks that properties are valid
+    and is the main way to change properties of relations
+    %}
     properties
         Group Group; % Group that this relation grid refers to
         Orient enumOrient;
