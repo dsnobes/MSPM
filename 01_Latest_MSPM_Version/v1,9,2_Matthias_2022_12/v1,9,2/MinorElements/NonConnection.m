@@ -1,6 +1,6 @@
 classdef NonConnection
-    %NONCONNECTION Summary of this class goes here
-    %   Detailed explanation goes here
+    % contains two Bodies which should be assumed to not be connected
+    % to each other
 
     properties
         Body1;
