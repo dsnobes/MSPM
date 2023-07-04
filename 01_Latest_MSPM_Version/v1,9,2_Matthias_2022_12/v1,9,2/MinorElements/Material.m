@@ -1,6 +1,7 @@
 classdef Material < handle
-    %MATERIAL Summary of this class goes here
-    %   Detailed explanation goes here
+    % holds data about all possible materials that can be used
+    % in parts of the model, specify a valid material name
+    % and this defines a single material and its properties
 
     properties (Constant)
         Source = {...
