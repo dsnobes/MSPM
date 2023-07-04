@@ -1,4 +1,9 @@
 classdef Relation < handle
+    %{
+    holds the properties of a relation:
+    the name, the mode, and two connections.
+    it is handled by a RelationManager
+    %}
     % Relation - Class
     % ... -> name - String
     % ... -> mode - enumRelation
