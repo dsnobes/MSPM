@@ -1331,24 +1331,33 @@ end
 function load_Callback(hObject, ~, h)
 % Asks the user if they want to save the current model
 % if True. Call save_Callback.
-switch questdlg('Do you want to save the current model?')
-    case 'Yes'
-        if ~isempty(h.Model.name)
-            switch questdlg('Do you want to save as a new Model?')
-                case 'Yes'
-                    saveModel(true,h);
-                case 'No'
-                    saveModel(false,h);
-                case {'Cancel',''}
-                    return;
+
+if isempty(h.Model.Groups.Bodies)
+    model_is_empty = true;
+else
+    model_is_empty = false;
+end
+
+if ~model_is_empty
+    switch questdlg('Do you want to save the current model?')
+        case 'Yes'
+            if ~isempty(h.Model.name)
+                switch questdlg('Do you want to save as a new Model?')
+                    case 'Yes'
+                        saveModel(true,h);
+                    case 'No'
+                        saveModel(false,h);
+                    case {'Cancel',''}
+                        return;
+                end
+            else
+                saveModel(true,h);
             end
-        else
-            saveModel(true,h);
-        end
-    case 'No'
-        % Do nothing
-    case {'Cancel',''}
-        return;
+        case 'No'
+            % Do nothing
+        case {'Cancel',''}
+            return;
+    end
 end
 
 % Then provide the user with a list of saved models in the Saved Files
