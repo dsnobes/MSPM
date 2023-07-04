@@ -1,6 +1,8 @@
 classdef CustomMinorLoss < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % models some loss coefficient between some
+    % two bodies.
+    % contains two bodies and the loss coefficient in each
+    % direction between them
 
     properties
         name string;
