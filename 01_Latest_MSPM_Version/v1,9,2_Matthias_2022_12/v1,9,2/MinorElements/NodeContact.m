@@ -1,6 +1,5 @@
 classdef NodeContact < handle
-    %NODECONTACT Summary of this class goes here
-    %   Detailed explanation goes here
+    % models the contact between adjacent nodes
 
     properties
         Node Node;
