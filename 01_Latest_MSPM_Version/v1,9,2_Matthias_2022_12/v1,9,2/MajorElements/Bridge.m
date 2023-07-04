@@ -1,6 +1,6 @@
 classdef Bridge < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a Bridge between two bodies / two connections,
+    % contains faces
 
     properties
         Body1 Body;
