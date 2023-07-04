@@ -1,6 +1,8 @@
 classdef MechanicalSystem < handle
-    %UNTITLED2 Summary of this class goes here
-    %   Detailed explanation goes here
+    % models the mechanical system of the output shaft.
+    % contains LinRotMechanisms, the inertia of the flywheel,
+    % friction coefficient for the output, calculates output shaft power
+    % and checks if shaft power converges during simulation
 
     properties (Constant)
         SteadyStateRMS = 0.1;
