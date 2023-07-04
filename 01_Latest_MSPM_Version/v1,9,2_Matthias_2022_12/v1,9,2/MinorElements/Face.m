@@ -1,6 +1,7 @@
 classdef Face < handle
-    %FACE Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a physical boundary between two nodes (which belong to bodies),
+    % contains the relevant functions to model thermodynamics
+    % between the nodes, depending on their phase (fluid or solid)
 
     properties
         Nodes Node;
