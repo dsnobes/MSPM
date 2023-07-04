@@ -1,6 +1,6 @@
 classdef Mesher < handle
-    %UNTITLED2 Summary of this class goes here
-    %   Detailed explanation goes here
+    % stores properties which are used by the smart discretizer
+    % to discretize bodies
 
     properties
         % Solid Related
