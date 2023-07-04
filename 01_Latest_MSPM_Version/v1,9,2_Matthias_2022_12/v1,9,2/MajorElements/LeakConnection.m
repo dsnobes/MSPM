@@ -1,6 +1,8 @@
 classdef LeakConnection < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a leak between two separate parts of the model,
+    % for example, a leak between one end of the displacer piston
+    % and the other end.
+    % contains a two connections, and a pointer to the Model
 
     properties
         isChanged logical = true;
