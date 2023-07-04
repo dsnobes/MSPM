@@ -350,7 +350,7 @@ classdef Body < handle
                             [b1,b2,~,~] = this.limits(enumOrient.Vertical);
                             for iBody = iCon.Bodies
                                 % Matthias: not sure about the logic of
-                                % this method to determne the Body's flow
+                                % this method to determine the Body's flow
                                 % direction. the command below always
                                 % returns [0,0] for 'Vertical'
                                 [x1,x2,~,~] = this.limits(enumOrient.Vertical);
@@ -362,16 +362,12 @@ classdef Body < handle
                 end          
                 if cons(1) == 0
                     dir = 2;
+                elseif cons(2) == 0
+                    dir = 1;
+                elseif cons(1) > cons(2)
+                    dir = 1;
                 else
-                    if cons(2) == 0
-                        dir = 1;
-                    else
-                        if cons(1) > cons(2)
-                            dir = 1;
-                        else
-                            dir = 2;
-                        end
-                    end
+                    dir = 2;
                 end
             end
         end
