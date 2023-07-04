@@ -1,6 +1,7 @@
 classdef Group < handle
-    %Group Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a Group of Bodies and Connections with
+    % the use of Relation Managers,
+    % contains Nodes, Faces, and a pointer to the Model
 
     properties (Constant)
         ConnectionTolerance = 1e-6; % 0.001 mm plenty small enough for films
