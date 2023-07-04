@@ -1,6 +1,8 @@
 classdef Body < handle
-    % body Summary of this class goes here
-    %   Detailed explanation goes here
+    %{
+    A body in MSPM is a rectangular object in the GUI,
+    it has a material, nodes and faces, and a temperature, etm.
+    %}
 
     properties (Constant)
         MaterialUndefinedColor = [1 0.5569 1];
@@ -374,6 +376,9 @@ classdef Body < handle
 
         %% Creation Tests
         function isit = overlaps(thisBody,otherBody)
+            %{
+            returns bool
+            %}
             isit = false;
             if thisBody ~= otherBody
                 % Test x-coords
@@ -653,6 +658,8 @@ classdef Body < handle
                     s_ub = this.s_ub_Hor;
             end
         end
+        % for some reason, the getters below change this, which you'd think
+        % isn't something that a getter should do
         function isValid = get.isValid(this)
             this.update();
             %             if this.isChanged; this.update(); end
