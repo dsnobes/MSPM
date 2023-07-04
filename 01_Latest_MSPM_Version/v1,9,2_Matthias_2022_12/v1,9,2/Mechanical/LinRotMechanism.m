@@ -1,6 +1,7 @@
 classdef LinRotMechanism < handle
-    %MECHANISM Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a mechanism that converts linear
+    % reciprocating motion into rotational motion.
+    % contains a pointer to the Model
 
     properties (Constant)
         g = 9.81;
