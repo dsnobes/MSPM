@@ -1,6 +1,9 @@
 classdef Matrix < handle
-    %MATRIX Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a "gas matrix", for example, that can be
+    % a heat exchanger or a regenerator for a stirling engine.
+    % contains various fluid dynamics functions that help
+    % define the flow characteristics of fluids through the matrix.
+    % contains a body, nodes and faces
     properties (Constant)
         GeometrySource = {...
             'Woven Screen';
