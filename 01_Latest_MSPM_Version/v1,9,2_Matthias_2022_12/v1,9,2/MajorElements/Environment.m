@@ -1,6 +1,7 @@
 classdef Environment < handle
-    %ENVIRONMENT Summary of this class goes here
-    %   Detailed explanation goes here
+    % models the Environment, which is everything that isn't defined by the user,
+    % in other words, everywhere where there isn't a body.
+    % contains a pressure, temperature, material, node, group
 
     properties (Constant)
         StdPressure = 101325; % Pa
