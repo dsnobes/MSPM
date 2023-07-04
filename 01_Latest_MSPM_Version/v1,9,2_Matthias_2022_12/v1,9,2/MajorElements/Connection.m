@@ -1,6 +1,6 @@
 classdef Connection < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a Connection between bodies in a group,
+    % contains faces
     properties (Constant)
         Extension = 1.1;
         MinimumDisplayLength = 0.4;
