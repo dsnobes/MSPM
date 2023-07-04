@@ -1,6 +1,5 @@
 classdef Position < handle
-    %POSITION Summary of this class goes here
-    %   Detailed explanation goes here
+    % contains the position information for anything (X, Y, Angle)
 
     properties
         x double = 0;
