@@ -1,6 +1,9 @@
 classdef Node < handle
-    %NODE Summary of this class goes here
-    %   Detailed explanation goes here
+    % models a subsection of a body, called a Node.
+    % this is a subdivision used in simulation to increase
+    % the resolution of the model. One node has one set of uniform
+    % properties, but many nodes in a Body means that a body can
+    % have a distribution of properties at some given time (in simulation)
 
     properties
         isDynamic logical;
