@@ -1,4 +1,8 @@
 function ParallelTestSet(sel, h)
+    %{
+    used for parallel processing of a test set,
+    creates the parallel pool and takes care of progress bar
+    %}
     % Surpress the recursion limit warning
     warning('off', 'MATLAB:loadsave:saveRecursionLimit')
 
