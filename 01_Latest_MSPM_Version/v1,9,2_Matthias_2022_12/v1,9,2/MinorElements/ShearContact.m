@@ -1,6 +1,5 @@
 classdef ShearContact
-    %FORCECONTACT Summary of this class goes here
-    %   Detailed explanation goes here
+    % used in Face.m to model the shear force between two faces
 
     properties
         ConverterIndex;
@@ -15,8 +14,6 @@ classdef ShearContact
         function this = ShearContact(...
                 ConverterIndex,MechanismIndex,Area,Node1,Node2,ActiveTimes)
             if nargin == 6
-                %FORCECONTACT Construct an instance of this class
-                %   Detailed explanation goes here
                 this.ConverterIndex = ConverterIndex;
                 this.MechanismIndex = MechanismIndex;
                 this.Area = Area;

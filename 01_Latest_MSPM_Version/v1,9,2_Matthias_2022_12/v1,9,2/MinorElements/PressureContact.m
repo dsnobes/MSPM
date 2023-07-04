@@ -1,6 +1,5 @@
 classdef PressureContact
-    %FORCECONTACT Summary of this class goes here
-    %   Detailed explanation goes here
+    % used in Face.m to model pressure between two faces
 
     properties
         ConverterIndex;
