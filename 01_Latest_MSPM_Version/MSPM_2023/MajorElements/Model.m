@@ -5919,6 +5919,8 @@ classdef Model < handle
                 if this.isDiscretized()
                     this.dispNodeIndexes(true);
                 end
+            else
+                this.dispNodeIndexes(false);
             end
 
 
