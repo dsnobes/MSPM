@@ -103,9 +103,13 @@ classdef Connection < handle
                     end
                 end
                 % Remove any visual remenant
+                this.show();
                 this.removeFromFigure(gca);
             end
+            this.Group.Model.update();
+            this.Group.Model.show();
             this.delete();
+            drawnow();
         end
         function change(this)
             this.isChanged = true;
