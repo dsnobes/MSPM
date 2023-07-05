@@ -1150,6 +1150,8 @@ end
 handles.Model.Selection = cell(0);
 % For all the selected items
 
+handles.Model.show();
+
 % Re-draw the model to update
 drawnow(); pause(0.05);
 end
