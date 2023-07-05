@@ -13,6 +13,8 @@ classdef LeakConnection < handle
         Connection1 Connection;
         Connection2 Connection;
         Model Model;
+
+        GUIObjects;
     end
 
     properties (Hidden)
@@ -156,111 +158,72 @@ classdef LeakConnection < handle
 
 
         function resetDiscretization(this)
+            this.isDiscretized = false;
 
         end
         %% Graphics
         function removeFromFigure(this,AxisReference)
-            %       if ~isempty(this.GUIObjects)
-            %         children = get(AxisReference,'Children');
-            %         for obj = this.GUIObjects
-            %           if isgraphics(obj)
-            %             for i = length(children):-1:1
-            %               if isgraphics(children(i)) && children(i) == obj
-            %                 children(i).delete;
-            %                 break;
-            %               end
-            %             end
-            %           end
-            %         end
-            %         this.GUIObjects = [];
-            %       end
+            if ~isempty(this.GUIObjects)
+            children = get(AxisReference,'Children');
+            for obj = this.GUIObjects
+                if isgraphics(obj)
+                for i = length(children):-1:1
+                    if isgraphics(children(i)) && children(i) == obj
+                    children(i).delete;
+                    break;
+                    end
+                end
+                end
+            end
+            this.GUIObjects = [];
+            end
         end
         function show(this,AxisReference)
+            % Plot a line from the center of one selected body and the second body or the environment
             this.removeFromFigure(AxisReference);
-            %       % Plot a dotted line between the middle of the Connection1's Overlap
-            %       % with Body1 to the middle of Connection2's Overlap with Body2
-            %
-            %       % Find P1;
-            %       if isa(this.obj1,'Body')
-            %         Ax = this.Connection1.Group;
-            %         R = RotMatrix(Ax.Position.Rot);
-            %         x = this.Connection1.x;
-            %         switch this.Connection1.Orient
-            %           case enumOrient.Vertical
-            %             [~,~,y1,y2] = this.obj1.limits(enumOrient.Horizontal);
-            %             A = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[(y1+y2)/2; x];
-            %             B = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[(y1+y2)/2; -x];
-            %           case enumOrient.Horizontal
-            %             [~,~,y1,y2] = this.obj1.limits(enumOrient.Horizontal);
-            %             A = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[x; (y1+y2)/2];
-            %             B = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[x; -(y1+y2)/2];
-            %         end
-            %       elseif isa(this.obj1,'Environment')
-            %         [x,y] = this.Model.EnvironmentPosition(this.obj1);
-            %         A = [x; y];
-            %         B = [x; y];
-            %       else
-            %         return;
-            %       end
-            %
-            %       % Find P2;
-            %       if isa(this.obj2,'Body')
-            %         Ax = this.Connection2.Group;
-            %         R = RotMatrix(Ax.Position.Rot);
-            %         x = this.Connection2.x;
-            %         switch this.Connection1.Orient
-            %           case enumOrient.Vertical
-            %             [~,~,y1,y2] = this.obj2.limits(enumOrient.Vertical);
-            %             C = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[(y1+y2)/2; x];
-            %             D = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[(y1+y2)/2; -x];
-            %           case enumOrient.Horizontal
-            %             [~,~,y1,y2] = this.obj2.limits(enumOrient.Horizontal);
-            %             C = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[x; (y1+y2)/2];
-            %             D = [Ax.Position.x; Ax.Position.y] + ...
-            %               R*[x; -(y1+y2)/2];
-            %         end
-            %       elseif isa(this.obj2,'Environment')
-            %         [x,y] = this.Model.EnvironmentPosition(this.obj2);
-            %         C = [x; y];
-            %         D = [x, y];
-            %       else
-            %         return;
-            %       end
-            %
-            %       % Find minimum pair
-            %       % pair = zeros(2,2);
-            %       if Dist4Compare(A,C) < Dist4Compare(B,D)
-            %         pair = [A C];
-            %         dmin = Dist4Compare(A,C);
-            %       else
-            %         pair = [B D];
-            %         dmin = Dist4Compare(B,D);
-            %       end
-            %       if Dist4Compare(A,D) < dmin
-            %         pair = [A D];
-            %         dmin = Dist4Compar(A,D);
-            %       end
-            %       if Dist4Compare(B,C) < dmin
-            %         pair = [B C];
-            %       end
-            %
-            %       % Find the closest blank space in the model and drag the label there
-            %       [x, y, h] = this.Model.findInterSpace(pair);
-            %       newpair = [pair(:,1) [x; y+h/2] [x; y-h/2] pair(:,2)];
-            %
-            %       % Two points in pair are minimum distance
-            %       this.GUIObjects = line(...
-            %         newpair(1,:),newpair(2,:),...
-            %         'Color',[0.5 0.5 0.5]);
+
+
+            % Find P1
+            if isa(this.obj1, 'Body')
+                % Get the connections that make up the body and find the center
+                conn_x1 = this.obj1.get('Inner Connection');
+                conn_x2 = this.obj1.get('Outer Connection');
+                conn_y1 = this.obj1.get('Bottom Connection');
+                conn_y2 = this.obj1.get('Top Connection');
+
+
+                % Extract the coordinates and find the middle
+                x1 = (conn_x1.x + conn_x2.x)./2;
+                y1 = (conn_y1.x + conn_y2.x)./2;
+
+            elseif isa(this.obj1, 'Environment')
+                [x1,y1] = this.Model.EnvironmentPosition(this.obj1);
+            end
+
+            % Find P2
+            if isa(this.obj2, 'Body')
+                % Get the connections that make up the body and find the center
+                conn_x1 = this.obj2.get('Inner Connection');
+                conn_x2 = this.obj2.get('Outer Connection');
+                conn_y1 = this.obj2.get('Bottom Connection');
+                conn_y2 = this.obj2.get('Top Connection');
+
+
+                % Extract the coordinates and find the middle
+                x2 = (conn_x1.x + conn_x2.x)./2;
+                y2 = (conn_y1.x + conn_y2.x)./2;
+
+            elseif isa(this.obj2, 'Environment')
+                [x2,y2] = this.Model.EnvironmentPosition(this.obj2);
+            end
+
+            % Change both x-coords to be negative
+            x1 = -x1;
+            x2 = -x2;
+
+            % Plot the line between them
+            this.GUIObjects = line([x1, x2],[y1, y2],'Color',[1 0.5 0]);
         end
     end
-
 end
 
