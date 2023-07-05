@@ -187,7 +187,7 @@ classdef PVoutput < handle
             %fprintf([num2str(WTotal) '\n']);
             text(a.XLim(1)+0.01*(a.XLim(2)-a.XLim(1)),...
                 a.YLim(2)-0.05*(a.YLim(2)-a.YLim(1)), Text);
-            drawnow;
+            drawnow();
             hold off;
         end
 
