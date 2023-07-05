@@ -2346,6 +2346,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 plot(1:Plot_Number,Plot_Powers(1:Plot_Number));
                 xlabel('Cycle Number')
                 ylabel('Shaft Power [W]')
+                title("Convergence")
 
                 %cycle_count = cycle_count + 1;
                 ME.Inc = 1;
@@ -2360,6 +2361,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number));
                 xlabel('Cycle Number')
                 ylabel('Power Factor')
+                title("Power Factor")
 
                 % Speed plot
                 if ME.MoveCondition == 2
@@ -2367,6 +2369,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                     plot(1:Plot_Number,Plot_Speed(1:Plot_Number));
                     xlabel('Cycle Number')
                     ylabel('Speed [rpm]')
+                    title("Speed")
                 end
 
                 % Get Local curvature
