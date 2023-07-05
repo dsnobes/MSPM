@@ -235,19 +235,23 @@ classdef Model < handle
             this.surroundings.resetDiscretization();
             this.change();
         end
-        function dispNodeIndexes(this)
+        function dispNodeIndexes(this, value)
             % Prints to screen the index associated with a node its display
             % ... position
             % Save GUI axes
+            % value is bool, whether to show
             guiAxes = gca;
-
-            progressbar('Plotting Node IDs')
-            progress_index = 0;
-            for iNd = this.Nodes
-                pnt = iNd.minCenterCoords;
-                this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
-                progress_index = progress_index + 1;
-                progressbar(progress_index/length(this.Nodes))
+            if value
+                progressbar('Plotting Node IDs')
+                progress_index = 0;
+                for iNd = this.Nodes
+                    pnt = iNd.minCenterCoords;
+                    this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
+                    progress_index = progress_index + 1;
+                    progressbar(progress_index/length(this.Nodes))
+                end
+            else
+                this.StaticGUIObjects = this.StaticGUIObjects(1:end-length(this.Nodes));
             end
         end
         
@@ -5913,7 +5917,7 @@ classdef Model < handle
             % Show node IDs
             if this.showNodeIDs
                 if this.isDiscretized()
-                    this.dispNodeIndexes();
+                    this.dispNodeIndexes(true);
                 end
             end
 

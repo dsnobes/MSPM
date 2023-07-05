@@ -1672,8 +1672,9 @@ h.Model.resetDiscretization();
 show_Model(h);
 end
 
-function DispNumbers_Callback(~, ~, h)
-% Check if the model is discritized
+function DispNumbers_Callback(hObject, ~, h)
+% Check if the model is discritized\
+value = get(hObject, 'Value');
 if ~h.Model.isDiscretized
     crun = struct('Model',h.Model.name,...
     'title',[h.Model.name ' test: ' date],...
@@ -1682,7 +1683,7 @@ if ~h.Model.isDiscretized
     h.Model.discretize(crun);
 end
 
-h.Model.dispNodeIndexes();
+h.Model.dispNodeIndexes(value);
 end
 
 function clearAxes_Callback(~, ~, ~)
