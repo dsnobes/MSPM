@@ -93,6 +93,7 @@ classdef Model < handle
         StaticGUIObjects = [];
         DynamicGUIObjects = [];
         GhostGUIObjects = [];
+        NodeIDGUIObjects = [];
         BodyIDIndex = 1;
         ConIDIndex = 1;
         OptIDIndex = 1;
@@ -107,6 +108,7 @@ classdef Model < handle
         showSensors = true;
         showEnvironmentConnections = false;
         showRelations = false;
+        showNodeIDs = false;
         
         % Matthias: Advanced Node Display Options
         showInterConnections = false;
@@ -236,9 +238,16 @@ classdef Model < handle
         function dispNodeIndexes(this)
             % Prints to screen the index associated with a node its display
             % ... position
+            % Save GUI axes
+            guiAxes = gca;
+
+            progressbar('Plotting Node IDs')
+            progress_index = 0;
             for iNd = this.Nodes
                 pnt = iNd.minCenterCoords;
-                text(pnt.x,pnt.y,num2str(iNd.index));
+                this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
+                progress_index = progress_index + 1;
+                progressbar(progress_index/length(this.Nodes))
             end
         end
         
@@ -5564,7 +5573,7 @@ classdef Model < handle
                 % showGroups showBodies showConnections showLeaks showBridges showInterConnections showEnvironmentConnections]
             end
             
-            if this.showInterConnections || this.showNodes || this.showNodeBounds
+            if this.showInterConnections || this.showNodes || this.showNodeBounds || this.showNodeIDs
                 % if condition below added by Matthias to prevent wait for discretization each time view is changed.
                 if ~this.isDiscretized()
                     crun = struct('Model',this.name,...
@@ -5900,6 +5909,15 @@ classdef Model < handle
             if this.showBodyGhosts
                 this.bringGhostToFront();
             end
+
+            % Show node IDs
+            if this.showNodeIDs
+                if this.isDiscretized()
+                    this.dispNodeIndexes();
+                end
+            end
+
+
         end
         function Animate(this,showOptions)
             if this.isChanged; this.update(); end

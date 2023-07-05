@@ -1323,7 +1323,7 @@ h.Model.recordVelocity = get(h.RecordVelocity,'Value');
 h.Model.showTurbulenceAnimation = get(h.ShowTurbulenceAnimation,'Value');
 h.Model.recordTurbulence = get(h.RecordTurbulence,'Value');
 h.Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
-h.Model.outputPath= get(h.OutputPath,'String');
+% h.Model.outputPath= get(h.OutputPath,'String');
 h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
 h.Model.animationFrameTime = str2double(get(h.AnimationFrameTime,'String'));
 
@@ -1833,6 +1833,15 @@ value = get(hObject,'Value');
 if (value ~= h.Model.recordStatistics)
     h.Model.recordStatistics = value;
 end
+end
+
+function DispNodeIDs_Callback(hObject, ~, h)
+value = get(hObject,'Value');
+if (value ~= h.Model.showNodeIDs)
+    h.Model.showNodeIDs = value;
+    show_Model(h);
+end
+
 end
 
 function OutputPath_CreateFcn(~, ~, ~)
