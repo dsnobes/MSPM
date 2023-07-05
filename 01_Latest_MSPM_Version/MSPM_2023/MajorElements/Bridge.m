@@ -683,4 +683,3 @@ classdef Bridge < handle
         end
     end
 end
-

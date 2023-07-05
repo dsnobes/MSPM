@@ -74,7 +74,7 @@ handles.ClickTolerance = 0.1;
 
 % Load/Create default save config
 if isfile('Config Files\parameters.mat')
-    load('Config Files\parameters.mat')
+    load('Config Files\parameters.mat', 'parameters')
     
     
     % Check if the save locations are valid and set locations
