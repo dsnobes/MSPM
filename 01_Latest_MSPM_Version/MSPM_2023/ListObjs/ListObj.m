@@ -83,6 +83,9 @@ classdef ListObj < handle
                     if ischar(this.Child)
                         Item = get(this.Parent,this.Child);
                         Item.Modify();
+                        if strcmp(this.Child, 'Material')
+                            this.Parent.show(gca);
+                        end
                     else
                         this.Child.Modify();
                     end
