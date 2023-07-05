@@ -481,6 +481,20 @@ classdef Bridge < handle
                     DestinationBody = this.Body1;
                 end
 
+                % max_r = 0;
+                % min_r = inf;
+                % for NContact = Source.NodeContacts
+                %     if NContact.Node.Body== SourceBody
+                %         if max_r < NContact.End
+                %             max_r = NContact.End;
+                %         end
+                %         if min_r > NContact.Start
+                %             min_r = NContact.Start;
+                %         end
+                %     end
+                % end 
+                
+                
                 % Finds the first and last node contacts that correspond with this body
                 max_r = 0;
                 min_r = 10000;
@@ -505,8 +519,11 @@ classdef Bridge < handle
                     end
                 end
 
-                % Removes those connections
-                Source.NodeContacts(DontKeep) = [];
+                if this.Connection1.Orient == enumOrient.Horizontal
+                    this.Connection1.NodeContacts(DontKeep) = [];
+                else
+                    this.Connection2.NodeContacts(DontKeep) = [];
+                end
 
                 
                 DontKeep = false(size(Destination.NodeContacts));
@@ -515,8 +532,8 @@ classdef Bridge < handle
                         DontKeep(i) = true;
                         r = Destination.x;
                         DCont = Destination.NodeContacts(i);
-                        s = DCont.Start;
-                        e = DCont.End;
+                        s = Destination.NodeContacts(i).Start;
+                        e = Destination.NodeContacts(i).End;
                         for j = 1:length(SContacts)
                             SCont = SContacts(j);
                             % Calculate Percentange that the segment covers
@@ -547,22 +564,22 @@ classdef Bridge < handle
                                     end
                                 end
                             end
-                            if ~isempty(DCont.data) && isfield(DCont.data,'Perc')
-                                DCont.data.Perc = DCont.data.Perc - P;
+                            if ~isempty(Destination.NodeContacts(i).data) && isfield(Destination.NodeContacts(i).data,'Perc')
+                                Destination.NodeContacts(i).data.Perc = Destination.NodeContacts(i).data.Perc - P;
                             else
-                                DCont.data = struct();
-                                DCont.data.Perc = 1 - P;
+                                Destination.NodeContacts(i).data = struct();
+                                Destination.NodeContacts(i).data.Perc = 1 - P;
                             end
                             if any(P > 0)
                                 % Make Faces
                                 % Precondition
                                 SCont.Start = this.x - max_r;
                                 SCont.End = this.x + max_r;
-                                P1 = DCont.data.Perc;
-                                DCont.data.Perc = 1;
-                                NewFace = Face(SCont,DCont, true);
+                                P1 = Destination.NodeContacts(i).data.Perc;
+                                Destination.NodeContacts(i).data.Perc = 1;
+                                NewFace = Face(SCont,Destination.NodeContacts(i));
                                 % Recondition
-                                DCont.data.Perc = P1;
+                                Destination.NodeContacts(i).data.Perc = P1;
                                 if isfield(NewFace.data,'Area')
                                     NewFace.data.Area = NewFace.data.Area.*P;
                                     if isfield(NewFace.data,'Dh')
@@ -581,7 +598,12 @@ classdef Bridge < handle
                         end
                     end
                 end
-                Destination.NodeContacts(DontKeep) = [];
+
+                if this.Connection1.Orient == enumOrient.Horizontal
+                    this.Connection2.NodeContacts(DontKeep) = [];
+                else
+                    this.Connection1.NodeContacts(DontKeep) = [];
+                end
 
             end
             this.isDiscretized = true;
