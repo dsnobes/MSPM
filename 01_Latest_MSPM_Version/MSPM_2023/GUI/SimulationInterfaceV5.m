@@ -82,20 +82,20 @@ if isfile('Config Files\parameters.mat')
         handles.save_location = parameters.savelocation;
     else
         disp("Model save location is invalid, reset to default location (Saved Files\)")
-        handles.save_location = 'Saved Files\';
+        handles.save_location = '\Saved Files\';
     end
     
     if isfolder(parameters.runlocation)
         handles.run_location = parameters.runlocation;
     else
-        disp("Run save location is invalid, reset to default location (..\Runs\)")
+        disp("Run save location is invalid, reset to default location (\Runs\)")
         handles.run_location = '\Runs\';
     end
     
 else
     disp("Parameters file not found!! Creating new file")
     % Set default locations
-    handles.save_location = 'Saved Files\';
+    handles.save_location = '\Saved Files\';
     handles.run_location = '\Runs\';
     
     % Create config file
@@ -2096,10 +2096,12 @@ selpath = uigetdir(h.save_location, 'Select a location to save model files');
 h.save_location = [selpath, '\'];
 
 % Update the config file
-load("Config Files\parameters.mat")
-parameters.savelocation = [selpath, '\'];
-save('Config Files\parameters.mat', 'parameters')
-clear parameters
+if selpath % if the user didn't cancel
+    load("Config Files\parameters.mat")
+    parameters.savelocation = [selpath, '\'];
+    save('Config Files\parameters.mat', 'parameters')
+    clear parameters
+end
 
 %% Update handles structure
 guidata(hObject, h);
@@ -2114,10 +2116,12 @@ selpath = uigetdir(h.run_location, 'Select a location to save model files');
 h.run_location = [selpath, '\'];
 
 % Update the config file
-load("Config Files\parameters.mat")
-parameters.runlocation = [selpath, '\'];
-save('Config Files\parameters.mat', 'parameters')
-clear parameters
+if selpath % if the user didn't cancel
+    load("Config Files\parameters.mat")
+    parameters.runlocation = [selpath, '\'];
+    save('Config Files\parameters.mat', 'parameters')
+    clear parameters
+end
 
 %% Update handles structure
 guidata(hObject, h);
