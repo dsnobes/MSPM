@@ -688,7 +688,7 @@ if tf
                             msgbox(['Selected relation type' ...
                                 ' is not implemented']);
                             h.IndexC = 1;
-                            error("No option selected!");;
+                            error("No option selected!");
                     end
                     if ~success
                         msgbox(['Relationship was not ' ...
