@@ -96,7 +96,7 @@ else
     disp("Parameters file not found!! Creating new file")
     % Set default locations
     handles.save_location = 'Saved Files\';
-    handles.run_location = '..\Runs\';
+    handles.run_location = '\Runs\';
     
     % Create config file
     parameters.savelocation = handles.save_location;
