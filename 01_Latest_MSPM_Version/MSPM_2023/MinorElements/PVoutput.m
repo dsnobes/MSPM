@@ -202,6 +202,7 @@ classdef PVoutput < handle
             h = gcf;
             xlabel('Volume (m^3)');
             ylabel('Pressure (Pa)');
+            title("Pressure vs Volume Diagram");
 
             if is_saved
                 frame = getframe(h);

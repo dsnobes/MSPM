@@ -153,6 +153,8 @@ handles.Model.RelationOn = true;
 
 %% Update handles structure
 guidata(hObject, handles);
+xlabel("radial position [m]");
+ylabel("axial position [m]");
 end
 
 % --- Outputs from this function are returned to the command line.
