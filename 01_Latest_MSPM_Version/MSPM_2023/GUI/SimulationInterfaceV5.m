@@ -89,7 +89,7 @@ if isfile('Config Files\parameters.mat')
         handles.run_location = parameters.runlocation;
     else
         disp("Run save location is invalid, reset to default location (..\Runs\)")
-        handles.run_location = '..\Runs\';
+        handles.run_location = '\Runs\';
     end
     
 else
