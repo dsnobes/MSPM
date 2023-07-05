@@ -520,7 +520,29 @@ classdef Model < handle
             if this.isChanged; this.update(); end
             
             %% Initializing Meshing
-            progressbar('Calculating Surroundings');
+            % Progressbar
+            progressbar('Total Progress',...
+                'Calculating Surroundings',...
+                'Discretizing Bridges',...
+                'Discretizing Bridges',...
+                'Discretizing Bridges',...
+                'Counting Elements',...
+                'Acquiring Nodes and Faces',...
+                'Cleaning up solid connections that are too small',...
+                'Assigning Node and Face Indexes',...
+                'Assessing Connections',...
+                'Decimating Extra Loops',...
+                'Vectorizing Nodes',...
+                'Vectorizing Faces',...
+                'Creating Shear/Pressure Contacts',...
+                'Creating Face - Use Turbulence',...
+                'Defining Max Time Step',...
+                'Defining Conduction/Transport Network',...
+                'Creating Regions and Loops For Solver',...
+                'Pressure/Shear Contacts, Sensors, PVoutputs',...
+                'Defining Area for Turbulence',...
+                'Defining Energy Statistics Handlers');
+            
             
             % Test if everything is discretized
             this.surroundings.discretize();
@@ -618,7 +640,7 @@ classdef Model < handle
             % discretization! --> all modifications to conductance (e.g. 'h_custom')
             % must be applied prior.
             
-            progressbar('Discretizing Bridges');
+            progressbar(1/21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             % Test and Discretize Bridges
             for iBridge = this.Bridges
                 if ~iBridge.isDiscretized
@@ -644,7 +666,7 @@ classdef Model < handle
                 end
             end
             
-            progressbar('Discretizing Groups');
+            progressbar(2/21,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             % Test and Discretize Groups
             for iGroup = this.Groups
                 if ~iGroup.isDiscretized
@@ -676,7 +698,7 @@ classdef Model < handle
                 end
             end
             
-            progressbar('Discretizing Leaks');
+            progressbar(3/21,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             LeakFaces = struct('Node1',Node(),'Node2',Node(),'LeakFunc',@CollapseVector);
             LeakFaces(:) = [];
             % Test and Discretize LeakConnections
@@ -697,7 +719,7 @@ classdef Model < handle
                 clear backup_growth;
             end
             
-            progressbar('Counting Elements');
+            progressbar(4/21,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             % Count the Nodes and Faces
             ndequ = 1; % <-- Environment Node
             fcequ = 0;
@@ -718,7 +740,7 @@ classdef Model < handle
             Sim.Model = this;
             
             %% Acquiring Nodes and Faces
-            progressbar('Acquiring Nodes and Faces');
+            progressbar(5/21,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             
             % Collect Nodes and Faces
             % Environment
@@ -842,7 +864,7 @@ classdef Model < handle
             end
             
             %% Cleaning up solid connections that are too small
-            progressbar('Cleaning up solid connections that are too small');
+            progressbar(6/21,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             
             % Clean up small nodes near bigger nodes
             keep = true(size(this.Faces));
@@ -887,7 +909,7 @@ classdef Model < handle
             clear nds2del;
             
             %% Assigning Node and Face Indexes
-            progressbar('Assigning Node and Face Indexes');
+            progressbar(7/21,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0)
             
             % Assign Face/Node indexs to Faces and Nodes
             % Determine the amount of Solid, Wall, Environment and Gas Nodes
@@ -945,7 +967,7 @@ classdef Model < handle
             
             
             %% Assessing Connections
-            progressbar('Assessing Connections');
+            progressbar(8/21,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0)
             
             % Orient them such that the node closer to 0,0 is
             % ... listed first
@@ -1183,7 +1205,7 @@ classdef Model < handle
             end
             
             %% Decimating Loops
-            progressbar('Decimating Extra Loops');
+            progressbar(9/21,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0)
             % debug_loopPlot(this,false);
             % Decimate extra loops
             Triads = cell(0,0);
@@ -1660,7 +1682,7 @@ classdef Model < handle
             
             
             %% Vectorizing Nodes
-            progressbar('Vectorizing Nodes');
+            progressbar(10/21,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0)
             % Generic Properties
             Sim.dT_dU = zeros(S_count_backup,1);
             Sim.u = Sim.dT_dU;
@@ -1827,7 +1849,7 @@ classdef Model < handle
             end
             
             %% Vectorizing Faces
-            progressbar('Vectorizing Faces');
+            progressbar(11/21,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0)
             
             Sim.Fc_Nd = zeros(length(this.Faces),2);
             Sim.Fc_U = zeros(G_count_backup_faces,1);
@@ -1889,7 +1911,7 @@ classdef Model < handle
             end
             
             %% Creating Shear/Pressure Contacts
-            progressbar('Creating Shear/Pressure Contacts');
+            progressbar(12/21,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0)
             
             % For all Faces, attempt to make a PressureContact
             for Fc = this.Faces
@@ -2270,7 +2292,7 @@ classdef Model < handle
             Sim.Dynamic = Sim.Dynamic';
             
             %% Creating Face - Use Turbulence
-            progressbar('Creating Face - Use Turbulence');
+            progressbar(13/21,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0)
             
             L = G_count_backup_faces + 1;
             for Fc = this.Faces
@@ -2299,7 +2321,7 @@ classdef Model < handle
             end
             
             %% Defining Max Time Step
-            progressbar('Defining Max Time Step');
+            progressbar(14/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0)
             
             BoundaryNodes = [];
             NGas = length(Sim.P);
@@ -2405,7 +2427,7 @@ classdef Model < handle
             end
             
             %% Defining Conduction/Transport Network
-            progressbar('Defining Conduction/Transport Network');
+            progressbar(16/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0)
             
             % SolidNds
             % Sim.Cond_Nds = all nodes except the environment, which is
@@ -2543,7 +2565,7 @@ classdef Model < handle
             Sim.TransNet = Temp;
             
             %% Creating Lookup Tables, Regions and Loops For Solver
-            progressbar('Creating Regions and Loops For Solver');
+            progressbar(17/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0)
             
             % the four sections of code below could probably be made into a single function
             
@@ -3011,7 +3033,7 @@ classdef Model < handle
             % NEED FACES AND NODES ORGANIZED BY REGION
             
             %% Pressure/Shear Contacts, Sensors, PVoutputs
-            progressbar('Pressure/Shear Contacts, Sensors, PVoutputs');
+            progressbar(18/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0)
             
             % Pressure Contacts
             PC_n = 1;
@@ -3092,8 +3114,7 @@ classdef Model < handle
             Sim.PRegion = zeros(length(Sim.Regions),1);
             Sim.PRegionTime = 0;
             
-            progressbar(12/13);
-            progressbar('Defining Area for Turbulence');
+            progressbar(19/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0)
             
             % Node Faces For Turbulent Decay and Generation
             Len = 1 + size(Sim.Area,2);
@@ -3211,7 +3232,7 @@ classdef Model < handle
             end
             
             %% Defining Energy Statistics Handlers
-            progressbar('Defining Energy Statistics Handlers');
+            progressbar(20/21,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0)
             
             % Statistics
             % Find all Solid Faces that go to the Environment
@@ -3348,7 +3369,7 @@ classdef Model < handle
             Sim.Fc_K21(isnan(Sim.Fc_K21)) = 1;
             Sim.Dynamic(isnan(Sim.Dynamic)) = 0;
             
-            progressbar(1);
+            progressbar(1)
         end
         %%
         function [success] = Run(ME, runs)
