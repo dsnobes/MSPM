@@ -171,6 +171,7 @@ classdef Body < handle
             % Remove any visual remenant
             this.removeFromFigure(gca);
             this.delete();
+            iModel.show();
         end
 
         %% get/set
