@@ -1857,7 +1857,7 @@ if value
         h.Model.discretize(crun);
     catch
         progressbar(1);
-        fprintf("XXX ERROR in discretization, cannot display Node IDs XXX")
+        fprintf("XXX ERROR in discretization, cannot display Node IDs XXX\n")
         return
     end
 end
@@ -2192,6 +2192,11 @@ for j = 1:length(h.Model.Groups)
     end
 end
 
+if pos == 1
+    % no bodies, would have error below
+    disp(['The total volume (excl. HX and regenerator) is: ', num2str(0), ' L'])
+    return
+end
 % Go through all the volumes and add them
 vol_table = struct2table(volumes);
 total_vol = sum(vol_table.vol);
