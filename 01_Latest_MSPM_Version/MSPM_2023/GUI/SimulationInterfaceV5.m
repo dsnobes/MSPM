@@ -2042,8 +2042,11 @@ end
 
 function ScaleModel_Callback(~, ~, h)
 % Get the scale value from the user
-scale_value_cell = inputdlg('Scale the model by:');
-scale_value = str2double(scale_value_cell{1});
+scale_value = '';
+while ~isnumeric(scale_value) || scale_value <= 0 || isnan(scale_value)
+    scale_value_cell = inputdlg('Scale the model by:');
+    scale_value = str2double(scale_value_cell{1});
+end
 
 % Scale motion
 for j = 1:length(h.Model.Converters)
