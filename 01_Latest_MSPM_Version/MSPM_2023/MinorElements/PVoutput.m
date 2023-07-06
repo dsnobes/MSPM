@@ -161,7 +161,9 @@ classdef PVoutput < handle
         function updatePlot(this, fig_pos)
             if isempty(this.Fig) || ~isvalid(this.Fig) || this.Fig < 1
                 this.Fig = figure();
-                movegui(this.Fig, fig_pos)
+                if nargin > 1
+                    movegui(this.Fig, fig_pos)
+                end
                 this.plot_axes = gca;
                 title(this.plot_axes, this.name);
                 xlabel(this.plot_axes,'Volume (m^3)');
