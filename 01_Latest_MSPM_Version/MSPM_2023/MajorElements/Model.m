@@ -3683,8 +3683,16 @@ classdef Model < handle
                         % 'crun' contains run options from test set
                         % 'RunConditions' structure
                         % Matthias: Added cycle_count and final_speed output
-                        [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
-                            islast, do_warmup, ss_tolerance, crun);
+                        try
+                            [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                                islast, do_warmup, ss_tolerance, crun);
+                        catch
+                            % running was canceled or failed
+                            ME.CurrentSim(:) = [];
+                            ME.Results(:) = [];
+                            ME.resetDiscretization();
+                            return;
+                        end
                         if isempty(ME.Results)
                             ME.CurrentSim(:) = [];
                             ME.Results(:) = [];

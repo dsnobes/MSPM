@@ -328,10 +328,14 @@ classdef Simulation < handle
                     invalid = false;
                     if isempty(output)
                         Results = [];
+                        success = [];
+                        cycle_count = [];
+                        final_speed = [];
+                        final_power = [];
                         return;
                     end
                     if ~all(ismember(output{1}, '0123456789+-.eE')); invalid = true;
-                    elseif ~strcmp(output{2},'SS') && ~isempty(output{2}); invalid = true;
+                    elseif ~strcmp(output{2},'SS'); invalid = true;
                     elseif ~strcmp(output{3},'C') && ~strcmp(output{3},'V'); invalid = true;
                     elseif ~all(ismember(output{4}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{5}, '0123456789+-.eE')); invalid = true;
@@ -2189,7 +2193,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
         end
 
         if ME.stop
-            fprintf('Simulation Finished Prematurely. (in "Run", line 660)\n');
+            fprintf('Simulation Finished Prematurely. (in Simulation.m: "Run")\n');
             clear assignDynamic;
             clear implicitSolve;
             % clear dUFunc;
@@ -2377,7 +2381,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 xlabel(plot_axes.fact,'Cycle Number')
                 ylabel(plot_axes.fact,'Power Factor')
                 title(plot_axes.fact,"Power Factor")
-;
+
 
                 % Speed plot
                 if ME.MoveCondition == 2
