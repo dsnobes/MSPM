@@ -98,6 +98,7 @@ classdef Model < handle
         ConIDIndex = 1;
         OptIDIndex = 1;
         LRMIDIndex = 1;
+        NodeIDIndices = [];
         % GUI Options
         showGroups = true;
         showBodies = true;
@@ -242,16 +243,20 @@ classdef Model < handle
             % value is bool, whether to show
             guiAxes = gca;
             if value
-                progressbar('Plotting Node IDs')
-                progress_index = 0;
-                for iNd = this.Nodes
-                    pnt = iNd.minCenterCoords;
-                    this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
-                    progress_index = progress_index + 1;
-                    progressbar(progress_index/length(this.Nodes))
+                if isempty(this.NodeIDIndices)
+                    progressbar('Plotting Node IDs')
+                    progress_index = 0;
+                    for iNd = this.Nodes
+                        pnt = iNd.minCenterCoords;
+                        this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
+                        this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                        progress_index = progress_index + 1;
+                        progressbar(progress_index/length(this.Nodes))
+                    end
                 end
             else
-                this.StaticGUIObjects = this.StaticGUIObjects(1:end-length(this.Nodes));
+                this.StaticGUIObjects = this.StaticGUIObjects(~this.NodeIDIndices);
+                this.NodeIDIndices = [];
             end
         end
         
