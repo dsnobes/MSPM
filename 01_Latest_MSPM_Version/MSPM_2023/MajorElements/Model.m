@@ -533,6 +533,10 @@ classdef Model < handle
             isit = this.isStateDiscretized;
         end
         function MeshCounts = discretize(this, run)
+            if isempty(this.Groups.Bodies)
+                MeshCounts = 0;
+                return
+            end
             this.resetDiscretization();
             for iLinRot = this.Converters
                 iLinRot.Populate(iLinRot.Type,iLinRot.originalInput);
