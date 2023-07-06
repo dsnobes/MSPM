@@ -1150,9 +1150,10 @@ for obj = handles.Model.Selection
     end
 end
 handles.Model.Selection = cell(0);
-% For all the selected items
 
-handles.Model.show();
+% Clear axes and show model
+cla
+show_Model(handles)
 
 % Re-draw the model to update
 drawnow(); pause(0.05);
