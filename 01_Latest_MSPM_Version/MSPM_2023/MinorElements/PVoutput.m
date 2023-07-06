@@ -15,6 +15,7 @@ classdef PVoutput < handle
         V double;
         Power double;
         Fig = [];
+        plot_axes;
     end
 
     methods
@@ -157,16 +158,21 @@ classdef PVoutput < handle
             end
         end
 
-        function updatePlot(this)
+        function updatePlot(this, fig_pos)
             if isempty(this.Fig) || ~isvalid(this.Fig) || this.Fig < 1
                 this.Fig = figure();
+                movegui(this.Fig, fig_pos)
+                this.plot_axes = gca;
+                title(this.plot_axes, this.name);
+                xlabel(this.plot_axes,'Volume (m^3)');
+                ylabel(this.plot_axes,'Pressure (Pa)');
+                set(this.Fig,'color','w');
+                hold on;
             end
-            figure(this.Fig);
-            title('Pressure vs Volume Diagram');
-            xlabel('Volume (m^3)');
-            ylabel('Pressure (Pa)');
-            set(gcf,'color','w');
-            a = this.Fig.CurrentAxes;
+            % figure(this.Fig);
+            cla(this.plot_axes)
+
+            % a = this.Fig.CurrentAxes;
             WTotal = 0;
             Text = '';
             for i = 1:length(this.Nodes)
@@ -178,17 +184,17 @@ classdef PVoutput < handle
                 if W > 0; Color = 'b'; % Color is Blue
                 else; Color = 'r'; % Color is Red
                 end
-                plot(pV,pP,'Color',Color,'LineStyle','-');
-                hold on;
-                plot(pV(1),pP(1),'Color','k','Marker','o');
+
+                plot(pV,pP,'Color',Color,'LineStyle','-', 'Parent', this.plot_axes);
+                plot(pV(1),pP(1),'Color','k','Marker','o', 'Parent', this.plot_axes);
             end
             this.Power = WTotal;
             Text = [Text 'Total = ' num2str(WTotal,4) 'Joules/Cycle'];
             %fprintf([num2str(WTotal) '\n']);
-            text(a.XLim(1)+0.01*(a.XLim(2)-a.XLim(1)),...
-                a.YLim(2)-0.05*(a.YLim(2)-a.YLim(1)), Text);
+            text(this.plot_axes.XLim(1)+0.01*(this.plot_axes.XLim(2)-this.plot_axes.XLim(1)),...
+                this.plot_axes.YLim(2)-0.05*(this.plot_axes.YLim(2)-this.plot_axes.YLim(1)), Text, 'Parent', this.plot_axes);
             drawnow();
-            hold off;
+
         end
 
         function plotData(this,is_saved,ModelName)

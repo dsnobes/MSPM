@@ -2105,17 +2105,27 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
     power_factor = 1;
     % Matthias: Display power and power factor plots in one figure, two
     % subplots
+
+    %% Plotting power and power factor
     fig = figure;
     if ME.MoveCondition == 2
         Convergence_Plot = subplot(3,1,1);
+        plot_axes.conver = gca;
         Factor_Plot = subplot(3,1,2);
+        plot_axes.fact = gca;
         Speed_Plot = subplot(3,1,3);
+        plot_axes.speed = gca;
     else
         Convergence_Plot = subplot(2,1,1);
+        plot_axes.conver = gca;
         Factor_Plot = subplot(2,1,2);
+        plot_axes.fact = gca;
     end
     %       Convergence_Plot = figure();
     %       Factor_Plot = figure();
+
+    % Move the figure to the top left
+    movegui(fig, 'northwest')
 
     if ME.ss_condition
         Tavg = zeros(size(ME.T));
@@ -2327,8 +2337,13 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 Results.Data.SnapShot_P = ME.Rs.*ME.T(1:length(ME.P)).*...
                     ME.m(1:length(ME.P))./ME.vol(1:length(ME.P));
 
+                figure_positions = {'north', 'northeast', 'southwest', 'south', 'southeast', 'northwest', 'north', 'northeast', 'southwest', 'south', 'southeast', 'northwest', 'north', 'northeast', 'southwest', 'south', 'southeast',};
+                pos_index = 1;
                 if ME.Model.showLivePV
-                    for iPVoutput = ME.Model.PVoutputs; iPVoutput.updatePlot(); end
+                    for iPVoutput = ME.Model.PVoutputs
+                        iPVoutput.updatePlot(figure_positions{pos_index});
+                        pos_index = pos_index + 1;
+                    end
                 end
 
                 % Acquire an understanding of the solution plateauing
@@ -2342,11 +2357,11 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 %             end
                 %             figure(Convergence_Plot);
                 % Power factor plot
-                axes(Convergence_Plot);
-                plot(1:Plot_Number,Plot_Powers(1:Plot_Number));
-                xlabel('Cycle Number')
-                ylabel('Shaft Power [W]')
-                title("Convergence")
+                % axes(Convergence_Plot);
+                plot(1:Plot_Number,Plot_Powers(1:Plot_Number), 'Parent', plot_axes.conver);
+                xlabel(plot_axes.conver,'Cycle Number')
+                ylabel(plot_axes.conver,'Shaft Power [W]')
+                title(plot_axes.conver,"Shaft Power")
 
                 %cycle_count = cycle_count + 1;
                 ME.Inc = 1;
@@ -2357,19 +2372,20 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 %               Factor_Plot = figure();
                 %             end
                 %             figure(Factor_Plot);
-                axes(Factor_Plot);
-                plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number));
-                xlabel('Cycle Number')
-                ylabel('Power Factor')
-                title("Power Factor")
+                % axes(Factor_Plot);
+                plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number), 'Parent', plot_axes.fact);
+                xlabel(plot_axes.fact,'Cycle Number')
+                ylabel(plot_axes.fact,'Power Factor')
+                title(plot_axes.fact,"Power Factor")
+;
 
                 % Speed plot
                 if ME.MoveCondition == 2
-                    axes(Speed_Plot);
-                    plot(1:Plot_Number,Plot_Speed(1:Plot_Number));
-                    xlabel('Cycle Number')
-                    ylabel('Speed [rpm]')
-                    title("Speed")
+                    % axes(Speed_Plot);
+                    plot(1:Plot_Number,Plot_Speed(1:Plot_Number), 'Parent', plot_axes.speed);
+                    xlabel(plot_axes.speed,'Cycle Number')
+                    ylabel(plot_axes.speed,'Speed [rpm]')
+                    title(plot_axes.speed,"Speed")
                 end
 
                 % Get Local curvature
