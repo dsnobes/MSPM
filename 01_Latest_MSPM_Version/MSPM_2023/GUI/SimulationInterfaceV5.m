@@ -2108,6 +2108,9 @@ end
 %% Update handles structure
 guidata(hObject, h);
 
+% Add to path
+startup();
+
 end
 
 function ChangeRunLocation_Callback(hObject,~,h)
@@ -2127,6 +2130,9 @@ end
 
 %% Update handles structure
 guidata(hObject, h);
+
+% Add to path
+startup();
 
 end
 
