@@ -181,6 +181,7 @@ classdef Model < handle
                     this.AxisReference = AxisReference;
             end
             this.isChanged = true;
+            this.isStateDiscretized = false;
         end
         function ID = getBodyID(this)
             % Creates a unique id when called
@@ -213,6 +214,7 @@ classdef Model < handle
         function resetDiscretization(this)
             % Reset the discretization of the entire model, removing all faces
             % ... and nodes
+            this.isStateDiscretized = false;
             for iLRM = this.Converters
                 iLRM.Model = this;
                 if isempty(iLRM.ID)
@@ -253,6 +255,7 @@ classdef Model < handle
                         progress_index = progress_index + 1;
                         progressbar(progress_index/length(this.Nodes))
                     end
+                    progressbar(1);
                 end
             else
                 this.StaticGUIObjects = this.StaticGUIObjects(~this.NodeIDIndices);
@@ -460,7 +463,6 @@ classdef Model < handle
         %% Update on Demand
         % verifies that the model parameters are still valid (hopefully after any modification is made)
         function update(this)
-            this.isStateDiscretized = true;
             if any(~isvalid(this.Bridges))
                 this.Bridges = this.Bridges(isvalid(this.Bridges));
             end
@@ -3380,14 +3382,13 @@ classdef Model < handle
             Sim.ExergyLossStatic = 0;
             
             this.Simulations = Sim;
-            
-            this.isStateDiscretized = true;
-            
+                        
             Sim.Fc_K12(isnan(Sim.Fc_K12)) = 1;
             Sim.Fc_K21(isnan(Sim.Fc_K21)) = 1;
             Sim.Dynamic(isnan(Sim.Dynamic)) = 0;
             
             progressbar(1)
+            this.isStateDiscretized = true;
         end
         %%
         function [success] = Run(ME, runs)
@@ -5511,6 +5512,7 @@ classdef Model < handle
                     end
                 end
                 this.StaticGUIObjects = [];
+                this.NodeIDIndices = [];
             end
         end
         function removeDynamicFromFigure(this)
@@ -5920,14 +5922,7 @@ classdef Model < handle
             end
 
             % Show node IDs
-            if this.showNodeIDs
-                if this.isDiscretized()
-                    this.dispNodeIndexes(true);
-                end
-            else
-                this.dispNodeIndexes(false);
-            end
-
+            this.dispNodeIndexes(this.showNodeIDs);
 
         end
         function Animate(this,showOptions)

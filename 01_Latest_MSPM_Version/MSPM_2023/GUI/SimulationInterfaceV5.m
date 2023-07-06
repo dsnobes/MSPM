@@ -1672,20 +1672,6 @@ h.Model.resetDiscretization();
 show_Model(h);
 end
 
-function DispNumbers_Callback(hObject, ~, h)
-% Check if the model is discritized\
-value = get(hObject, 'Value');
-if ~h.Model.isDiscretized
-    crun = struct('Model',h.Model.name,...
-    'title',[h.Model.name ' test: ' date],...
-    'rpm',h.Model.engineSpeed,...
-    'NodeFactor',h.Model.deRefinementFactorInput);
-    h.Model.discretize(crun);
-end
-
-h.Model.dispNodeIndexes(value);
-end
-
 function clearAxes_Callback(~, ~, ~)
 cla;
 end
@@ -1838,11 +1824,21 @@ end
 
 function DispNodeIDs_Callback(hObject, ~, h)
 value = get(hObject,'Value');
-if (value ~= h.Model.showNodeIDs)
-    h.Model.showNodeIDs = value;
-    show_Model(h);
+if value
+    crun = struct('Model',h.Model.name,...
+    'title',[h.Model.name ' test: ' date],...
+    'rpm',h.Model.engineSpeed,...
+    'NodeFactor',h.Model.deRefinementFactorInput);
+    try
+        h.Model.discretize(crun);
+    catch
+        progressbar(1);
+        fprintf("XXX ERROR in discretization, cannot display Node IDs XXX")
+        return
+    end
 end
-
+h.Model.showNodeIDs = value;
+show_Model(h);
 end
 
 function OutputPath_CreateFcn(~, ~, ~)
