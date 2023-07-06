@@ -1838,7 +1838,7 @@ if value
         h.Model.discretize(crun);
     catch
         progressbar(1);
-        fprintf("XXX ERROR in discretization, cannot display Node IDs XXX")
+        fprintf("XXX ERROR in discretization, cannot display Node IDs XXX\n")
         return
     end
 end

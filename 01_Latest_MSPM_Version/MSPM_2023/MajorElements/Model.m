@@ -5513,7 +5513,7 @@ classdef Model < handle
                     if isgraphics(this.StaticGUIObjects(j))
                         for i = length(children):-1:1
                             if isgraphics(children(i)) && children(i) == this.StaticGUIObjects(j)
-                                children(i).delete;
+                                children(i).delete();
                                 break;
                             end
                         end
@@ -5530,7 +5530,7 @@ classdef Model < handle
                     if isgraphics(this.DynamicGUIObjects(j))
                         for i = length(children):-1:1
                             if isgraphics(children(i)) && children(i) == this.DynamicGUIObjects(j)
-                                children(i).delete;
+                                children(i).delete();
                                 break;
                             end
                         end
@@ -5546,7 +5546,7 @@ classdef Model < handle
                     if isgraphics(obj)
                         for i = length(children):-1:1
                             if isgraphics(children(i)) && children(i) == obj
-                                children(i).delete;
+                                children(i).delete();
                                 break;
                             end
                         end
@@ -5574,6 +5574,7 @@ classdef Model < handle
         
         %% For showing elements in GUI. Edited by Matthias.
         function show(this,showOptions)
+            cla;
             if this.isChanged; this.update(); end
             this.removeStaticFromFigure();
             this.removeGhostFromFigure();
