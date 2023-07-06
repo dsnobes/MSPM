@@ -82,21 +82,21 @@ if isfile('Config Files\parameters.mat')
         handles.save_location = parameters.savelocation;
     else
         disp("Model save location is invalid, reset to default location (Saved Files\)")
-        handles.save_location = '\Saved Files\';
+        handles.save_location = [pwd, '\Saved Files\'];
     end
     
     if isfolder(parameters.runlocation)
         handles.run_location = parameters.runlocation;
     else
         disp("Run save location is invalid, reset to default location (\Runs\)")
-        handles.run_location = '\Runs\';
+        handles.run_location = [pwd, '\Runs\'];
     end
     
 else
     disp("Parameters file not found!! Creating new file")
     % Set default locations
-    handles.save_location = '\Saved Files\';
-    handles.run_location = '\Runs\';
+    handles.save_location = [pwd, '\Saved Files\'];
+    handles.run_location = [pwd, '\Runs\'];
     
     % Create config file
     parameters.savelocation = handles.save_location;
