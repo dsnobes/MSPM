@@ -1099,8 +1099,12 @@ function CreateMechanism_Callback(hObject, eventdata, handles)  %#ok<INUSL>
 Data = Holder({});
 [h] = CreateMechanismInterface(Data);
 uiwait(h);
-handles.Model.addConverter(LinRotMechanism(handles.Model,...
-    Data.vars{1},Data.vars{2}));
+if ~isempty(Data.vars)
+    handles.Model.addConverter(LinRotMechanism(handles.Model,...
+        Data.vars{1},Data.vars{2}));
+else
+    fprintf("No mechanism created\n");
+end
 end
 
 % --- Executes on button press in Animate.
@@ -2090,11 +2094,11 @@ function ChangeModelLocation_Callback(hObject,~,h)
 % Get the user to select a new save folder (start from original save folder)
 selpath = uigetdir(h.save_location, 'Select a location to save model files');
 
-% Update the location in the currently running gui
-h.save_location = [selpath, '\'];
 
 % Update the config file
 if selpath % if the user didn't cancel
+    % Update the location in the currently running gui
+    h.save_location = [selpath, '\'];
     load("Config Files\parameters.mat")
     parameters.savelocation = [selpath, '\'];
     save('Config Files\parameters.mat', 'parameters')
@@ -2110,11 +2114,11 @@ function ChangeRunLocation_Callback(hObject,~,h)
 % Get the user to select a new save folder (start from original save folder)
 selpath = uigetdir(h.run_location, 'Select a location to save model files');
 
-% Update the location in the currently running gui
-h.run_location = [selpath, '\'];
 
 % Update the config file
 if selpath % if the user didn't cancel
+    % Update the location in the currently running gui
+    h.run_location = [selpath, '\'];
     load("Config Files\parameters.mat")
     parameters.runlocation = [selpath, '\'];
     save('Config Files\parameters.mat', 'parameters')
