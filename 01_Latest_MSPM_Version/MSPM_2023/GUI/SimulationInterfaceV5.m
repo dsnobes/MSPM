@@ -1099,11 +1099,30 @@ function CreateMechanism_Callback(hObject, eventdata, handles)  %#ok<INUSL>
 Data = Holder({});
 [h] = CreateMechanismInterface(Data);
 uiwait(h);
-if ~isempty(Data.vars)
+
+% Check to see if the window was closed without press
+if isempty(Data.vars)
+    disp("Window was closed. No mechanism created")
+    return
+end
+
+% Check to see if all have a value
+data_table = cell2table(Data.vars{1,2});
+data_row = data_table{2,:};
+
+hasempty = false;
+for datapoint = data_row
+    if isempty(datapoint{1})
+        hasempty = true;
+        break;
+    end
+end
+
+if ~hasempty
     handles.Model.addConverter(LinRotMechanism(handles.Model,...
         Data.vars{1},Data.vars{2}));
 else
-    fprintf("No mechanism created\n");
+    fprintf("No mechanism created - missing information\n");
 end
 end
 
