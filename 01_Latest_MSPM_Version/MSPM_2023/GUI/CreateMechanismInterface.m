@@ -106,7 +106,18 @@ function CreateMechanismInterface_OpeningFcn(hObject, eventdata, handles, vararg
     % Other things
     handles.MODE = '';
 
-    % Update handles structure
+    % Run the dropdown select callback to select the Ideal Sinusoid motion profile
+    Type = 'Ideal Sinusoid';
+
+    [Data, Instructions] = LinRotMechanism.GetPropertyTableSource(Type);
+    handles.DataEstablished = true;
+    
+    set(handles.PropertiesTable,'Visible','on');
+    set(handles.PropertiesTable,'Data',Data);
+    handles.PropertiesTable.ColumnEditable = true(1,size(Data,2));
+    handles.PropertiesTable.ColumnFormat = cell(1,size(Data,2));
+    set(handles.Instructions,'String',Instructions);
+    EstablishWidths(handles);
     guidata(hObject, handles);
 
     % UIWAIT makes CreateMechanismInterface wait for user response (see UIRESUME)
