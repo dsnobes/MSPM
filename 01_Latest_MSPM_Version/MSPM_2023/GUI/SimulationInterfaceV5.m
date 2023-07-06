@@ -1099,8 +1099,12 @@ function CreateMechanism_Callback(hObject, eventdata, handles)  %#ok<INUSL>
 Data = Holder({});
 [h] = CreateMechanismInterface(Data);
 uiwait(h);
-handles.Model.addConverter(LinRotMechanism(handles.Model,...
-    Data.vars{1},Data.vars{2}));
+if ~isempty(Data.vars)
+    handles.Model.addConverter(LinRotMechanism(handles.Model,...
+        Data.vars{1},Data.vars{2}));
+else
+    fprintf("No mechanism created\n");
+end
 end
 
 % --- Executes on button press in Animate.
