@@ -533,7 +533,7 @@ classdef Model < handle
             isit = this.isStateDiscretized;
         end
         function MeshCounts = discretize(this, run)
-            if isempty(this.Groups.Bodies)
+            if isempty(this.Groups(1).Bodies)
                 MeshCounts = 0;
                 return
             end
