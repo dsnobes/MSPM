@@ -1161,8 +1161,8 @@ classdef Matrix < handle
                                     this.Nodes(ncount).xmin = xs(i);
                                     this.Nodes(ncount).xmax = xs(i+1);
                                     % Suspect that ys sould be using index j, as in loop head (fixed)
-                                    this.Nodes(ncount).ymin = ys(j,:); %Matthias
-                                    this.Nodes(ncount).ymax = ys(j+1,:); %Matthias
+                                    this.Nodes(ncount).ymin = ys(j); %Matthias
+                                    this.Nodes(ncount).ymax = ys(j+1); %Matthias
                                     %                   this.Nodes(ncount).ymin = ys(i,:);
                                     %                   this.Nodes(ncount).ymax = ys(i+1,:);
                                     this.Nodes(ncount).Type = enumNType.SN;
