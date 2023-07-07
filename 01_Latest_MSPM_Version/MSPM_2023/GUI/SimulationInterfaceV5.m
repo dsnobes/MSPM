@@ -273,6 +273,10 @@ if h.IndexC == 4
             'PromptString','Select a material type for this new body:',...
             'SelectionMode','single',...
             'ListString',Material.Source);
+        
+        if ~tf
+            break
+        end
     end
     if tf
         newBody = Body(...
@@ -592,7 +596,7 @@ if ~isempty(names)
         'ListString',names,...
         'SelectionMode','single',...
         'ListSize',[1000 800]);
-
+    
 end
 
 if tf
@@ -1023,29 +1027,29 @@ if h.OptimizationStudyIndex == 0
     if ~isempty(h.Model.OptimizationSchemes)
         h.OptimizationStudyIndex = h.Model.OptimizationSchemes(1).ID;
         set(h.OptStudyName,'String',h.Model.OptimizationSchemes(1).name);
-    % If no created studies, set to "Create New Study"
+        % If no created studies, set to "Create New Study"
     else
         set(h.OptStudyName,'String','Create New Study');
     end
     % Update the GUI
     guidata(hObject,h);
     return;
-
-% If a study is selected, get the next one
+    
+    % If a study is selected, get the next one
 else
     newIndex = h.OptimizationStudyIndex + 1;
-
+    
     % Check if we have gone over the end of the list
     % If we have, set to "Create New Study"
     if newIndex > length(h.Model.OptimizationSchemes)
         h.OptimizationStudyIndex = 0;
         set(h.OptStudyName,'String','Create New Study');
-    % Otherwise, set to the new ID
+        % Otherwise, set to the new ID
     else
         h.OptimizationStudyIndex = h.Model.OptimizationSchemes(newIndex).ID;
         set(h.OptStudyName,'String',h.Model.OptimizationSchemes(newIndex).name);
     end
-
+    
     % Update the GUI
     guidata(hObject,h);
 end
@@ -1850,9 +1854,9 @@ function DispNodeIDs_Callback(hObject, ~, h)
 value = get(hObject,'Value');
 if value
     crun = struct('Model',h.Model.name,...
-    'title',[h.Model.name ' test: ' date],...
-    'rpm',h.Model.engineSpeed,...
-    'NodeFactor',h.Model.deRefinementFactorInput);
+        'title',[h.Model.name ' test: ' date],...
+        'rpm',h.Model.engineSpeed,...
+        'NodeFactor',h.Model.deRefinementFactorInput);
     try
         h.Model.discretize(crun);
     catch
@@ -2064,8 +2068,26 @@ function ScaleModel_Callback(~, ~, h)
 scale_value = '';
 while ~isnumeric(scale_value) || scale_value <= 0 || isnan(scale_value)
     scale_value_cell = inputdlg('Scale the model by:');
-    scale_value = str2double(scale_value_cell{1});
+    if isempty(scale_value_cell)
+        disp("Please provide a scaling value. Scaling Canceled")
+        return
+    else
+        if isempty(scale_value_cell{1})
+            disp("Please provide a scaling value. Scaling Canceled")
+            return
+        else
+            scale_value = str2double(scale_value_cell{1});
+        end
+    end
 end
+
+% Create progressbar for scaling
+progressbar(...
+    'Scaling',...
+    'Motion',...
+    'Connections',...
+    'Sensors'...
+    )
 
 % Scale motion
 for j = 1:length(h.Model.Converters)
@@ -2076,14 +2098,19 @@ for j = 1:length(h.Model.Converters)
     origin_in{2,1} = num2str(str2double(origin_in{2,1}).*scale_value);
     % Apply the change to the converter
     iConverter.Populate(iConverter.Type, origin_in)
+    progressbar([], j/length(h.Model.Converters), [], [])
 end
 
+progressbar(1/3, 1, [], [])
+
 % Go through all the connections in the group and multiply their value by 2
+
 for j = 1:length(h.Model.Groups)
     iGroup = h.Model.Groups(j);
     for i = 1:length(iGroup.Connections)
         iConn = h.Model.Groups.Connections(i);
         iConn.x =  (iConn.x).*scale_value;
+        progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [])
         for k = 1:length(iGroup.Bodies)
             iBody = h.Model.Groups.Bodies(k);
             iBody.update();
@@ -2093,22 +2120,25 @@ for j = 1:length(h.Model.Groups)
     % Update each group
     iGroup.update()
 end
+progressbar(2/3, [], 1, [])
 
 % Update all sensors
 for j = 1:length(h.Model.Sensors)
     iSensor = h.Model.Sensors(j);
     iSensor.update()
+    progressbar([],[],[],j./length(h.Model.Sensors))
 end
+
 
 % Update the model
 h.Model.update()
+progressbar(1)
 
 % Redraw the model
-cla;
 show_Model(h);
-drawnow(); pause(0.05);
 
 disp("Done Scaling")
+
 
 end
 
@@ -2197,7 +2227,7 @@ end
 
 if pos == 1
     % no bodies, would have error below
-    disp(['The total volume (excl. HX and regenerator) is: ', num2str(0), ' L'])
+    disp(['The total volume (excl. "Crank Case") is: ', num2str(0), ' L'])
     return
 end
 % Go through all the volumes and add them
