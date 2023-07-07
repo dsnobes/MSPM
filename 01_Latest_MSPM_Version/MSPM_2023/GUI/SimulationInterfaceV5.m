@@ -1355,6 +1355,24 @@ h.Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
 h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
 h.Model.animationFrameTime = str2double(get(h.AnimationFrameTime,'String'));
 
+%% Check the file name vs the model name
+% Get the filename
+filename_array = strsplit(name, '\');
+filename = filename_array{end};
+filename = filename(1:(end-4));
+
+% Get the model name
+model_name = h.Model.name;
+
+% If the names are different, change the model name to match the filename
+if ~strcmp(filename, model_name)
+    disp("Filename does not match name of model. Model name was changed to match filename")
+    h.Model.name = filename;
+    % Save the new filename
+    saveME(h.Model)
+end
+    
+% Show the model in the GUI
 cla;
 show_Model(h);
 drawnow(); pause(0.05);
