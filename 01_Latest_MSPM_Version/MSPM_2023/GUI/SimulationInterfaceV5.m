@@ -1130,6 +1130,34 @@ else
 end
 end
 
+function DeleteMotion_Callback(hObject, eventdata, handles)
+    if ~isempty(handles.Model.Converters)
+        % Get the lin to rotational converters
+        motions = handles.Model.Converters;
+
+        % Get the names of all the converters
+        names = cell(length(motions), 1);
+        for motion = 1:length(motions)
+            names{motion} = motions(motion).name;
+        end
+
+        % Create a list to delete the motions
+        if ~isempty(names)
+            [indx, tf] = listdlg(...
+                'PromptString','Select Linear to Rotational Mechanisms to Remove',...
+                'ListString',names,'ListSize',[1000 800]);
+            if tf
+                toKeep = true(length(names),1);
+                toKeep(indx) = false;
+                handles.Model.Converters(~toKeep) = [];
+            end
+        end
+    end
+
+
+
+end
+
 % --- Executes on button press in Animate.
 function Animate_Callback(hObject, ~, handles)
 % Temporarily turn off connections, ghosts, groups... etc.
