@@ -9,6 +9,8 @@ classdef Body < handle
         ActiveColor = [0 1 0];
         NormalColor = [0 0 0];
         InvalidColor = [1 0 0];
+        % Added color if there is a matrix element
+        MatrixColor = [0.85 1 1];
     end
 
     properties (Hidden)
@@ -1034,7 +1036,9 @@ classdef Body < handle
             % this.removeFromFigure(AxisReference);
 
             if this.isValid
-                if ~isempty(this.matl) && ~isempty(this.matl.Color)
+                if ~isempty(this.Matrix)
+                    fillcolor = Body.MatrixColor;
+                elseif ~isempty(this.matl) && ~isempty(this.matl.Color)
                     fillcolor = this.matl.Color;
                 else
                     fillcolor = Body.MaterialUndefinedColor;
