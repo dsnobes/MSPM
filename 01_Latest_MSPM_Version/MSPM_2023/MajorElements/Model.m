@@ -4118,7 +4118,7 @@ classdef Model < handle
                             response = questdlg('Would you like to save a SnapShot?', ...
                                 'Save SnapShot','Yes','No','Yes');
                             if strcmp(response,'Yes')
-                                ME.Results.getSnapShot(ME,getProperName('SnapShot'), true);
+                                ME.Results.getSnapShot(ME,getProperName('SnapShot', {ME.name}), true);
                             end
                         end
                     end
