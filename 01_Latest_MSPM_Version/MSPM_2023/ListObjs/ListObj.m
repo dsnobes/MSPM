@@ -81,8 +81,24 @@ classdef ListObj < handle
                     % this source is used as an input into the child's constructor
                     % Bring up a user form
                     if ischar(this.Child)
+                        % Make a copy of the parent for Matrix Changes
+                        if strcmp(this.Child, 'Change Matrix')
+                            parentCopy = this.Parent;
+                        end
+
+                        % Get the item and modify
                         Item = get(this.Parent,this.Child);
                         Item.Modify();
+
+                        % For Changing a body's matrix
+                        if strcmp(this.Child, 'Change Matrix')
+                            if isempty(Item.Dh)
+                                % Revert the parent to the unmodified version
+                                this.Parent = parentCopy;
+                                return
+                            end
+                        end
+
                         if strcmp(this.Child, 'Material')
                             this.Parent.show(gca);
                         end

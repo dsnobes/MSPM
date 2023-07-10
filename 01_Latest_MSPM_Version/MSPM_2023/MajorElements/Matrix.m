@@ -132,6 +132,10 @@ classdef Matrix < handle
             % define Material
             if isempty(this.matl); this.matl = Material(); end
             this.matl.Modify();
+            if isempty(this.matl.name)
+                disp("No material selected. Matrix Creation Failed")
+                return
+            end
 
             % define Geometry
             if ~isempty(this.Geometry)
@@ -140,9 +144,13 @@ classdef Matrix < handle
                 end
             else; index = 1;
             end
-            index = listdlg('ListString',this.GeometrySource,...
+            [index, tf] = listdlg('ListString',this.GeometrySource,...
                 'SelectionMode','single',...
                 'InitialValue',index);
+            if ~tf
+                disp("No Geometry Selected. Matrix Creation Failed")
+                return
+            end
             if isempty(this.GeometryEnum); this.assignGeometryEnum(); end
             this.Geometry = this.GeometryEnum(index);
 
@@ -379,9 +387,11 @@ classdef Matrix < handle
                             end
                         end
                         if ~found; index = 1; end
-                        index = listdlg('ListString',Source,'SelectionMode','single','InitialValue',index,'ListSize',[300 350]); % [W H] Default: [160 300]
-                        if isempty(this.data); this.data = struct('Classification',Source{index});
-                        else; this.data.Classification = Source{index}; end
+                        [index, tf] = listdlg('ListString',Source,'SelectionMode','single','InitialValue',index,'ListSize',[300 350]); % [W H] Default: [160 300]
+                        if tf
+                            if isempty(this.data); this.data = struct('Classification',Source{index});
+                            else; this.data.Classification = Source{index}; end
+                        end
 
                         % If the User Made a selection
                         if index > 0
@@ -944,7 +954,8 @@ classdef Matrix < handle
                                     this.data.hasSource = true;
                             end
                         else
-                            fprintf('XXX Matrix not finished XXX\n');
+                            fprintf('HX Type Not Selected. Matrix Creation Failed\n');
+                            % this.Geometry = [];
                             return;
                         end
                     end
@@ -2098,7 +2109,7 @@ classdef Matrix < handle
         %% End of Discretize
         % get Properties
         function name = get.name(this)
-            if ~isempty(this.Geometry)
+            if ~isempty(this.Geometry) && ~isempty(this.Dh)
                 for index = 1:length(this.GeometryEnum)
                     if this.GeometryEnum(index) == this.Geometry
                         break;
