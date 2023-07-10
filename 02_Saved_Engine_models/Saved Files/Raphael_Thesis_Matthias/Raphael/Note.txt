@@ -1,3 +1,0 @@
-The first file '*one_exp_body.mat' is the model without displacer piston seal in Matthias thesis (variants A and B).
-The second file '*_DPseal.mat' is the model with a perfect displacer piston seal (variants C and D).
-'*SENSOR_IMG.mat' has most sensors removed to render the relavant sensors for the figure in Matthias thesis.

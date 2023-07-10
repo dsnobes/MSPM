@@ -1350,6 +1350,13 @@ h.Model.showVelocityAnimation = get(h.ShowVelocityAnimation,'Value');
 h.Model.recordVelocity = get(h.RecordVelocity,'Value');
 h.Model.showTurbulenceAnimation = get(h.ShowTurbulenceAnimation,'Value');
 h.Model.recordTurbulence = get(h.RecordTurbulence,'Value');
+% Added missing toggles
+% The GUI "h" have an uppecase first letter, the Model has a lowercase
+h.Model.showConductionAnimation = get(h.ShowConductionAnimation,'Value');
+h.Model.recordConductionFlux = get(h.RecordConductionFlux,'Value');
+h.Model.showPressureDropAnimation = get(h.ShowPressureDropAnimation,'Value');
+h.Model.recordPressureDrop = get(h.RecordPressureDrop,'Value');
+
 h.Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
 % h.Model.outputPath= get(h.OutputPath,'String');
 h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
@@ -1806,14 +1813,14 @@ if (value ~= h.Model.recordTurbulence)
 end
 if ~value
     set(h.ShowTurbulenceAnimation,'Value',value);
-    ShowTurbulenceAnimation_Callback(h.ShowVelocityAnimation,[],h);
+    ShowTurbulenceAnimation_Callback(h.ShowTurbulenceAnimation,[],h);
 end
 end
 
 function ShowConductionAnimation_Callback(hObject, ~, h)
 value = get(hObject,'Value');
 if (value ~= h.Model.showConductionAnimation)
-    h.Model.showTurbulenceAnimation = value;
+    h.Model.showConductionAnimation = value;
 end
 if value
     set(h.RecordConductionFlux,'Value',value);
@@ -1824,7 +1831,7 @@ end
 function RecordConductionFlux_Callback(hObject, ~, h)
 value = get(hObject,'Value');
 if (value ~= h.Model.recordConductionFlux)
-    h.Model.recordTurbulence = value;
+    h.Model.recordConductionFlux = value;
 end
 if ~value
     set(h.ShowConductionAnimation,'Value',value);
@@ -1838,8 +1845,8 @@ if (value ~= h.Model.showPressureDropAnimation)
     h.Model.showPressureDropAnimation = value;
 end
 if value
-    set(h.recordPressureDrop,'Value',value);
-    recordPressureDrop_Callback(h.recordPressureDrop,[],h);
+    set(h.RecordPressureDrop,'Value',value);
+    recordPressureDrop_Callback(h.RecordPressureDrop,[],h);
 end
 end
 
@@ -1849,8 +1856,8 @@ if (value ~= h.Model.recordPressureDrop)
     h.Model.recordPressureDrop = value;
 end
 if ~value
-    set(h.PressureDropAnimation,'Value',value);
-    PressureDropAnimation_Callback(h.PressureDropAnimation,[],h);
+    set(h.ShowPressureDropAnimation,'Value',value);
+    PressureDropAnimation_Callback(h.ShowPressureDropAnimation,[],h);
 end
 end
 
