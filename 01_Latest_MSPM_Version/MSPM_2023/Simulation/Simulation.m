@@ -1280,7 +1280,7 @@ classdef Simulation < handle
                     ME.REcrit(indnminus) = 200*max(ReCritComparitor);
                     TurbTime = 0;
                     steps = ME.Fc_K12 > 0;
-                    while TurbTime < h
+                    while (TurbTime + 1E-14) < h
                         ME.Fc_turb =  0.5*(ME.turb(nd1) + ME.turb(nd2));
                         h_turb = h - TurbTime;
                         dturb_dt = zeros(lenn,1);
