@@ -111,7 +111,7 @@ function Model = load_sub(name, h)
     Model.showTurbulenceAnimation = get(h.ShowTurbulenceAnimation,'Value');
     Model.recordTurbulence = get(h.RecordTurbulence,'Value');
     Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
-    Model.outputPath= get(h.OutputPath,'String');
+    % Model.outputPath= get(h.OutputPath,'String');
     Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
     Model.animationFrameTime = str2double(get(h.AnimationFrameTime,'String'));
 end
