@@ -5068,7 +5068,15 @@ classdef Model < handle
         function saveME(Model)
             % Surpress the recursion limit warning
             warning('off', 'MATLAB:loadsave:saveRecursionLimit')
-            
+
+            % Reset the discritization
+            Model.resetDiscretization();
+
+            % Save then clear the model save/run location
+            save_location = Model.save_location
+            Model.save_location = '';
+            Model.run_location = '';
+
             Model.Faces(:) = [];
             Model.Nodes(:) = [];
             Model.Simulations(:) = [];
@@ -5108,7 +5116,8 @@ classdef Model < handle
                 iBridge.GUIObjects(:) = [];
                 iBridge.Faces(:) = [];
             end
-            save([Model.save_location, Model.name '.mat'],'Model');
+
+            save([save_location, Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
             

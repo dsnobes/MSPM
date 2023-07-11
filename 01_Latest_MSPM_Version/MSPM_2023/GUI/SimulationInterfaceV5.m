@@ -1338,8 +1338,8 @@ newfile = [h.save_location, name, '.mat'];
 Model = h.Model; %#ok<NASGU>
 
 % Apply save locations to the model
-Model.save_location = h.save_location;
-Model.run_location = h.run_location;
+% Model.save_location = h.save_location;
+% Model.run_location = h.run_location;
 
 Model.saveME();
 h.Model.AxisReference = backupAxis;
