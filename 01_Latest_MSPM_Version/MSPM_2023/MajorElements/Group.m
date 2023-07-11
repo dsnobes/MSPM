@@ -268,6 +268,9 @@ classdef Group < handle
             fprintf(['Cleaned up Connections in Group ' this.name '.\n']);
         end
         function fixDatum(this)
+            % Clean up connections first
+            this.cleanUpConnections();
+            
             offset = 0;
             for iCon = this.Connections
                 if iCon.Orient == enumOrient.Horizontal && iCon.x < offset
