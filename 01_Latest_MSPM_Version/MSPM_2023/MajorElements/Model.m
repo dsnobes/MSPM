@@ -5073,7 +5073,7 @@ classdef Model < handle
             Model.resetDiscretization();
 
             % Save then clear the model save/run location
-            savelocation = Model.save_location;
+            load('parameters.mat', 'parameters')
             Model.save_location = '';
             Model.run_location = '';
 
@@ -5117,7 +5117,7 @@ classdef Model < handle
                 iBridge.Faces(:) = [];
             end
 
-            save([savelocation, Model.name '.mat'],'Model');
+            save([parameters.savelocation, Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
             

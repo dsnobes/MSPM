@@ -9,7 +9,7 @@ function [RunConditions] = Raphael_New_HX_Speed_vs_Work_Plots()
 %% Input Parameters
 % Name of experimental data files.
 model = {
-   'Original Raphael New HX - Updated H' 
+   'Raphael New HX - No Disp Heater - Air - Changed Mesh' 
     }; % Name of MSPM model geometry.
 
 pressures = [300, 435, 570] .*1000; % [Pa]

@@ -1905,7 +1905,7 @@ end
 
 function DispNodeIDs_Callback(hObject, ~, h)
 value = get(hObject,'Value');
-if value
+if ~h.Model.isStateDiscretized
     crun = struct('Model',h.Model.name,...
         'title',[h.Model.name ' test: ' date],...
         'rpm',h.Model.engineSpeed,...
@@ -2139,6 +2139,7 @@ progressbar(...
     'Scaling',...
     'Motion',...
     'Connections',...
+    'Bodies',...
     'Sensors'...
     )
 
@@ -2154,7 +2155,7 @@ for j = 1:length(h.Model.Converters)
     progressbar([], j/length(h.Model.Converters), [], [])
 end
 
-progressbar(1/3, 1, [], [])
+progressbar(1/3, 1, [], [], [])
 
 % Go through all the connections in the group and multiply their value by 2
 
@@ -2163,11 +2164,13 @@ for j = 1:length(h.Model.Groups)
     for i = 1:length(iGroup.Connections)
         iConn = h.Model.Groups.Connections(i);
         iConn.x =  (iConn.x).*scale_value;
-        progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [])
-        for k = 1:length(iGroup.Bodies)
-            iBody = h.Model.Groups.Bodies(k);
-            iBody.update();
-        end
+        progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [], [])
+    end
+
+    for k = 1:length(iGroup.Bodies)
+        iBody = h.Model.Groups.Bodies(k);
+        iBody.update();
+        progressbar([], [], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Bodies)), [])
     end
     
     % Update each group
@@ -2179,7 +2182,7 @@ progressbar(2/3, [], 1, [])
 for j = 1:length(h.Model.Sensors)
     iSensor = h.Model.Sensors(j);
     iSensor.update()
-    progressbar([],[],[],j./length(h.Model.Sensors))
+    progressbar([],[],[],[],j./length(h.Model.Sensors))
 end
 
 
