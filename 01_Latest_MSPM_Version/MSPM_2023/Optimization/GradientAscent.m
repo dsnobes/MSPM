@@ -193,7 +193,7 @@ function [History] = GradientAscent(...
         Model.warmUpPhaseLength = 0;
         Model.deRefinementFactorInput = 1;
         Model.RelationOn = true;
-        save(Model.name,'Model');
+        saveME(Model);
     
         % Initialize Recording
         % ... Struct that provides the class-field names and value, as well as goal
@@ -217,6 +217,8 @@ function [History] = GradientAscent(...
         Scale = 1;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         local_scale = 1;
+        pressure_scale = local_scale.*10000000;
+        rpm_scale = local_scale .* 1000;
         %EPara2 = ones(size(shifts))*0.01;
         %EGrad2 = ones(size(shifts));
     
@@ -247,9 +249,9 @@ function [History] = GradientAscent(...
             for i = 1:length(History.Names)
                 for j = 1:length(Study.History.Names)
                     if strcmp(History.Names{i},Study.History.Names{j}) % two for loops and if that do nothing? #33
-                        %         EPara2(i) = Study.History.EPara2(j);
-                        %         EGrad2(i) = Study.History.EGrad2(j);
-                        %         gradient(i) = Study.History.gradient(j);
+                        % EPara2(i) = Study.History.EPara2(j);
+                        % EGrad2(i) = Study.History.EGrad2(j);
+                        % gradient(i) = Study.History.gradient(j);
                         break;
                     end
                 end
@@ -324,11 +326,12 @@ function [History] = GradientAscent(...
             % With Scale=1, a shift in a single variable is limited to 0.005m or rpm or
             % Pa. This makes sense for locations in (m) but is way too small for
             % optimizing speed or pressure! --> Vary 'Scale'
-            if max(abs(shifts)) > Scale*0.005
-                shifts = Scale*shifts*0.005/max(abs(shifts));
-            elseif max(abs(shifts)) < Scale*0.0002
-                %         elseif max(abs(shifts)) < Scale*0.002
-                shifts = Scale*shifts*0.002/max(abs(shifts));
+            for ind = 1:length(shifts)
+                if abs(shifts(ind)) > Scale*0.005
+                    shifts(ind) = Scale*shifts(ind)*0.005/abs(shifts(ind));
+                elseif abs(shifts(ind)) < Scale*0.0002
+                    shifts(ind) = Scale*shifts(ind)*0.002/abs(shifts(ind));
+                end
             end
     
             fprintf('\nShifts: ')
@@ -383,13 +386,13 @@ function [History] = GradientAscent(...
                 if mod_pressure
                     backup(pressure_ind) = RunConditions.EnginePressure;
                     RunConditions.EnginePressure = min(options.MaxPressure,...
-                        max(options.MinPressure,RunConditions.EnginePressure + local_scale * shifts(pressure_ind)));
+                        max(options.MinPressure,RunConditions.EnginePressure + pressure_scale * shifts(pressure_ind)));
                     fprintf(['Shifting Pressure by ' num2str(RunConditions.EnginePressure-backup(pressure_ind)) ' Pa\n']);
                 end
                 if mod_speed
                     backup(speed_ind) = RunConditions.rpm;
                     RunConditions.rpm = min(options.MaxSpeed,...
-                        max(options.MinSpeed,RunConditions.rpm + local_scale * shifts(speed_ind)));
+                        max(options.MinSpeed,RunConditions.rpm + rpm_scale * shifts(speed_ind)));
                     fprintf(['Shifting Speed by ' num2str(RunConditions.rpm-backup(speed_ind)) ' rpm\n']);
                 end
     
@@ -428,13 +431,15 @@ function [History] = GradientAscent(...
                     if mod_pressure; RunConditions.EnginePressure = backup(pressure_ind); end
                     if mod_speed; RunConditions.rpm = backup(speed_ind); end
                     Power = power_backup;
-                    save(Model.name,'Model');
+                    saveME(Model);
                     if stepcount == 1 && trial < 3
                         % We overstepped this point, but the gradient is still valid
                         % shifts = shifts;
                         trial = trial + 1;
                         increasing = true;
                         local_scale = local_scale / 2;
+                        pressure_scale = local_scale.*10000000;
+                        rpm_scale = local_scale .* 1000;
                     else
                         local_scale = 1;
                         stepcount = 1;
@@ -498,7 +503,7 @@ function [History] = GradientAscent(...
         History.Scale = Scale;
         History.gradient = gradient;
         Study.History = History;
-        save(Model.name,'Model');
+        saveME(Model);
     
         % Record Matrix of Body Sizes
         for iGroup = Model.Groups
@@ -531,8 +536,12 @@ function [History] = GradientAscent(...
 end
 
 function [Parameter, success, ShaftPower, statistics] = RunSubFunction(Model, RunConditions, options)
-    [success] = Model.Run(RunConditions);
+    % Add model and run save location to the model
     load('Config Files\parameters.mat', 'parameters')
+    Model.run_location = parameters.runlocation;
+    Model.save_location = parameters.savelocation;
+    
+    [success] = Model.Run(RunConditions);
     addpath([parameters.runlocation, RunConditions.title]);
     try
         load([RunConditions.title '_Statistics'],'statistics');
@@ -640,18 +649,19 @@ function [grad, History, RunCon] = getShiftRunCon(grad,History,...
     Model,RunCon,Field,MinVal,MaxVal,options)
     success = false;
     backup = RunCon.(Field);
-    while ~success
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Modify amount of shift in pressure and speed
         % Might want to increase these since the change in power resulting from
         % these miniscule changes in speed/pressure may be smaller than the
         % solver uncertainty from its convergence tolerance.
         if strcmp(Field,'EnginePressure')
-            modshift = 100;
+            modshift = 10000;
         elseif strcmp(Field,'rpm')
             modshift = 0.1;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+    while ~success
         RunCon.(Field) = min(MaxVal,max(MinVal,backup + modshift));
         fprintf(['\nRunning test to get gradient for ' Field '\n'])
         [Power, success, ~, ~] = RunSubFunction(Model,RunCon,options);

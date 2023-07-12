@@ -8,8 +8,8 @@ function [RunConditions] = Optimization_Test()
 
 %% Input Parameters
 pressure = 300.*1000; % [Pa]
-speed = 100; % [rpm]
-simTime = 600; %(s) Simulation time.
+speed = 120; % [rpm]
+simTime = 1; %(s) Simulation time.
 minCycles = 10; % minimum number of engine cycles to complete before turning to steady state.
 SS = true; % Steady state toggle.
 movement_option = 'C';
@@ -31,10 +31,12 @@ NodeFactor = 1;
       'SinkTemp',5 + 273.15,... [K]
       'EnginePressure',pressure,...
       'NodeFactor',NodeFactor,...
-      'Uniform_Scale',1,...
+      'SpeedBounds', [120 500],...
+      'PressureBounds', [100000, 500000],...
       'HX_Convection', 1);
       %'PressureBounds',[101325 10*101325],...
       %'SpeedBounds',[20 1000]);
+      
 
 
 
