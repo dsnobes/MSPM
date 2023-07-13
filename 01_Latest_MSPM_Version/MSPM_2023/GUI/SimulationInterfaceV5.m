@@ -2117,19 +2117,27 @@ show_Model(h);
 end
 
 function ScaleModel_Callback(~, ~, h)
+% Set up the prompt to ask for scale
+prompt = {'Scale axially by:', 'Scale radially by:'};
+dlgtitle = 'Scale Model';
+dims = [1 40];
+definput = {'1', '1'};
+
 % Get the scale value from the user
-scale_value = '';
-while ~isnumeric(scale_value) || scale_value <= 0 || isnan(scale_value)
-    scale_value_cell = inputdlg('Scale the model by:');
+a_scale = '';
+r_scale = '';
+while ~isnumeric(a_scale) || a_scale <= 0 || isnan(a_scale) || ~isnumeric(r_scale) || r_scale <= 0 || isnan(r_scale)
+    scale_value_cell = inputdlg(prompt,dlgtitle,dims,definput);
     if isempty(scale_value_cell)
         disp("Please provide a scaling value. Scaling Canceled")
         return
     else
-        if isempty(scale_value_cell{1})
+        if isempty(scale_value_cell{1}) || isempty(scale_value_cell{2})
             disp("Please provide a scaling value. Scaling Canceled")
             return
         else
-            scale_value = str2double(scale_value_cell{1});
+            a_scale = str2double(scale_value_cell{1});
+            r_scale = str2double(scale_value_cell{2});
         end
     end
 end
@@ -2149,7 +2157,7 @@ for j = 1:length(h.Model.Converters)
     % Get the original input
     origin_in = iConverter.originalInput;
     % Update the stroke in the input
-    origin_in{2,1} = num2str(str2double(origin_in{2,1}).*scale_value);
+    origin_in{2,1} = num2str(str2double(origin_in{2,1}).*a_scale);
     % Apply the change to the converter
     iConverter.Populate(iConverter.Type, origin_in)
     progressbar([], j/length(h.Model.Converters), [], [])
@@ -2157,13 +2165,17 @@ end
 
 progressbar(1/3, 1, [], [], [])
 
-% Go through all the connections in the group and multiply their value by 2
-
+% Go through all the connections in the group and scale appropriately
 for j = 1:length(h.Model.Groups)
     iGroup = h.Model.Groups(j);
     for i = 1:length(iGroup.Connections)
         iConn = h.Model.Groups.Connections(i);
-        iConn.x =  (iConn.x).*scale_value;
+        switch iConn.Orient
+            case enumOrient.Vertical
+                iConn.x =  (iConn.x).*r_scale;
+            case enumOrient.Horizontal
+                iConn.x =  (iConn.x).*a_scale;
+        end
         progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [], [])
     end
 
