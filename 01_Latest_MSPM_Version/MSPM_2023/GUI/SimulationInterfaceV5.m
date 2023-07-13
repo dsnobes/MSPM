@@ -1913,8 +1913,8 @@ if (value ~= h.Model.showReynoldsAnimation)
     h.Model.showReynoldsAnimation = value;
 end
 if value
-    set(h.recordReynolds,'Value',value);
-    recordPressureDrop_Callback(h.recordReynolds,[],h);
+    set(h.RecordReynolds,'Value',value);
+    recordPressureDrop_Callback(h.RecordReynolds,[],h);
 end
 end
 
@@ -1924,8 +1924,8 @@ if (value ~= h.Model.recordReynolds)
     h.Model.recordReynolds = value;
 end
 if ~value
-    set(h.showReynoldsAnimation,'Value',value);
-    PressureDropAnimation_Callback(h.showReynoldsAnimation,[],h);
+    set(h.ShowReynoldsAnimation,'Value',value);
+    PressureDropAnimation_Callback(h.ShowReynoldsAnimation,[],h);
 end
 end
 
