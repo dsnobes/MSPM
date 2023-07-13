@@ -1131,28 +1131,28 @@ end
 end
 
 function DeleteMotion_Callback(hObject, eventdata, handles)
-    if ~isempty(handles.Model.Converters)
-        % Get the lin to rotational converters
-        motions = handles.Model.Converters;
-
-        % Get the names of all the converters
-        names = cell(length(motions), 1);
-        for motion = 1:length(motions)
-            names{motion} = motions(motion).name;
-        end
-
-        % Create a list to delete the motions
-        if ~isempty(names)
-            [indx, tf] = listdlg(...
-                'PromptString','Select Linear to Rotational Mechanisms to Remove',...
-                'ListString',names,'ListSize',[1000 800]);
-            if tf
-                toKeep = true(length(names),1);
-                toKeep(indx) = false;
-                handles.Model.Converters(~toKeep) = [];
-            end
+if ~isempty(handles.Model.Converters)
+    % Get the lin to rotational converters
+    motions = handles.Model.Converters;
+    
+    % Get the names of all the converters
+    names = cell(length(motions), 1);
+    for motion = 1:length(motions)
+        names{motion} = motions(motion).name;
+    end
+    
+    % Create a list to delete the motions
+    if ~isempty(names)
+        [indx, tf] = listdlg(...
+            'PromptString','Select Linear to Rotational Mechanisms to Remove',...
+            'ListString',names,'ListSize',[1000 800]);
+        if tf
+            toKeep = true(length(names),1);
+            toKeep(indx) = false;
+            handles.Model.Converters(~toKeep) = [];
         end
     end
+end
 
 
 
@@ -1385,6 +1385,10 @@ h.Model.recordConductionFlux = get(h.RecordConductionFlux,'Value');
 h.Model.showPressureDropAnimation = get(h.ShowPressureDropAnimation,'Value');
 h.Model.recordPressureDrop = get(h.RecordPressureDrop,'Value');
 
+% Added reynolds number
+h.Model.showReynoldsAnimation = get(h.ShowReynoldsAnimation,'Value');
+h.Model.recordReynolds = get(h.RecordReynolds,'Value');
+
 h.Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
 % h.Model.outputPath= get(h.OutputPath,'String');
 h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
@@ -1406,7 +1410,7 @@ if ~strcmp(filename, model_name)
     % Save the new filename
     saveME(h.Model)
 end
-    
+
 % Show the model in the GUI
 cla;
 show_Model(h);
@@ -1903,6 +1907,28 @@ if (value ~= h.Model.recordStatistics)
 end
 end
 
+function ReynoldsAnimation_Callback(hObject,~,h)
+value = get(hObject,'Value');
+if (value ~= h.Model.showReynoldsAnimation)
+    h.Model.showReynoldsAnimation = value;
+end
+if value
+    set(h.recordReynolds,'Value',value);
+    recordPressureDrop_Callback(h.recordReynolds,[],h);
+end
+end
+
+function recordReynolds_Callback(hObject,~,h)
+value = get(hObject,'Value');
+if (value ~= h.Model.recordReynolds)
+    h.Model.recordReynolds = value;
+end
+if ~value
+    set(h.showReynoldsAnimation,'Value',value);
+    PressureDropAnimation_Callback(h.showReynoldsAnimation,[],h);
+end
+end
+
 function DispNodeIDs_Callback(hObject, ~, h)
 value = get(hObject,'Value');
 if ~h.Model.isStateDiscretized
@@ -2178,7 +2204,7 @@ for j = 1:length(h.Model.Groups)
         end
         progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [], [])
     end
-
+    
     for k = 1:length(iGroup.Bodies)
         iBody = h.Model.Groups.Bodies(k);
         iBody.update();
