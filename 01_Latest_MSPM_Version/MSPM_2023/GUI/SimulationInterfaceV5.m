@@ -2178,15 +2178,17 @@ progressbar(...
     )
 
 % Scale motion
-for j = 1:length(h.Model.Converters)
-    iConverter = h.Model.Converters(j);
-    % Get the original input
-    origin_in = iConverter.originalInput;
-    % Update the stroke in the input
-    origin_in{2,1} = num2str(str2double(origin_in{2,1}).*a_scale);
-    % Apply the change to the converter
-    iConverter.Populate(iConverter.Type, origin_in)
-    progressbar([], j/length(h.Model.Converters), [], [])
+if a_scale ~= 1
+    for j = 1:length(h.Model.Converters)
+        iConverter = h.Model.Converters(j);
+        % Get the original input
+        origin_in = iConverter.originalInput;
+        % Update the stroke in the input
+        origin_in{2,1} = num2str(str2double(origin_in{2,1}).*a_scale);
+        % Apply the change to the converter
+        iConverter.Populate(iConverter.Type, origin_in)
+        progressbar([], j/length(h.Model.Converters), [], [])
+    end
 end
 
 progressbar(1/3, 1, [], [], [])
