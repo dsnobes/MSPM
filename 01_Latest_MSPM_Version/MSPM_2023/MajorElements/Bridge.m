@@ -187,7 +187,7 @@ classdef Bridge < handle
                 %% Standard, same Orientation
                 % Validity Check
                 if Con1.Orient == enumOrient.Vertical
-                    if Con1.x ~= Con2.x
+                    if abs(Con1.x - Con2.x) > 1e-10
                         fprintf(['XXX Bridge: ' this.name ...
                             ' Failed to discretize due to incompatible radii']);
                         this.isDiscretized = false;
@@ -243,7 +243,7 @@ classdef Bridge < handle
                 %% Both Vertical, Offset
 
                 % Validity Check
-                if Con1.x ~= Con2.x
+                if abs(Con1.x - Con2.x) > 1e-10
                     fprintf(['XXX Bridge: ' this.name ...
                         ' Failed to discretize due to incompatible radii']);
                     this.isDiscretized = true;
