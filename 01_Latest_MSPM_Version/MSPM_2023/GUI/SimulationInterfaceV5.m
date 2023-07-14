@@ -1421,7 +1421,7 @@ function load_Callback(hObject, ~, h)
 % Asks the user if they want to save the current model
 % if True. Call save_Callback.
 
-if isempty(h.Model.Groups.Bodies)
+if isempty(h.Model.Groups(1).Bodies)
     model_is_empty = true;
 else
     model_is_empty = false;
