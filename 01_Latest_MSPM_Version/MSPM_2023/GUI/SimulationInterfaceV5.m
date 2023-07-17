@@ -227,6 +227,12 @@ if L && found == false % Left Click
     else
         Con = h.Model.ActiveGroup.FindConnection(...
             C,DIR,h.SelectCon(h.IndexC-1));
+        for connec = h.SelectCon
+            if connec == Con
+                disp("You cannot choose the same connection twice!!!")
+                return
+            end
+        end
         if ~isempty(Con)
             h.SelectCon(h.IndexC) = Con;
             fprintf(['Selected Connection: ' ...
