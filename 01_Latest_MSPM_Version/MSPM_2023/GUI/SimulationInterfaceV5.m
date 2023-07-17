@@ -227,6 +227,12 @@ if L && found == false % Left Click
     else
         Con = h.Model.ActiveGroup.FindConnection(...
             C,DIR,h.SelectCon(h.IndexC-1));
+        for connec = h.SelectCon
+            if connec == Con
+                disp("You cannot choose the same connection twice!!!")
+                return
+            end
+        end
         if ~isempty(Con)
             h.SelectCon(h.IndexC) = Con;
             fprintf(['Selected Connection: ' ...
@@ -2230,7 +2236,7 @@ progressbar(1/3, 1, [], [], [])
 for j = 1:length(h.Model.Groups)
     iGroup = h.Model.Groups(j);
     for i = 1:length(iGroup.Connections)
-        iConn = h.Model.Groups.Connections(i);
+        iConn = iGroup.Connections(i);
         switch iConn.Orient
             case enumOrient.Vertical
                 iConn.x =  (iConn.x).*r_scale;
@@ -2241,9 +2247,14 @@ for j = 1:length(h.Model.Groups)
     end
     
     for k = 1:length(iGroup.Bodies)
-        iBody = h.Model.Groups.Bodies(k);
+        iBody = iGroup.Bodies(k);
         iBody.update();
         progressbar([], [], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Bodies)), [])
+    end
+
+    % Scale the group positions
+    if r_scale ~= 1
+        iGroup.Position.x = iGroup.Position.x .* r_scale;
     end
     
     % Update each group

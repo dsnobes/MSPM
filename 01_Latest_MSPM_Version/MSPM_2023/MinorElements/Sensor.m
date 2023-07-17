@@ -1,13 +1,13 @@
 classdef Sensor < handle
     % models a Sensor in the Model,
     % which logs information throughout the cycle
-
+    
     properties (Constant)
         ActiveColor = [0 1 0];
         NormalColor = [1 0 1]; % magenta
     end
-
-
+    
+    
     properties
         name;
         Body;
@@ -21,27 +21,27 @@ classdef Sensor < handle
         PntCount; % Number of elements along a line
         Nodes; % Vector
         Interp; % Matrix
-
+        
         % Derived Components
         PlotCoordinates; % Vector 1xN
         LocalCoordinates;
-
+        
         isActive logical = false;
-
+        
         index = 0; % adding to the data set
         GUIObjects;
     end
-
+    
     methods
         function this = Sensor(Modelobj,Body)
             if nargin == 2
                 this.Body = Body;
                 this.Model = Modelobj;
                 this.index = 0;
-
+                
                 % Define the name
                 this.name = getProperName( 'Sensor' );
-
+                
                 % Define the location
                 notdone = true;
                 source = {...
@@ -58,7 +58,7 @@ classdef Sensor < handle
                     end
                 end
                 this.LocationStyle = source{index};
-
+                
                 % Define the independent variable
                 notdone = true;
                 source = {'Phase','Time'};
@@ -71,7 +71,7 @@ classdef Sensor < handle
                     end
                 end
                 this.averaging = index;
-
+                
                 % Define the dependent variable
                 notdone = true;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,7 +87,7 @@ classdef Sensor < handle
                     end
                 end
                 this.DataType = source{index};
-
+                
                 % Define the point count
                 switch this.LocationStyle
                     case {'Body xaxis','Body yaxis'}
@@ -274,7 +274,7 @@ classdef Sensor < handle
             this.index = 0;
             this.Data = [];
         end
-
+        
         function SourceData = getData(this,Simulation) % Changed the getter to return SourceData based off the structure, function is only used if a model has no sensors
             property = this.DataType;
             switch property
@@ -290,7 +290,7 @@ classdef Sensor < handle
                     SourceData = Simulation.RE(this.Nodes);
                 case 'U'
                     SourceData = Simulation.U(this.Nodes);
-
+                    
                 otherwise
                     fprintf(['XXX Property: ' property ...
                         ' not supported in the Sensor Class XXX\n']);
@@ -323,7 +323,7 @@ classdef Sensor < handle
                     end
             end
         end
-
+        
         function plotData(this,is_saving,ModelName)
             oldfigure = gcf;
             oldaxes = gca;
@@ -358,7 +358,7 @@ classdef Sensor < handle
                         case 2
                             a.YAxis.TickLabelFormat = '%.2f';
                     end
-
+                    
                     % Matthias: Added Re and U plot
                 case 'Re'
                     titleStr = [this.name ': Reynolds Number vs '];
@@ -378,7 +378,7 @@ classdef Sensor < handle
                         case 2
                             a.YAxis.TickLabelFormat = '%.2f';
                     end
-
+                    
             end
             switch this.dimensions
                 case 1
@@ -451,7 +451,7 @@ classdef Sensor < handle
                     end
                     ylabel(hcb, titleStr, 'Interpreter','none');
             end
-
+            
             if is_saving
                 frame = getframe(h);
                 im = frame2im(frame);
@@ -470,7 +470,7 @@ classdef Sensor < handle
                 save([str '.mat'],'data');
                 imwrite(imind,cm,[str '.jpg']);
             end
-
+            
             close(h);
             figure(oldfigure);
             axes(oldaxes);
@@ -520,16 +520,28 @@ classdef Sensor < handle
                 % It is a line
                 pos1 = RotMatrix(this.Body.Group.Position.Rot-pi/2)*this.LocalCoordinates(1,:)';
                 pos2 = RotMatrix(this.Body.Group.Position.Rot-pi/2)*this.LocalCoordinates(2,:)';
+
+                % Offset by the group posiiton
+                pos1(1) = pos1(1) +this.Body.Group.Position.x;
+                pos2(1) = pos2(1) +this.Body.Group.Position.x;
+                pos1(2) = pos1(2) +this.Body.Group.Position.y;
+                pos2(2) = pos2(2) +this.Body.Group.Position.y;
+
                 this.GUIObjects = line([pos1(1) pos2(1)],[pos1(2) pos2(2)],...
                     'Color',color,'Marker','o','MarkerSize',8);
             else
                 % It is a point
                 pos = RotMatrix(this.Body.Group.Position.Rot-pi/2)*this.LocalCoordinates(:);
+
+                % Offset by the group posiiton
+                pos(1) = pos(1) + this.Body.Group.Position.x;
+                pos(2) = pos(2) +this.Body.Group.Position.y;
+
                 this.GUIObjects = line(pos(1),pos(2),...
                     'Color',color,'Marker','o','MarkerSize',8);
             end
         end
     end
-
+    
 end
 

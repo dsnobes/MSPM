@@ -5747,28 +5747,28 @@ classdef Model < handle
                                 if nd.Type == enumNType.SN % Solid node
                                     xData(j).SN = c1.x;
                                     yData(j).SN = c1.y;
-                                    xBoundsData(j).SN = nodeBoundsX(:,nd.index);
-                                    yBoundsData(j).SN = nodeBoundsY(:,nd.index);
+                                    xBoundsData(j).SN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
+                                    yBoundsData(j).SN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                 elseif nd.Type == enumNType.SVGN % Static Volume Gas Node
                                     xData(j).SVGN = c1.x;
                                     yData(j).SVGN = c1.y;
-                                    xBoundsData(j).SVGN = nodeBoundsX(:,nd.index);
-                                    yBoundsData(j).SVGN = nodeBoundsY(:,nd.index);
+                                    xBoundsData(j).SVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
+                                    yBoundsData(j).SVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                 elseif nd.Type == enumNType.VVGN % Variable Volume Gas Node
                                     xData(j).VVGN = c1.x;
                                     yData(j).VVGN = c1.y;
-                                    xBoundsData(j).VVGN = nodeBoundsX(:,nd.index);
-                                    yBoundsData(j).VVGN = nodeBoundsY(:,nd.index);
+                                    xBoundsData(j).VVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
+                                    yBoundsData(j).VVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                 elseif nd.Type == enumNType.SAGN % Shearing Annular Gas Node
                                     xData(j).SAGN = c1.x;
                                     yData(j).SAGN = c1.y;
-                                    xBoundsData(j).SAGN = nodeBoundsX(:,nd.index);
-                                    yBoundsData(j).SAGN = nodeBoundsY(:,nd.index);
+                                    xBoundsData(j).SAGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
+                                    yBoundsData(j).SAGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                 elseif nd.Type == enumNType.EN %environment
                                     xData(j).EN = c1.x;
                                     yData(j).EN = c1.y;
-                                    xBoundsData(j).EN = nodeBoundsX(:,nd.index);
-                                    yBoundsData(j).EN = nodeBoundsY(:,nd.index);
+                                    xBoundsData(j).EN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
+                                    yBoundsData(j).EN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                 end
                                 j = j + 1;
                             end
