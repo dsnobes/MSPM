@@ -2303,7 +2303,7 @@ for j = 1:length(groupsToScale)
     % Update each group
     iGroup.update()
 end
-progressbar(2/3, [], 1, [])
+progressbar(3/4, [], 1, [])
 
 % Update all sensors
 for j = 1:length(h.Model.Sensors)
