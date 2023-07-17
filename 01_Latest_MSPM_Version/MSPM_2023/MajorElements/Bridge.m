@@ -75,12 +75,16 @@ classdef Bridge < handle
                     Item = this.Body1;
                 case 'Body 2'
                     Item = this.Body2;
+                case 'Offset'
+                    Item = this.x;
                 otherwise
                     fprintf(['XXX Bridge GET Inteface for ' PropertyName ' is not found XXX\n']);
             end
         end
-        function set(~,PropertyName,~)
+        function set(this,PropertyName,Item)
             switch PropertyName
+                case 'Offset'
+                    this.x = Item;
                 otherwise
                     fprintf(['XXX Bridge SET Inteface for ' PropertyName ' is not found XXX\n']);
                     return;

@@ -2181,6 +2181,36 @@ show_Model(h);
 
 end
 
+function UpdateModel_Callback(~, ~, h)
+% Function to update the model ignoring the ischanged flag
+% Go through all the connections in the group and scale appropriately
+for j = 1:length(h.Model.Groups)
+    iGroup = h.Model.Groups(j);
+    for k = 1:length(iGroup.Bodies)
+        iBody = iGroup.Bodies(k);
+        iBody.update();
+    end
+
+    % Update each group
+    iGroup.update()
+end
+
+% Update all sensors
+for j = 1:length(h.Model.Sensors)
+    iSensor = h.Model.Sensors(j);
+    iSensor.update()
+end
+
+% Update the model
+h.Model.update()
+progressbar(1)
+
+% Redraw the model
+show_Model(h);
+
+disp("Done Updating")
+end
+
 function ScaleModel_Callback(~, ~, h)
 % Set up the prompt to ask for scale
 prompt = {'Scale axially by:', 'Scale radially by:'};
