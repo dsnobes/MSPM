@@ -420,6 +420,82 @@ function h = newInsertBridge(h, C, hObject)
 
 end
 
+function h = InsertLeakConnection(h, C)
+    %{
+    runs if the user clicks the insert leak connection button in the GUI
+    %}
+    % Select 2 horizontal connections and 2 bodies/Environments
+    Bod = Body.empty;
+    if h.IndexB == 1
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if ~isempty(Bod)
+            h.SelectBody(h.IndexB) = Bod;
+            h.Model.HighLight(Bod);
+            h.IndexB = 2;
+            set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
+        end
+    elseif h.IndexB == 2
+        % Picking the first Body
+        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
+        if Bod ~= h.SelectBody(1)
+            if ~isempty(Bod)
+                h.SelectBody(h.IndexB) = Bod;
+                h.Model.HighLight(Bod);
+                set(h.message,'String','---');
+                [N,E] = LeakConnection.getParameters();
+                h.Model.addLeakConnection(...
+                    LeakConnection(h.SelectBody(1),h.SelectBody(2),N,E));
+            end
+            return;
+        end
+        % No object was selected, select the environment instead
+        set(h.message,'String','---');
+        [N,E] = LeakConnection.getParameters();
+        h.Model.addLeakConnection(LeakConnection(h.SelectBody(1),h.Model.surroundings,N,E));
+    end
+end
+    
+function h = InsertSensor(h, C)
+%{
+runs if the user clicks the insert sensor button in the GUI
+%}
+% Select a group
+C = C(1,1:2);
+% Select a body
+[~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+if ~isempty(objects)
+    for obj = objects
+        if isa(obj{1},'Body')
+            h.Model.HighLight(obj{1});
+            h.Model.addSensor(Sensor(h.Model,obj{1}));
+        end
+    end
+end
+end
+    
+function h = InsertPVoutput(h, C)
+%{
+runs if the user clicks the insert PVOutput button in the GUI
+%}
+% Find, within a radius of confidence, the nearest Body
+C = C(1,1:2);
+[~, objects] = h.Model.findNearest(C,h.ClickTolerance);
+if ~isempty(objects)
+    for obj = objects
+        if isa(obj{1},'Body')
+            if obj{1}.matl.Phase == enumMaterial.Gas
+                h.Model.addPVoutput(PVoutput(obj{1}));
+                set(h.message,'String',['PVoutput added to Body: ' obj{1}.name]);
+            else
+                set(h.message,'String','Must select a Gas Body');
+            end
+        end
+    end
+end
+end
 
 function h = InsertNonConnection(h, C)
 %{
