@@ -2237,34 +2237,40 @@ while ~isnumeric(a_scale) || a_scale <= 0 || isnan(a_scale) || ~isnumeric(r_scal
     end
 end
 
+% Ask which groups to scale
+names = cell(length(h.Model.Groups),1);
+for i = 1:length(h.Model.Groups)
+    names{i} = h.Model.Groups(i).name;
+end
+
+[indx, tf] = listdlg(...
+    'PromptString','Select Groups to Scale',...
+    'ListString',names,'ListSize',[750 500]);
+if ~tf
+    disp("Scaling Canceled")
+    return
+end
+
+% Get the groups to scale
+groupsToScale = h.Model.Groups(indx);
+
+
 % Create progressbar for scaling
 progressbar(...
     'Scaling',...
-    'Motion',...
     'Connections',...
     'Bodies',...
-    'Sensors'...
+    'Sensors',...
+    'Motion'...
     )
 
-% Scale motion
-if a_scale ~= 1
-    for j = 1:length(h.Model.Converters)
-        iConverter = h.Model.Converters(j);
-        % Get the original input
-        origin_in = iConverter.originalInput;
-        % Update the stroke in the input
-        origin_in{2,1} = num2str(str2double(origin_in{2,1}).*a_scale);
-        % Apply the change to the converter
-        iConverter.Populate(iConverter.Type, origin_in)
-        progressbar([], j/length(h.Model.Converters), [], [])
-    end
-end
-
-progressbar(1/3, 1, [], [], [])
 
 % Go through all the connections in the group and scale appropriately
-for j = 1:length(h.Model.Groups)
-    iGroup = h.Model.Groups(j);
+converters = {};
+convert_pos = 1;
+
+for j = 1:length(groupsToScale)
+    iGroup = groupsToScale(j);
     for i = 1:length(iGroup.Connections)
         iConn = iGroup.Connections(i);
         switch iConn.Orient
@@ -2273,13 +2279,20 @@ for j = 1:length(h.Model.Groups)
             case enumOrient.Horizontal
                 iConn.x =  (iConn.x).*a_scale;
         end
-        progressbar([], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Connections)), [], [])
+
+        % Check if there are any motion profiles and record which ones
+        if ~isempty(iConn.RefFrame)
+            converters{convert_pos} = iConn.RefFrame.Mechanism.name;
+            convert_pos = convert_pos + 1;
+        end
+
+        progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [], [])
     end
     
     for k = 1:length(iGroup.Bodies)
         iBody = iGroup.Bodies(k);
         iBody.update();
-        progressbar([], [], [], (j.*i)./(length(h.Model.Groups).*length(iGroup.Bodies)), [])
+        progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [], [])
     end
 
     % Scale the group positions
@@ -2296,7 +2309,29 @@ progressbar(2/3, [], 1, [])
 for j = 1:length(h.Model.Sensors)
     iSensor = h.Model.Sensors(j);
     iSensor.update()
-    progressbar([],[],[],[],j./length(h.Model.Sensors))
+    progressbar([],[],[], j./length(h.Model.Sensors), [])
+end
+
+% Update the motion profiles associated with that group
+if a_scale ~= 1 && ~isempty(converters)
+
+    % Get the converters from the frames
+    uniqueConverters = unique(converters);
+    
+    % Find the correct motion profiles
+    for i = 1:length(h.Model.Converters)
+        if any(strcmp(h.Model.Converters(i).name, uniqueConverters))
+            iConverter = h.Model.Converters(i);
+            % Get the original input
+            origin_in = iConverter.originalInput;
+            % Update the stroke in the input
+            origin_in{2,1} = num2str(str2double(origin_in{2,1}).*a_scale);
+            % Apply the change to the converter
+            iConverter.Populate(iConverter.Type, origin_in)
+        end
+
+        progressbar([], [], i/length(h.Model.Converters))
+    end
 end
 
 
@@ -2305,6 +2340,7 @@ h.Model.update()
 progressbar(1)
 
 % Redraw the model
+cla;
 show_Model(h);
 
 disp("Done Scaling")
