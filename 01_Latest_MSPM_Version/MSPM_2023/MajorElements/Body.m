@@ -563,7 +563,7 @@ classdef Body < handle
                 found = false;
                 for j = i+1:length(this.Connections)
                     if ~this.Connections(j).get('isStationary') ...
-                            && this.Connections(i).RefFrame == frame
+                            && this.Connections(j).RefFrame == frame
                         varenum = enumMove.Moving;
                         found = true;
                     end
