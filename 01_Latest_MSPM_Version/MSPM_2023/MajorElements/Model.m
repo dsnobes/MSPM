@@ -6105,6 +6105,13 @@ classdef Model < handle
                 end
                 % Wait
                 pause(10*max([0 nexttime-cputime]));
+
+                if ~this.isAnimating
+                    break
+                end
+
+
+
             end
             
             % Reset Screen to previous settings
