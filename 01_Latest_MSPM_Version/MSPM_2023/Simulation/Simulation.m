@@ -303,7 +303,7 @@ classdef Simulation < handle
                 end
                 % inputdlg( prompt , dlg_title , num_lines , defAns );
                 invalid = true;
-                output = {'10','C',...
+                output = {'10',...
                     num2str(ME.Model.engineSpeed*60),'0.1',...
                     num2str(ME.Model.enginePressure),...
                     num2str(ME.Model.MaxFourierConverging),...
@@ -313,7 +313,6 @@ classdef Simulation < handle
                 while invalid
                     output = inputdlg({...
                         'Maximum Simulation Time (seconds)',...
-                        'Motion Condition (C - Constant Velocity, V - Variable Velocity)',...
                         'Initial Velocity (rpm)',...
                         'maximum time step (s)',...
                         'Engine Pressure (Pa)',...
@@ -334,34 +333,30 @@ classdef Simulation < handle
                         return;
                     end
                     if ~all(ismember(output{1}, '0123456789+-.eE')); invalid = true;
-                    elseif ~strcmp(output{2},'C') && ~strcmp(output{2},'V'); invalid = true;
+                    elseif ~all(ismember(output{2}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{3}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{4}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{5}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{6}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{7}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{8}, '0123456789+-.eE')); invalid = true;
-                    elseif ~all(ismember(output{9}, '0123456789+-.eE')); invalid = true;
                     end
                 end
 
                 simTime = str2double(output{1});
                 ME.ss_condition = true;
                 ME.continuetoSS = false;
-                switch output{2}
-                    case 'C'; ME.MoveCondition = 1;
-                    case 'V'; ME.MoveCondition = 2;
-                end
-                ME.Model.engineSpeed = str2double(output{3})/60;
+                ME.MoveCondition = 1;
+                ME.Model.engineSpeed = str2double(output{2})/60;
                 ME.dA = ME.Model.engineSpeed*2*pi;
                 ME.dA_old = ME.dA;
-                ME.MAXdt = str2double(output{4});
-                ME.Model.enginePressure = str2double(output{5});
+                ME.MAXdt = str2double(output{3});
+                ME.Model.enginePressure = str2double(output{4});
                 engine_Pressure = ME.Model.enginePressure;
-                ME.Model.MaxCourantConverging = str2double(output{6});
-                ME.Model.MaxCourantFinal = str2double(output{7});
-                ME.Model.MaxCourantConverging = str2double(output{8});
-                ME.Model.MaxCourantFinal = str2double(output{9});
+                ME.Model.MaxCourantConverging = str2double(output{5});
+                ME.Model.MaxCourantFinal = str2double(output{6});
+                ME.Model.MaxCourantConverging = str2double(output{7});
+                ME.Model.MaxCourantFinal = str2double(output{8});
             end
 
             Load_Function_is_Not_Given = false;
