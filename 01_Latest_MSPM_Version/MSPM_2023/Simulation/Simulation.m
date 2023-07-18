@@ -2356,6 +2356,11 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 xlabel(plot_axes.conver,'Cycle Number')
                 ylabel(plot_axes.conver,'Shaft Power [W]')
                 title(plot_axes.conver,"Shaft Power")
+                if cycle_count > 1
+                    xlim(plot_axes.conver, [1, cycle_count])
+                end
+                ylim(plot_axes.conver, [min([0, min(Plot_Powers)])*1.1, max([0, max(Plot_Powers)])*1.1])
+                xticks(plot_axes.conver, [1:1:cycle_count])
 
                 %cycle_count = cycle_count + 1;
                 ME.Inc = 1;
@@ -2371,6 +2376,12 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 xlabel(plot_axes.fact,'Cycle Number')
                 ylabel(plot_axes.fact,'Power Factor')
                 title(plot_axes.fact,"Power Factor")
+                if cycle_count > 1
+                    xlim(plot_axes.fact, [1, cycle_count])
+                end
+                ylim(plot_axes.fact, [-0.1, 1.1])
+                xticks(plot_axes.fact, [1:1:cycle_count])
+                yticks(plot_axes.fact, [0, 0.2, 0.4, 0.6, 0.8, 1])
 
 
                 % Speed plot
