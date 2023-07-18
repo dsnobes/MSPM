@@ -5982,7 +5982,7 @@ classdef Model < handle
             
             k = 1;
             i_ani = 1;
-            while this.isAnimating && cputime-t < this.AnimationLength_s
+            while this.isAnimating
                 
                 %Matthias: For pausing animation with a breakpoint at a
                 %specified time
