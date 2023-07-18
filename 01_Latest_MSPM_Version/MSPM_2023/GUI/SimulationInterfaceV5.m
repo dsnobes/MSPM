@@ -1775,7 +1775,15 @@ end
 end
 
 function stopSimulation_Callback(~, ~, h)
-h.Model.stopSimulation();
+% This function will stop the simulation after the next cycle
+% setGlobalStopSim(true);
+h.Model.stopSimulation = true;
+end
+
+function terminateSimulation_Callback(~, ~, h)
+% This function will stop the simulation immediatly
+% setGlobalStopSim(true);
+h.Model.terminate = true;
 end
 
 function Run_Callback(~, ~, h)
@@ -2442,7 +2450,6 @@ total_vol = sum(vol_table.vol);
 total_liters = total_vol.*1000;
 disp(['The total volume (excl. HX and regenerator) is: ', num2str(total_liters), ' L'])
 end
-
 
 
 % --- Executes on button press in checkboxGasFaces.
