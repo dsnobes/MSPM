@@ -622,132 +622,129 @@ runs if the user clicks the insert relation button in the GUI
 % Find, within a radius of confidence, the nearest connection
 C = C(1,1:2);
 % Find the nearest connection
-[names, objects] = h.Model.FindNearestConnecton(C,h.ClickTolerance);
+[~, object] = h.Model.FindNearestConnecton(C,h.ClickTolerance);
 
-% Get the user to select a connection
-if ~isempty(names)
-    [index,tf] = listdlg(...
-        'PromptString','Which Object did you select?',...
-        'ListString',names,...
-        'SelectionMode','single',...
-        'ListSize',[1000 800]);
-    
-end
+% Select object
+obj = object{1};
 
-if tf
-    % Get the selected connection
-    obj = objects{index};
+% Create the relation
+if h.IndexC == 1
+    h.SelectCon(h.IndexC) = obj;
+    h.Model.HighLight(h.SelectCon(h.IndexC));
+    show_Model(h)
+    h.IndexC = 2;
+
+elseif (h.IndexC == 2)
+    if ~(obj.Orient == h.SelectCon(1).Orient && ...
+        obj.Group == h.SelectCon(1).Group)
+        msgbox('The two connections must have the same orientation.');
+        return
+    end
+
+    h.SelectCon(h.IndexC) = obj;
+    h.Model.HighLight(h.SelectCon(h.IndexC));
+    show_Model(h)
     
-    % Create the relation
-    if h.IndexC == 1 || ...
-            (obj.Orient == h.SelectCon(1).Orient && ...
-            obj.Group == h.SelectCon(1).Group)
-        h.SelectCon(h.IndexC) = obj;
-        if (h.IndexC == 2)
-            % Finalize the new relation
-            % Ask the user about the type
-            names = {
-                'Constant Offset', ...
-                'Cross-Section Maintaining', ...
-                'Zero x Based Scale', ...
-                'Smallest x Based Scale', ...
-                'Width Set'};
-            if obj.Orient == enumOrient.Horizontal
-                names{end+1} = 'Defines Stroke Length';
-                names{end+1} = 'Defines Piston Length';
+    % Finalize the new relation
+    % Ask the user about the type
+    names = {
+        'Constant Offset', ...
+        'Cross-Section Maintaining', ...
+        'Zero x Based Scale', ...
+        'Smallest x Based Scale', ...
+        'Width Set'};
+    if obj.Orient == enumOrient.Horizontal
+        names{end+1} = 'Defines Stroke Length';
+        names{end+1} = 'Defines Piston Length';
+    end
+    for RMan = obj.Group.RelationManagers
+        if RMan.Orient == obj.Orient; break; end
+    end
+    if ~isempty(RMan)
+        [Type, tf] = listdlg(...
+            'PromptString','What type of relationship?',...
+            'ListString',names,...
+            'SelectionMode','single',...
+            'ListSize',[400 250]);
+        switch names{Type}
+            case 'Constant Offset'
+                EnumType = enumRelation.Constant;
+            case 'Cross-Section Maintaining'
+                EnumType = enumRelation.AreaConstant;
+            case 'Zero x Based Scale'
+                EnumType = enumRelation.Scaled;
+            case 'Smallest x Based Scale'
+                EnumType = enumRelation.LowestScaled;
+            case 'Width Set'
+                EnumType = enumRelation.Width;
+            case 'Defines Stroke Length'
+                EnumType = enumRelation.Stroke;
+            case 'Defines Piston Length'
+                EnumType = enumRelation.Piston;
+        end
+        if tf
+            Label = RMan.getLabel(EnumType, ...
+                h.SelectCon(1), h.SelectCon(2));
+            if isempty(Label)
+                Label = getProperName([names{Type} ' Relation']);
             end
-            for RMan = obj.Group.RelationManagers
-                if RMan.Orient == obj.Orient; break; end
-            end
-            if ~isempty(RMan)
-                [Type, tf] = listdlg(...
-                    'PromptString','What type of relationship?',...
-                    'ListString',names,...
-                    'SelectionMode','single',...
-                    'ListSize',[400 250]);
-                switch names{Type}
-                    case 'Constant Offset'
-                        EnumType = enumRelation.Constant;
-                    case 'Cross-Section Maintaining'
-                        EnumType = enumRelation.AreaConstant;
-                    case 'Zero x Based Scale'
-                        EnumType = enumRelation.Scaled;
-                    case 'Smallest x Based Scale'
-                        EnumType = enumRelation.LowestScaled;
-                    case 'Width Set'
-                        EnumType = enumRelation.Width;
-                    case 'Defines Stroke Length'
-                        EnumType = enumRelation.Stroke;
-                    case 'Defines Piston Length'
-                        EnumType = enumRelation.Piston;
+            if isempty(Label); return; end
+            if EnumType == enumRelation.Stroke || ...
+                    EnumType == enumRelation.Piston
+                % Ask which mechanism?
+                objs = h.Model.Converters;
+                mecs = cell(0);
+                for index = length(objs):-1:1
+                    mecs{index} = objs(index).name;
                 end
-                if tf
-                    Label = RMan.getLabel(EnumType, ...
-                        h.SelectCon(1), h.SelectCon(2));
-                    if isempty(Label)
-                        Label = getProperName([names{Type} ' Relation']);
-                    end
-                    if isempty(Label); return; end
-                    if EnumType == enumRelation.Stroke || ...
-                            EnumType == enumRelation.Piston
-                        % Ask which mechanism?
-                        objs = h.Model.Converters;
-                        mecs = cell(0);
-                        for index = length(objs):-1:1
-                            mecs{index} = objs(index).name;
-                        end
-                        index = listdlg(...
-                            'ListString',mecs,...
-                            'SelectionMode','single');
-                        if isempty(index)
-                            error("No option selected!");
-                        else
-                            Mech = objs(index).Frames(1);
-                        end
-                    end
-                    switch EnumType
-                        case {enumRelation.Constant, ...
-                                enumRelation.AreaConstant, ...
-                                enumRelation.Scaled, ...
-                                enumRelation.LowestScaled, ...
-                                enumRelation.Width}
-                            success = RMan.addRelation(...
-                                Label, ...
-                                EnumType, ...
-                                h.SelectCon(1), ...
-                                h.SelectCon(2));
-                        case {enumRelation.Stroke, ...
-                                enumRelation.Piston}
-                            % Ask which mechanism?
-                            success = RMan.addRelation(...
-                                Label, ...
-                                EnumType, ...
-                                h.SelectCon(1), ...
-                                h.SelectCon(2), ...
-                                Mech);
-                        otherwise
-                            msgbox(['Selected relation type' ...
-                                ' is not implemented']);
-                            h.IndexC = 1;
-                            error("No option selected!");
-                    end
-                    if ~success
-                        msgbox(['Relationship was not ' ...
-                            'added successfully']);
-                    end
+                index = listdlg(...
+                    'ListString',mecs,...
+                    'SelectionMode','single');
+                if isempty(index)
+                    error("No option selected!");
+                else
+                    Mech = objs(index).Frames(1);
+                end
+            end
+            switch EnumType
+                case {enumRelation.Constant, ...
+                        enumRelation.AreaConstant, ...
+                        enumRelation.Scaled, ...
+                        enumRelation.LowestScaled, ...
+                        enumRelation.Width}
+                    success = RMan.addRelation(...
+                        Label, ...
+                        EnumType, ...
+                        h.SelectCon(1), ...
+                        h.SelectCon(2));
+                case {enumRelation.Stroke, ...
+                        enumRelation.Piston}
+                    % Ask which mechanism?
+                    success = RMan.addRelation(...
+                        Label, ...
+                        EnumType, ...
+                        h.SelectCon(1), ...
+                        h.SelectCon(2), ...
+                        Mech);
+                otherwise
+                    msgbox(['Selected relation type' ...
+                        ' is not implemented']);
                     h.IndexC = 1;
-                end
+                    error("No option selected!");
+            end
+            if ~success
+                msgbox(['Relationship was not ' ...
+                    'added successfully']);
             end
             h.IndexC = 1;
         end
-        h.IndexC = 2;
-    else
-        msgbox(['The two connections must have the ' ...
-            'same orientation.']);
     end
+    h.IndexC = 1;
+    h.Model.clearHighLighting();
+end
+end
     
-end
-end
+
 
 %% General button codes
 function GUI_ButtonDownFcn(hObject, ~, h)
@@ -938,7 +935,7 @@ hObject.UserData(1) = 0;
 end
 
 function InsertRelation_Callback(hObject, ~, handles)
-ButtonCore(hObject,'InsertRelation',handles,'[click] To select a connection');
+ButtonCore(hObject,'InsertRelation',handles,'[click] To select two parallel connections');
 end
 
 function ChangeGroup_Callback(hObject, ~, handles)
@@ -1775,7 +1772,15 @@ end
 end
 
 function stopSimulation_Callback(~, ~, h)
-h.Model.stopSimulation();
+% This function will stop the simulation after the next cycle
+% setGlobalStopSim(true);
+h.Model.stopSimulation = true;
+end
+
+function terminateSimulation_Callback(~, ~, h)
+% This function will stop the simulation immediatly
+% setGlobalStopSim(true);
+h.Model.terminate = true;
 end
 
 function Run_Callback(~, ~, h)
@@ -2442,7 +2447,6 @@ total_vol = sum(vol_table.vol);
 total_liters = total_vol.*1000;
 disp(['The total volume (excl. HX and regenerator) is: ', num2str(total_liters), ' L'])
 end
-
 
 
 % --- Executes on button press in checkboxGasFaces.

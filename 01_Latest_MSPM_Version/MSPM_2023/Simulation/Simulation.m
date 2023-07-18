@@ -575,6 +575,10 @@ classdef Simulation < handle
             
             [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure, SetSpeed);
 
+            if ME.Model.terminate
+                return
+            end
+            
             progressbar(1);
 
             if ~ME.Model.recordOnlyLastCycle
@@ -2127,6 +2131,8 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
     end
     % Matthias: added continuetoSS to loop condition to allow surpassing simTime if in final cycle.
     while (ME.curTime < simTime) || ME.continuetoSS
+        % Check if the simulation should be terminated
+  
         %% Main Solve
         ME.dt_max = 2*ME.A_Inc/(ME.dA_old + ME.dA);
         Forces = ME.Iteration_Solve();
@@ -2393,6 +2399,7 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                     title(plot_axes.speed,"Speed")
                 end
 
+
                 % Get Local curvature
                 if Plot_Number > 2
                     Power_curv_backup = power_curv;
@@ -2559,8 +2566,17 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
                 AdjustTime = ME.curTime;
+
+                % Check if the stop simulation button is pressed
+                if ME.Model.stopSimulation
+                    break
+                end
             end
             assignDynamic(ME,ME.Inc,false); % Initialize the dynamic function
+        end
+        % Check if the terminate simulation button is pressed
+        if ME.Model.terminate
+            return
         end
     end
 end
