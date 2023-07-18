@@ -194,7 +194,7 @@ classdef PVoutput < handle
             Text = [Text 'Total = ' num2str(WTotal,4) 'Joules/Cycle'];
             %fprintf([num2str(WTotal) '\n']);
             text(this.plot_axes.XLim(1)+0.01*(this.plot_axes.XLim(2)-this.plot_axes.XLim(1)),...
-                this.plot_axes.YLim(2)-0.05*(this.plot_axes.YLim(2)-this.plot_axes.YLim(1)), Text, 'Parent', this.plot_axes);
+                this.plot_axes.YLim(2)-0.05*(this.plot_axes.YLim(2)-this.plot_axes.YLim(1)), Text, 'Parent', this.plot_axes, 'FontSize', 18);
             drawnow();
 
         end
@@ -205,8 +205,8 @@ classdef PVoutput < handle
             end
             oldfigure = gcf;
             oldaxes = gca;
-            a = gca;
             updatePlot(this);
+            a = gca;
             h = gcf;
             xlabel('Volume (m^3)');
             ylabel('Pressure (Pa)');
@@ -214,6 +214,7 @@ classdef PVoutput < handle
 
             if is_saved
                 h.Position = [0, 0, 1000, 1000]; % won't go above screen resolution sadly, but want it to be square
+                set(a, 'FontSize', 18)
                 frame = getframe(h);
                 im = frame2im(frame);
                 [imind,cm] = rgb2ind(im,256);
