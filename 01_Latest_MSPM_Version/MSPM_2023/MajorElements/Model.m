@@ -4243,6 +4243,11 @@ classdef Model < handle
         function [snapshot] = RunHeadless(ME, runs)
             success = false;
             backup_path = ME.outputPath;
+
+            % Set stop simulation to false
+            ME.stopSimulation = false;
+            ME.terminate = false;
+
             % Always record all outputs
             
             tests = length(runs);
@@ -4522,9 +4527,27 @@ classdef Model < handle
                     % 'crun' contains run options from test set
                     % 'RunConditions' structure
                     % Matthias: Added cycle_count and final_speed output
-                    [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
-                        islast, do_warmup, ss_tolerance, crun);
-                    if isempty(ME.Results)
+                    try
+                        [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                            islast, do_warmup, ss_tolerance, crun);
+                    catch
+                        % running was canceled or failed
+                        if ME.terminate
+                            disp("Simulation Terminated!!!")
+                            msgbox("Simulation Terminated!!!", "Simulation Status")
+                            
+                            % Close all figures but the main window
+                            all_figs = findobj(groot, 'type', 'figure');
+                            for i = 1:length(all_figs)
+                                if ~strcmp(all_figs(i).Name, 'MSPM 2023')
+                                    close(all_figs(i))
+                                end
+                            end
+                            msgbox("Simulation Terminated!!!", "Simulation Status")
+                        
+                            return
+                        end
+
                         ME.CurrentSim(:) = [];
                         ME.Results(:) = [];
                         ME.resetDiscretization();
