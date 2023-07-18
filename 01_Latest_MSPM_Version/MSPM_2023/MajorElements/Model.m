@@ -3722,7 +3722,7 @@ classdef Model < handle
                         end
                         
                         runtime = toc; % reads simulation timer
-                        fprintf(['Elapsed time: ' num2str(runtime) 's\n']);
+                        fprintf(['Elapsed time: ' SecondsToString(runtime) 's\n']);
                         
                         % write test set statistics file
                         % Matthias: For test sets, record runtime (s), number of
@@ -4527,7 +4527,7 @@ classdef Model < handle
                     end
                     
                     runtime = toc; % reads simulation timer
-                    fprintf(['Elapsed time: ' num2str(runtime) 's\n']);
+                    fprintf(['Elapsed time: ' SecondsToString(runtime) 's\n']);
                     
                     if ~success || isempty(ME.Results); return; end
                     
