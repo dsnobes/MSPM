@@ -303,7 +303,7 @@ classdef Simulation < handle
                 end
                 % inputdlg( prompt , dlg_title , num_lines , defAns );
                 invalid = true;
-                output = {'10','SS','C',...
+                output = {'10',...
                     num2str(ME.Model.engineSpeed*60),'0.1',...
                     num2str(ME.Model.enginePressure),...
                     num2str(ME.Model.MaxFourierConverging),...
@@ -313,8 +313,6 @@ classdef Simulation < handle
                 while invalid
                     output = inputdlg({...
                         'Maximum Simulation Time (seconds)',...
-                        'End Condition (SS - Steady State)',...
-                        'Motion Condition (C - Constant Velocity, V - Variable Velocity)',...
                         'Initial Velocity (rpm)',...
                         'maximum time step (s)',...
                         'Engine Pressure (Pa)',...
@@ -323,7 +321,7 @@ classdef Simulation < handle
                         'Converging Courant Number',...
                         'Final Courant Number'},...
                         'Enter Simulation Parameters',...
-                        [1 20],...
+                        [1 40],...
                         output);
                     invalid = false;
                     if isempty(output)
@@ -335,38 +333,30 @@ classdef Simulation < handle
                         return;
                     end
                     if ~all(ismember(output{1}, '0123456789+-.eE')); invalid = true;
-                    elseif ~strcmp(output{2},'SS'); invalid = true;
-                    elseif ~strcmp(output{3},'C') && ~strcmp(output{3},'V'); invalid = true;
+                    elseif ~all(ismember(output{2}, '0123456789+-.eE')); invalid = true;
+                    elseif ~all(ismember(output{3}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{4}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{5}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{6}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{7}, '0123456789+-.eE')); invalid = true;
                     elseif ~all(ismember(output{8}, '0123456789+-.eE')); invalid = true;
-                    elseif ~all(ismember(output{9}, '0123456789+-.eE')); invalid = true;
-                    elseif ~all(ismember(output{10}, '0123456789+-.eE')); invalid = true;
                     end
                 end
 
                 simTime = str2double(output{1});
-                switch output{2}
-                    case 'SS'; ME.ss_condition = true;
-                    otherwise; ME.ss_condition = false;
-                end
+                ME.ss_condition = true;
                 ME.continuetoSS = false;
-                switch output{3}
-                    case 'C'; ME.MoveCondition = 1;
-                    case 'V'; ME.MoveCondition = 2;
-                end
-                ME.Model.engineSpeed = str2double(output{4})/60;
+                ME.MoveCondition = 1;
+                ME.Model.engineSpeed = str2double(output{2})/60;
                 ME.dA = ME.Model.engineSpeed*2*pi;
                 ME.dA_old = ME.dA;
-                ME.MAXdt = str2double(output{5});
-                ME.Model.enginePressure = str2double(output{6});
+                ME.MAXdt = str2double(output{3});
+                ME.Model.enginePressure = str2double(output{4});
                 engine_Pressure = ME.Model.enginePressure;
+                ME.Model.MaxCourantConverging = str2double(output{5});
+                ME.Model.MaxCourantFinal = str2double(output{6});
                 ME.Model.MaxCourantConverging = str2double(output{7});
                 ME.Model.MaxCourantFinal = str2double(output{8});
-                ME.Model.MaxCourantConverging = str2double(output{9});
-                ME.Model.MaxCourantFinal = str2double(output{10});
             end
 
             Load_Function_is_Not_Given = false;
@@ -2372,6 +2362,11 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 xlabel(plot_axes.conver,'Cycle Number')
                 ylabel(plot_axes.conver,'Shaft Power [W]')
                 title(plot_axes.conver,"Shaft Power")
+                if cycle_count > 1
+                    xlim(plot_axes.conver, [1, cycle_count])
+                end
+                ylim(plot_axes.conver, [min([0, min(Plot_Powers)])*1.1, max([0, max(Plot_Powers)])*1.1])
+                xticks(plot_axes.conver, [1:1:cycle_count])
 
                 %cycle_count = cycle_count + 1;
                 ME.Inc = 1;
@@ -2387,6 +2382,12 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                 xlabel(plot_axes.fact,'Cycle Number')
                 ylabel(plot_axes.fact,'Power Factor')
                 title(plot_axes.fact,"Power Factor")
+                if cycle_count > 1
+                    xlim(plot_axes.fact, [1, cycle_count])
+                end
+                ylim(plot_axes.fact, [-0.1, 1.1])
+                xticks(plot_axes.fact, [1:1:cycle_count])
+                yticks(plot_axes.fact, [0, 0.2, 0.4, 0.6, 0.8, 1])
 
 
                 % Speed plot

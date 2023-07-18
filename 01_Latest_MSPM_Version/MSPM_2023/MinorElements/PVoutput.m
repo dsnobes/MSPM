@@ -213,6 +213,7 @@ classdef PVoutput < handle
             title("Pressure vs Volume Diagram");
 
             if is_saved
+                h.Position = [0, 0, 1000, 1000]; % won't go above screen resolution sadly, but want it to be square
                 frame = getframe(h);
                 im = frame2im(frame);
                 [imind,cm] = rgb2ind(im,256);
@@ -228,7 +229,7 @@ classdef PVoutput < handle
                 end
                 str = [str(1:3), replace(str(4:end),':',' -')];
                 save([str '.mat'],'data');
-                imwrite(imind,cm,[str '.jpg']);
+                imwrite(imind,cm,[str '.png']);
             end
 
             close(h);
