@@ -549,6 +549,11 @@ classdef Connection < handle
                     end
                 end
             end
+
+            if this.isActive
+                color = Connection.ActiveColor;
+                return
+            end
             if this.Group.Model.showRelations
                 for RMan = this.Group.RelationManagers
                     if RMan.Orient == this.Orient
