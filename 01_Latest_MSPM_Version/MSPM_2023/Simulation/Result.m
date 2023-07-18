@@ -336,11 +336,13 @@ classdef Result < handle
                                     set(PatchHandleBodies,'XData',B_XData);
                                     set(PatchHandleBodies,'YData',B_YData);
                                     set(PatchHandle,'CData',real(C));
-                                    set(TextHandle,'String',[num2str(round(timepnts(i),2)) ' seconds']);
+                                    set(TextHandle,'String',[num2str(round(timepnts(i),2)) ' seconds'], 'FontSize', 18);
                                     drawnow;
 
                                     % Capture the plot as an image
                                     %                 try
+                                    h.Position = [0, 0, 1000, 1000]; % won't go above screen resolution sadly, but want it to be square
+                                    set(a, 'FontSize', 18)                    
                                     frame = getframe(h);
                                     %                 catch
                                     %                   return;
@@ -549,10 +551,12 @@ classdef Result < handle
                             end
                             set(PatchHandleBodies,'XData',B_XData);
                             set(PatchHandleBodies,'YData',B_YData);
-                            set(TextHandle,'String',[num2str(round(timepnts(i),2)) ' seconds']);
+                            set(TextHandle,'String',[num2str(round(timepnts(i),2)) ' seconds'], 'FontSize', 18);
                             drawnow;
 
                             % Capture the plot as an image
+                            h.Position = [0, 0, 1000, 1000]; % won't go above screen resolution sadly, but want it to be square
+                            set(a, 'FontSize', 18)            
                             try
                                 frame = getframe(h);
                             catch
