@@ -561,22 +561,31 @@ runs if the user clicks the insert custom minor loss button in the GUI
 %}
 % Find, within a radius of confidence, the nearest body
 C = C(1,1:2);
-[~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-if ~isempty(objects)
-    for obj = objects
-        if isa(obj{1},'Body')
-            h.SelectBody(h.IndexB) = obj{1};
-            if (h.IndexB == 2)
-                % Finalize Custom Minor Loss
-                h.IndexB = 1;
-                h.Model.addCustomMinorLoss(...
-                    CustomMinorLoss(...
-                    h.SelectBody(1),...
-                    h.SelectBody(2)));
-            end
-            h.IndexB = 2;
-        end
+%% Select two bodies
+% Select the first body
+if h.IndexB == 1
+    [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+    if ~isempty(Bod) && Bod ~= 0
+        h.SelectBody(h.IndexB) = Bod;
+        h.Model.HighLight(Bod);
+        h.IndexB = 2;
+        set(h.message,'String','[click] Select the second body');
     end
+    
+    % Select the second body
+elseif h.IndexB == 2
+    [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+    if ~isempty(Bod) && Bod ~= 0 && Bod ~= h.SelectBody(1)
+        h.SelectBody(h.IndexB) = Bod;
+        h.Model.HighLight(Bod);
+        show_Model(h);
+        set(h.message,'String','---');
+        h.Model.addCustomMinorLoss(CustomMinorLoss(h.SelectBody(1),h.SelectBody(2)));
+    else
+        % Same selection or no selection
+        return
+    end
+    h.IndexB = 1;
 end
 end
 
