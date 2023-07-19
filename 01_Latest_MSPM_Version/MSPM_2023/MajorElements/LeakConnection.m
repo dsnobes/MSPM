@@ -195,9 +195,6 @@ classdef LeakConnection < handle
                 % Extract the coordinates and find the middle
                 x1 = (conn_x1.x + conn_x2.x)./2;
                 y1 = (conn_y1.x + conn_y2.x)./2;
-
-            elseif isa(this.obj1, 'Environment')
-                [x1,y1] = this.Model.EnvironmentPosition(this.obj1);
             end
 
             % Find P2
@@ -214,7 +211,7 @@ classdef LeakConnection < handle
                 y2 = (conn_y1.x + conn_y2.x)./2;
 
             elseif isa(this.obj2, 'Environment')
-                [x2,y2] = this.Model.EnvironmentPosition(this.obj2);
+                [x2,y2] = this.Model.HorizontalBorderPos(this.obj1);
             end
 
             % Change both x-coords to be negative
