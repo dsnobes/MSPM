@@ -461,14 +461,14 @@ classdef Sensor < handle
                     'IndependentVariable',this.IndependentVariable,...
                     'DependentVariable',this.Data);
                 if isempty(this.Body.Group.Model.outputPath)
-                    str = [ModelName '_' titleStr];
+                    str = [titleStr];
                 else
                     str = [this.Body.Group.Model.outputPath '\' ...
-                        ModelName '_' titleStr];
+                           titleStr];
                 end
                 str = [str(1:3), replace(str(4:end),':',' -')];
                 save([str '.mat'],'data');
-                imwrite(imind,cm,[str '.jpg']);
+                imwrite(imind,cm,[str '.png']);
             end
             
             close(h);
