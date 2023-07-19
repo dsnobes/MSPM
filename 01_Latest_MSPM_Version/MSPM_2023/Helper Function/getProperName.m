@@ -23,7 +23,7 @@ function [ answer ] = getProperName( ObjectName, def)
         end
         
         % If the user does not enter a value, return an empty char array
-        if isempty(answer{1})
+        if isempty(answer) || isempty(answer{1})
             answer = '';
             return;
         end

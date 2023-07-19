@@ -712,7 +712,10 @@ elseif (h.IndexC == 2)
             if isempty(Label)
                 Label = getProperName([names{Type} ' Relation']);
             end
-            if isempty(Label); return; end
+            if isempty(Label)
+                disp("Relation Creation Canceled!!")
+                return;
+            end
             if EnumType == enumRelation.Stroke || ...
                     EnumType == enumRelation.Piston
                 % Ask which mechanism?
