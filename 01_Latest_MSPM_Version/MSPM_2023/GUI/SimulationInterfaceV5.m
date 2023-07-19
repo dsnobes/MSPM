@@ -2198,6 +2198,7 @@ crun = struct('Model',h.Model.name,...
     'rpm',h.Model.engineSpeed,...
     'NodeFactor',h.Model.deRefinementFactorInput);
 h.Model.discretize(crun);
+show_Model(h)
 end
 
 function ChangeAllGasBodies_Callback(~, ~, h)
