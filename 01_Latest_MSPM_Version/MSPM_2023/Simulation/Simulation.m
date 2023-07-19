@@ -483,53 +483,54 @@ classdef Simulation < handle
 
             %% Warm Up Phase
             if do_warmup
-                progressbar('Warmup Phase');
-                hmax = mean(ME.Solid_dt_max);
-                t = 0;
-                progressbar_update = 1;
+                % progressbar('Warmup Phase');
+                % hmax = mean(ME.Solid_dt_max);
+                % t = 0;
+                % progressbar_update = 1;
 
-                if ME.Model.warmUpPhaseLength > 0; assignAvgDynamic(ME); end
+                % if ME.Model.warmUpPhaseLength > 0; assignAvgDynamic(ME); end
 
-                % Record a backup of the gas properties, just so that we don't have
-                % ... to bother.
-                indn = 1:length(ME.P); indf = 1:length(ME.Fc_U); indmf = ME.Mix_Fc;
-                Cfcs = ME.Cond_Fcs; Cnd1 = ME.Cond_Nds1; Cnd2 = ME.Cond_Nds2;
-                Gm = ME.m(indn); Gu = ME.u(indn); GT = ME.T(indn);
-                Sm = ME.m(sindn); ST = ME.T(sindn);
-                Q = zeros(length(ME.T),1);
-                ME.Fc_Cond(indmf) = ME.Fc_Area(indmf)./(ME.Fc_R(indmf)' + 15);
-                ME.Fc_Cond(indf) = 0.5*ME.Fc_Area(indf)./ME.Fc_Cond_Dist(indf);
-                while (t < ME.Model.warmUpPhaseLength)
-                    h = min(hmax, ME.Model.warmUpPhaseLength - t);
+                % % Record a backup of the gas properties, just so that we don't have
+                % % ... to bother.
+                % indn = 1:length(ME.P); indf = 1:length(ME.Fc_U); indmf = ME.Mix_Fc;
+                % Cfcs = ME.Cond_Fcs; Cnd1 = ME.Cond_Nds1; Cnd2 = ME.Cond_Nds2;
+                % Gm = ME.m(indn); Gu = ME.u(indn); GT = ME.T(indn);
+                % Sm = ME.m(sindn); ST = ME.T(sindn);
+                % Q = zeros(length(ME.T),1);
+                % ME.Fc_Cond(indmf) = ME.Fc_Area(indmf)./(ME.Fc_R(indmf)' + 15);
+                % ME.Fc_Cond(indf) = 0.5*ME.Fc_Area(indf)./ME.Fc_Cond_Dist(indf);
+                % while (t < ME.Model.warmUpPhaseLength)
+                %     h = min(hmax, ME.Model.warmUpPhaseLength - t);
 
-                    Ti = [GT; ME.T(sindn)];
+                %     Ti = [GT; ME.T(sindn)];
 
-                    Q(:) = 0;
-                    Qfc = ME.Fc_Cond(Cfcs).*(Ti(Cnd1) - Ti(Cnd2));
-                    for i = 1:3:length(ME.CondNet)-2
-                        Q(ME.CondNet{i+1}) = Q(ME.CondNet{i+1}) + ...
-                            ME.CondNet{i}.*Qfc(ME.CondNet{i+2});
-                    end
+                %     Q(:) = 0;
+                %     Qfc = ME.Fc_Cond(Cfcs).*(Ti(Cnd1) - Ti(Cnd2));
+                %     for i = 1:3:length(ME.CondNet)-2
+                %         Q(ME.CondNet{i+1}) = Q(ME.CondNet{i+1}) + ...
+                %             ME.CondNet{i}.*Qfc(ME.CondNet{i+2});
+                %     end
 
-                    % Internal Energy Change - Gas
-                    Gu = Gu + h*Q(indn)./Gm;
+                %     % Internal Energy Change - Gas
+                %     Gu = Gu + h*Q(indn)./Gm;
 
-                    % Temperature - Gas
-                    GT = ME.u2T(Gu);
+                %     % Temperature - Gas
+                %     GT = ME.u2T(Gu);
 
-                    % Temperature - Solid
-                    ST = ME.dT_dU(sindn).*Q(sindn)./Sm;
+                %     % Temperature - Solid
+                %     ST = ME.dT_dU(sindn).*Q(sindn)./Sm;
 
-                    t = t + h;
-                    if progressbar_update > 1/h
-                        progressbar(t/ME.Model.warmUpPhaseLength);
-                        progressbar_update = 1;
-                    else
-                        progressbar_update = progressbar_update + 1;
-                    end
-                end
+                %     t = t + h;
+                %     if progressbar_update > 1/h
+                %         progressbar(t/ME.Model.warmUpPhaseLength);
+                %         progressbar_update = 1;
+                %     else
+                %         progressbar_update = progressbar_update + 1;
+                %     end
+                % end
 
-                ME.T(sindn) = ST;
+                % ME.T(sindn) = ST;
+                disp("Warmup is not implemented!!")
             end
 
             sindn = length(ME.P):length(ME.T);
