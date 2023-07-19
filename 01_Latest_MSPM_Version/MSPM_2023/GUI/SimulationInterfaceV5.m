@@ -766,6 +766,10 @@ elseif (h.IndexC == 2)
     h.IndexC = 1;
     h.Model.clearHighLighting();
 end
+
+
+
+
 end
 
 
@@ -959,6 +963,12 @@ hObject.UserData(1) = 0;
 end
 
 function InsertRelation_Callback(hObject, ~, handles)
+
+if ~handles.Model.showConnections
+    set(handles.showConnections, 'Value', true);
+    showConnections_Callback(handles.showConnections,[], handles)
+end
+
 ButtonCore(hObject,'InsertRelation',handles,'[click] To select two parallel connections');
 end
 
