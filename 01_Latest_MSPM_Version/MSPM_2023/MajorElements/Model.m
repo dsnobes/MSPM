@@ -6119,6 +6119,20 @@ classdef Model < handle
             set(ReferenceAxis,'YLimMode',mode);
             set(ReferenceAxis,'ZLimMode',mode);
         end
+
+        function [x, y] = HorizontalBorderPos(this, bod)
+            % Get the nearest border to the right of the body
+
+            % Find the leftmost connection 
+            x = max([bod.Group.Connections([bod.Group.Connections.Orient] == enumOrient.Vertical).x]) + 0.02;
+            
+            % For the y coord, get the average of the top and the bottom
+            lowerConn = bod.get('Bottom Connection');
+            upperConn = bod.get('Top Connection');
+
+            % Get the average
+            y = mean([lowerConn.x, upperConn.x]);
+        end
         
     end
     
@@ -6265,3 +6279,6 @@ B = CollapseVector(B);
 C = CollapseVector(C);
 D = CollapseVector(D);
 end
+
+
+

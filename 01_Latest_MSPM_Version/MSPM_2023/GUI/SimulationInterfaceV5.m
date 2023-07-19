@@ -318,152 +318,167 @@ h.Model.distributeGroup(h.InterGroupDistance);
 end
 
 function h = newInsertBridge(h, C, hObject)
-    % Creates a new bridge
+% Creates a new bridge
 
-    if h.IndexC == 1
-        %% First connection/body
-        % Select the group for the bridge start
-        set(h.message,'String','[click] Select the Group for Bridge Start');
-        ChangeGroup_Callback(hObject, [], h);
+if h.IndexC == 1
+    %% First connection/body
+    % Select the group for the bridge start
+    set(h.message,'String','[click] Select the Group for Bridge Start');
+    ChangeGroup_Callback(hObject, [], h);
+    
+    set(h.message,'String','[click] Select the Bridge Starting Connection');
+    h.IndexC = 2;
+    return
+end
 
-        set(h.message,'String','[click] Select the Bridge Starting Connection');
-        h.IndexC = 2;
-        return
+if h.IndexC == 2
+    % Select first connection
+    while isempty(h.Conn1)
+        h.Conn1 = h.Model.ActiveGroup.FindConnection(C);
+        h.Model.HighLight(h.Conn1);
     end
+    
+    set(h.message,'String','[click] Select the Foundation Body');
+    h.IndexC = 3;
+    return
+end
 
-    if h.IndexC == 2
-        % Select first connection
-        while isempty(h.Conn1)
-            h.Conn1 = h.Model.ActiveGroup.FindConnection(C);
-            h.Model.HighLight(h.Conn1);
-        end
-
-        set(h.message,'String','[click] Select the Foundation Body');
-        h.IndexC = 3;
-        return
+if h.IndexC == 3
+    % Select first body
+    while isempty(h.Body1)
+        h.Body1 = h.Conn1.findConnectedBody(C);
+        h.Model.HighLight(h.Body1);
     end
+    
+    set(h.message,'String','Click to continue, press the Bridge button to cancel');
+    h.IndexC = 4;
+    return
+end
 
-    if h.IndexC == 3
-        % Select first body
-        while isempty(h.Body1)
-            h.Body1 = h.Conn1.findConnectedBody(C);
-            h.Model.HighLight(h.Body1);
-        end
 
-        set(h.message,'String','Click to continue, press the Bridge button to cancel');
-        h.IndexC = 4;
-        return
+if h.IndexC == 4
+    %% Second connection/body
+    % Select the group for the bridge start
+    set(h.message,'String','[click] Select the Group for Bridge End');
+    ChangeGroup_Callback(hObject, [], h);
+    set(h.message,'String','[click] Select the Bridge Ending Connection');
+    
+    h.IndexC = 5;
+    return
+end
+
+if h.IndexC == 5
+    % Select second connection
+    while isempty(h.Conn2)
+        h.Conn2 = h.Model.ActiveGroup.FindConnection(C);
+        h.Model.HighLight(h.Conn2);
     end
+    
+    set(h.message,'String','[click] Select the Ending Body');
+    h.IndexC = 6;
+    return
+end
 
-
-    if h.IndexC == 4
-        %% Second connection/body
-        % Select the group for the bridge start
-        set(h.message,'String','[click] Select the Group for Bridge End');
-        ChangeGroup_Callback(hObject, [], h);
-        set(h.message,'String','[click] Select the Bridge Ending Connection');
-        
-        h.IndexC = 5;
-        return
+if h.IndexC == 6
+    % Select second body
+    while isempty(h.Body2)
+        h.Body2 = h.Conn2.findConnectedBody(C);
+        h.Model.HighLight(h.Body2);
     end
-
-    if h.IndexC == 5
-        % Select second connection
-        while isempty(h.Conn2)
-            h.Conn2 = h.Model.ActiveGroup.FindConnection(C);
-            h.Model.HighLight(h.Conn2);
-        end
-
-        set(h.message,'String','[click] Select the Ending Body');
-        h.IndexC = 6;
-        return
-    end
-
-    if h.IndexC == 6
-        % Select second body
-        while isempty(h.Body2)
-            h.Body2 = h.Conn2.findConnectedBody(C);
-            h.Model.HighLight(h.Body2);
-        end
-
-        %% Get correct offset
-        offset = {};
-        while isempty(offset)
-            if h.Conn1.Orient == h.Conn2.Orient
-                if h.Conn1.Orient == enumOrient.Vertical
-                    prompt = 'Select the height adjustment for body 2 as it is placed around body 1';
-                    [~,~,defaultval,~] = h.Body1.limits(enumOrient.Vertical);
-                else
-                    prompt = 'Select the radial offset distance';
-                    defaultval = 0;
-                end
+    
+    %% Get correct offset
+    offset = {};
+    while isempty(offset)
+        if h.Conn1.Orient == h.Conn2.Orient
+            if h.Conn1.Orient == enumOrient.Vertical
+                prompt = 'Select the height adjustment for body 2 as it is placed around body 1';
+                [~,~,defaultval,~] = h.Body1.limits(enumOrient.Vertical);
             else
-                prompt = 'Select the vertical center offset for the horizontal face to be up the vertical face';
-                if h.Conn1.Orient == enumOrient.Vertical
-                    [~,~,defaultval,~] = h.Body1.limits(enumOrient.Vertical);
-                else
-                    [~,~,defaultval,~] = h.Body2.limits(enumOrient.Vertical);
-                end
+                prompt = 'Select the radial offset distance';
+                defaultval = 0;
             end
-            offset = inputdlg(prompt,'Specify Bridge Offset',[1, 200],{num2str(defaultval)});
-
-            if isempty(offset{1}) || isnan(str2double(offset{1}))
-                disp("Please try again")
-                offset = {};
+        else
+            prompt = 'Select the vertical center offset for the horizontal face to be up the vertical face';
+            if h.Conn1.Orient == enumOrient.Vertical
+                [~,~,defaultval,~] = h.Body1.limits(enumOrient.Vertical);
+            else
+                [~,~,defaultval,~] = h.Body2.limits(enumOrient.Vertical);
             end
         end
-
-        % Reset the instruction window
-        set(h.message,'String','---');
-
-        %% Create and add the bridge
-        bridgeToAdd = Bridge(h.Body1, h.Body2, h.Conn1, h.Conn2, str2double(offset{1}));
-        h.Model.addBridge(bridgeToAdd)
-
-        h.IndexC = 1;
-        return
+        offset = inputdlg(prompt,'Specify Bridge Offset',[1, 200],{num2str(defaultval)});
+        
+        if isempty(offset{1}) || isnan(str2double(offset{1}))
+            disp("Please try again")
+            offset = {};
+        end
     end
+    
+    % Reset the instruction window
+    set(h.message,'String','---');
+    
+    %% Create and add the bridge
+    bridgeToAdd = Bridge(h.Body1, h.Body2, h.Conn1, h.Conn2, str2double(offset{1}));
+    h.Model.addBridge(bridgeToAdd)
+    
+    h.IndexC = 1;
+    return
+end
 
 end
 
 function h = InsertLeakConnection(h, C)
-    %{
+%{
     runs if the user clicks the insert leak connection button in the GUI
-    %}
-    % Select 2 horizontal connections and 2 bodies/Environments
-    Bod = Body.empty;
-    if h.IndexB == 1
-        % Picking the first Body
-        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-        if ~isempty(Bod)
+%}
+%% Select two bodies
+% Select the first body
+if h.IndexB == 1
+    [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+    if ~isempty(Bod) && Bod ~= 0
+        h.SelectBody(h.IndexB) = Bod;
+        h.Model.HighLight(Bod);
+        h.IndexB = 2;
+        set(h.message,'String','[click] Select the second body, or [right click] to select the environment');
+    end
+    
+    % Select the second body
+elseif h.IndexB == 2
+    switch get(gcf,'SelectionType')
+        case 'normal'
+            L = true;
+        case 'alt'
+            L = false;
+        case 'extend'
+            L = false;
+        otherwise
+            L = true;
+    end
+    
+    if L
+        % Select a body
+        [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+        if ~isempty(Bod) && Bod ~= 0 && Bod ~= h.SelectBody(1)
             h.SelectBody(h.IndexB) = Bod;
             h.Model.HighLight(Bod);
-            h.IndexB = 2;
-            set(h.message,'String','[click] Select the second body, or click in open space to select the environment');
+            show_Model(h);
+            set(h.message,'String','---');
+            [N,E] = LeakConnection.getParameters();
+            h.Model.addLeakConnection(LeakConnection(h.SelectBody(1),h.SelectBody(2),N,E));
+        else
+            % Same selection or no selection
+            return
         end
-    elseif h.IndexB == 2
-        % Picking the first Body
-        [~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-        for obj = objects; if isa(obj{1},'Body'); Bod = obj{1}; break; end; end
-        if Bod ~= h.SelectBody(1)
-            if ~isempty(Bod)
-                h.SelectBody(h.IndexB) = Bod;
-                h.Model.HighLight(Bod);
-                set(h.message,'String','---');
-                [N,E] = LeakConnection.getParameters();
-                h.Model.addLeakConnection(...
-                    LeakConnection(h.SelectBody(1),h.SelectBody(2),N,E));
-            end
-            return;
-        end
-        % No object was selected, select the environment instead
+        
+    else
+        % Select the environment
         set(h.message,'String','---');
         [N,E] = LeakConnection.getParameters();
         h.Model.addLeakConnection(LeakConnection(h.SelectBody(1),h.Model.surroundings,N,E));
     end
+    h.IndexB = 1;
 end
-    
+end
+
 function h = InsertSensor(h, C)
 %{
 runs if the user clicks the insert sensor button in the GUI
@@ -481,7 +496,7 @@ if ~isempty(objects)
     end
 end
 end
-    
+
 function h = InsertPVoutput(h, C)
 %{
 runs if the user clicks the insert PVOutput button in the GUI
@@ -546,22 +561,31 @@ runs if the user clicks the insert custom minor loss button in the GUI
 %}
 % Find, within a radius of confidence, the nearest body
 C = C(1,1:2);
-[~, objects] = h.Model.findNearest(C,h.ClickTolerance);
-if ~isempty(objects)
-    for obj = objects
-        if isa(obj{1},'Body')
-            h.SelectBody(h.IndexB) = obj{1};
-            if (h.IndexB == 2)
-                % Finalize Custom Minor Loss
-                h.IndexB = 1;
-                h.Model.addCustomMinorLoss(...
-                    CustomMinorLoss(...
-                    h.SelectBody(1),...
-                    h.SelectBody(2)));
-            end
-            h.IndexB = 2;
-        end
+%% Select two bodies
+% Select the first body
+if h.IndexB == 1
+    [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+    if ~isempty(Bod) && Bod ~= 0
+        h.SelectBody(h.IndexB) = Bod;
+        h.Model.HighLight(Bod);
+        h.IndexB = 2;
+        set(h.message,'String','[click] Select the second body');
     end
+    
+    % Select the second body
+elseif h.IndexB == 2
+    [Bod, ~] = h.Model.findNearestBody(C,h.ClickTolerance);
+    if ~isempty(Bod) && Bod ~= 0 && Bod ~= h.SelectBody(1)
+        h.SelectBody(h.IndexB) = Bod;
+        h.Model.HighLight(Bod);
+        show_Model(h);
+        set(h.message,'String','---');
+        h.Model.addCustomMinorLoss(CustomMinorLoss(h.SelectBody(1),h.SelectBody(2)));
+    else
+        % Same selection or no selection
+        return
+    end
+    h.IndexB = 1;
 end
 end
 
@@ -633,14 +657,14 @@ if h.IndexC == 1
     h.Model.HighLight(h.SelectCon(h.IndexC));
     show_Model(h)
     h.IndexC = 2;
-
+    
 elseif (h.IndexC == 2)
     if ~(obj.Orient == h.SelectCon(1).Orient && ...
-        obj.Group == h.SelectCon(1).Group)
+            obj.Group == h.SelectCon(1).Group)
         msgbox('The two connections must have the same orientation.');
         return
     end
-
+    
     h.SelectCon(h.IndexC) = obj;
     h.Model.HighLight(h.SelectCon(h.IndexC));
     show_Model(h)
@@ -743,7 +767,7 @@ elseif (h.IndexC == 2)
     h.Model.clearHighLighting();
 end
 end
-    
+
 
 
 %% General button codes
@@ -879,7 +903,7 @@ hObject.UserData(1) = 0;
 end
 
 function InsertLeakConnection_Callback(hObject, ~, handles)
-ButtonCore(hObject,'InsertLeakConnection',handles,'[click] To select Connection 1');
+ButtonCore(hObject,'InsertLeakConnection',handles,'[click] To select Body 1');
 end
 
 function SelectObjects_CreateFcn(hObject, ~, ~)
@@ -2195,7 +2219,7 @@ for j = 1:length(h.Model.Groups)
         iBody = iGroup.Bodies(k);
         iBody.update();
     end
-
+    
     % Update each group
     iGroup.update()
 end
@@ -2284,13 +2308,13 @@ for j = 1:length(groupsToScale)
             case enumOrient.Horizontal
                 iConn.x =  (iConn.x).*a_scale;
         end
-
+        
         % Check if there are any motion profiles and record which ones
         if ~isempty(iConn.RefFrame)
             converters{convert_pos} = iConn.RefFrame.Mechanism.name;
             convert_pos = convert_pos + 1;
         end
-
+        
         progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [], [])
     end
     
@@ -2299,7 +2323,7 @@ for j = 1:length(groupsToScale)
         iBody.update();
         progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [], [])
     end
-
+    
     % Scale the group positions
     if r_scale ~= 1
         iGroup.Position.x = iGroup.Position.x .* r_scale;
@@ -2319,7 +2343,7 @@ end
 
 % Update the motion profiles associated with that group
 if a_scale ~= 1 && ~isempty(converters)
-
+    
     % Get the converters from the frames
     uniqueConverters = unique(converters);
     
@@ -2334,7 +2358,7 @@ if a_scale ~= 1 && ~isempty(converters)
             % Apply the change to the converter
             iConverter.Populate(iConverter.Type, origin_in)
         end
-
+        
         progressbar([], [], i/length(h.Model.Converters))
     end
 end
@@ -2362,10 +2386,13 @@ selpath = uigetdir(h.save_location, 'Select a location to save model files');
 if selpath % if the user didn't cancel
     % Update the location in the currently running gui
     h.save_location = [selpath, '\'];
-    load("Config Files\parameters.mat")
+    load("Config Files\parameters.mat", 'parameters')
     parameters.savelocation = [selpath, '\'];
     save('Config Files\parameters.mat', 'parameters')
     clear parameters
+    
+    
+    msgbox("Model Save Location Updated")
 end
 
 %% Update handles structure
@@ -2385,10 +2412,12 @@ selpath = uigetdir(h.run_location, 'Select a location to save model files');
 if selpath % if the user didn't cancel
     % Update the location in the currently running gui
     h.run_location = [selpath, '\'];
-    load("Config Files\parameters.mat")
+    load("Config Files\parameters.mat", 'parameters')
     parameters.runlocation = [selpath, '\'];
     save('Config Files\parameters.mat', 'parameters')
     clear parameters
+    
+    msgbox("Run Save Location Updated")
 end
 
 %% Update handles structure
