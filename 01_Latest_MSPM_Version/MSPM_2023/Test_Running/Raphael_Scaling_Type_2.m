@@ -10,10 +10,10 @@ model = {
     'Raphael New HX - Type 2 - Scale 10',...
     }; % Name of MSPM model geometry.
 
-pressures = [300 345 390 435 480 525 570] .*1000; % [Pa]
-speeds = [6 24 96 384]; % [rpm]
-simTime = 600; %(s) Simulation time.
-minCycles = 10; % minimum number of engine cycles to complete before turning to steady state.
+pressures = [300 435 570] .*1000; % [Pa]
+speeds = [1 2 4 8 16 32 64 128 256 512]; % [rpm]
+simTime = 1200; %(s) Simulation time.
+minCycles = 5; % minimum number of engine cycles to complete before turning to steady state.
 SS = true; % Steady state toggle.
 movement_option = 'C';
 max_dt = 0.1; %(s) Maximum time step.
