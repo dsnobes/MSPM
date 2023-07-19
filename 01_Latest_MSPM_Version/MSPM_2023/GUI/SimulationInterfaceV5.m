@@ -1427,7 +1427,7 @@ h.Model.recordReynolds = get(h.RecordReynolds,'Value');
 
 h.Model.recordOnlyLastCycle = get(h.RecordOnlyLastCycle,'Value');
 % h.Model.outputPath= get(h.OutputPath,'String');
-h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
+% h.Model.warmUpPhaseLength = str2double(get(h.WarmUpPhaseLength,'String'));
 h.Model.animationFrameTime = str2double(get(h.AnimationFrameTime,'String'));
 
 %% Check the file name vs the model name
