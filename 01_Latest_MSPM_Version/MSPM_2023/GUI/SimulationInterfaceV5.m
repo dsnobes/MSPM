@@ -712,7 +712,10 @@ elseif (h.IndexC == 2)
             if isempty(Label)
                 Label = getProperName([names{Type} ' Relation']);
             end
-            if isempty(Label); return; end
+            if isempty(Label)
+                disp("Relation Creation Canceled!!")
+                return;
+            end
             if EnumType == enumRelation.Stroke || ...
                     EnumType == enumRelation.Piston
                 % Ask which mechanism?
@@ -766,6 +769,10 @@ elseif (h.IndexC == 2)
     h.IndexC = 1;
     h.Model.clearHighLighting();
 end
+
+
+
+
 end
 
 
@@ -959,6 +966,12 @@ hObject.UserData(1) = 0;
 end
 
 function InsertRelation_Callback(hObject, ~, handles)
+
+if ~handles.Model.showConnections
+    set(handles.showConnections, 'Value', true);
+    showConnections_Callback(handles.showConnections,[], handles)
+end
+
 ButtonCore(hObject,'InsertRelation',handles,'[click] To select two parallel connections');
 end
 
@@ -2185,6 +2198,7 @@ crun = struct('Model',h.Model.name,...
     'rpm',h.Model.engineSpeed,...
     'NodeFactor',h.Model.deRefinementFactorInput);
 h.Model.discretize(crun);
+show_Model(h)
 end
 
 function ChangeAllGasBodies_Callback(~, ~, h)

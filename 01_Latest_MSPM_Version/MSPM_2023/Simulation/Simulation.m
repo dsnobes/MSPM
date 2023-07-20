@@ -482,6 +482,7 @@ classdef Simulation < handle
             ME.old_vol = ME.vol;
 
             %% Warm Up Phase
+            do_warmup = false;
             if do_warmup
                 % progressbar('Warmup Phase');
                 % hmax = mean(ME.Solid_dt_max);

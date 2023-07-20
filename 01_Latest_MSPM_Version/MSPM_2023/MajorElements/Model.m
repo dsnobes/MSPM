@@ -605,21 +605,15 @@ classdef Model < handle
                 % 'Wall_Smart_Discretize' function on all the bodies that
                 % have the function enabled. By default (Steven), only
                 % this.Mesher.Gas_Entrance_Exit_N
-                % this.Mesher.Gas_Maximum_Size
+                % this.Mesher.Gas_Maximum_Sizerun
                 % this.Mesher.Gas_Minimum_Size
                 % are changed by 'NodeFactor'.
                 % Matthias May 31: uncommented
-                this.Mesher.oscillation_depth_N = ...
-                    ceil(sqrt(double(run.NodeFactor))*double(backup_ODN));
-                this.Mesher.maximum_thickness = ...
-                    backup_MXT/sqrt(double(run.NodeFactor));
-                %
-                this.Mesher.Gas_Entrance_Exit_N = ...
-                    double(run.NodeFactor)*double(backup_gas_entrance);
-                this.Mesher.Gas_Maximum_Size = ...
-                    double(backup_gas_maximum_size)/double(run.NodeFactor);
-                this.Mesher.Gas_Minimum_Size = ...
-                    double(backup_gas_minimum_size)/double(run.NodeFactor);
+                this.Mesher.oscillation_depth_N = ceil(sqrt(double(run.NodeFactor))*double(backup_ODN));
+                this.Mesher.maximum_thickness =  backup_MXT/sqrt(double(run.NodeFactor));
+                this.Mesher.Gas_Entrance_Exit_N = ceil(double(run.NodeFactor)*double(backup_gas_entrance));
+                this.Mesher.Gas_Maximum_Size = double(backup_gas_maximum_size)/double(run.NodeFactor);
+                this.Mesher.Gas_Minimum_Size = double(backup_gas_minimum_size)/double(run.NodeFactor);
                 %%
             end
             
