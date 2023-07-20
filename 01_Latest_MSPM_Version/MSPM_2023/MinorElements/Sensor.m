@@ -77,11 +77,13 @@ classdef Sensor < handle
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Available variables
                 source = {'T','P','turb','Re','U'};
+                % Should be in the same order as source
+                shown_source = {'Temperature', 'Pressure','Turbulence', 'Reynolds Number', 'Velocity'};
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 while notdone
                     index = listdlg('PromptString','What is the dependent variable?',...
                         'SelectionMode','single',...
-                        'ListString',source);
+                        'ListString',shown_source);
                     if index ~= 0
                         notdone = false;
                     end
