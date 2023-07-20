@@ -1565,7 +1565,7 @@ classdef Simulation < handle
             indl = 1:length(skipLoop);
             rows(skipLoop) = [];
             indl(skipLoop) = [];
-            x = Ainv*b;
+            x = A\b;
 
             % Initialize Solving Loop
             iteration = 1;
