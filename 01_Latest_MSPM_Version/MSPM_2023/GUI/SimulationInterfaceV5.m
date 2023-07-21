@@ -2449,7 +2449,7 @@ pos = 1;
 for j = 1:length(h.Model.Groups)
     iGroup = h.Model.Groups(j);
     for i = 1:length(iGroup.Bodies)
-        iBody = h.Model.Groups.Bodies(i);
+        iBody = iGroup.Bodies(i);
         if iBody.matl.Phase == enumMaterial.Gas
             % Get the positions of the x and y bounds
             [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
