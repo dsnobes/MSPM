@@ -3441,6 +3441,7 @@ classdef Model < handle
                 end
                 % If it has a steady state end condition and only the last cycle is
                 % ... important then use the Multi-Grid Formulation.
+                crun.SS = true;
                 useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
                 ntrials = 1;
                 
@@ -3665,23 +3666,23 @@ classdef Model < handle
                         % snapshot to produce a 'cyclic steady state' result with in-cycle speed
                         % variations.
                         % Only works when running from a Test Set!
-                        if nargin > 1 && ...
-                                crun.movement_option == 'V' && ...
-                                crun.SS && ...
-                                ME.recordStatistics && ...
-                                ME.recordOnlyLastCycle
-                            dynamic = true;
-                            record_P_backup = ME.recordPressure;
-                            record_T_backup = ME.recordTemperature;
-                            record_t_backup = ME.recordTurbulence;
-                            ME.recordPressure = true;
-                            ME.recordTemperature = true;
-                            ME.recordTurbulence = true;
-                            crun.movement_option = 'C';
-                            ss_tolerance = sst1;
-                        else
-                            dynamic = false;
-                        end
+                        % if nargin > 1 && ...
+                        %         crun.movement_option == 'V' && ...
+                        %         crun.SS && ...
+                        %         ME.recordStatistics && ...
+                        %         ME.recordOnlyLastCycle
+                        %     dynamic = true;
+                        %     record_P_backup = ME.recordPressure;
+                        %     record_T_backup = ME.recordTemperature;
+                        %     record_t_backup = ME.recordTurbulence;
+                        %     ME.recordPressure = true;
+                        %     ME.recordTemperature = true;
+                        %     ME.recordTurbulence = true;
+                        %     crun.movement_option = 'C';
+                        %     ss_tolerance = sst1;
+                        % else
+                        %     dynamic = false;
+                        % end
                         
                         tic; % starts simulation timer
                         % 'crun' contains run options from test set
@@ -3720,22 +3721,22 @@ classdef Model < handle
                             return;
                         end
                         
-                        % 2nd run (final transient cycle) for 'dynamic' cases
-                        if dynamic
-                            % Reset Settings
-                            crun.movement_option = 'V';
-                            crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
-                            % Save and Reload Snapshot
-                            ME.Results.getSnapShot(ME,'Temp');
-                            ME.assignSnapShot(ME.SnapShots{end});
-                            ME.SnapShots(end) = [];
-                            ME.recordPressure = record_P_backup;
-                            ME.recordTemperature = record_T_backup;
-                            ME.recordTurbulence = record_t_backup;
-                            % Run
-                            [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
-                                islast, do_warmup, ss_tolerance, crun);
-                        end
+                        % % 2nd run (final transient cycle) for 'dynamic' cases
+                        % if dynamic
+                        %     % Reset Settings
+                        %     crun.movement_option = 'V';
+                        %     crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
+                        %     % Save and Reload Snapshot
+                        %     ME.Results.getSnapShot(ME,'Temp');
+                        %     ME.assignSnapShot(ME.SnapShots{end});
+                        %     ME.SnapShots(end) = [];
+                        %     ME.recordPressure = record_P_backup;
+                        %     ME.recordTemperature = record_T_backup;
+                        %     ME.recordTurbulence = record_t_backup;
+                        %     % Run
+                        %     [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                        %         islast, do_warmup, ss_tolerance, crun);
+                        % end
                         
                         runtime = toc; % reads simulation timer
                         fprintf(['Elapsed time: ' SecondsToString(runtime) 's\n']);
@@ -4498,24 +4499,24 @@ classdef Model < handle
                     % run (further below) with variable speed uses the calculated load &
                     % snapshot to produce a 'cyclic steady state' result with in-cycle speed
                     % variations.
-                    % Only works when running from a Test Set!
-                    if nargin > 1 && ...
-                            crun.movement_option == 'V' && ...
-                            crun.SS && ...
-                            ME.recordStatistics && ...
-                            ME.recordOnlyLastCycle
-                        dynamic = true;
-                        record_P_backup = ME.recordPressure;
-                        record_T_backup = ME.recordTemperature;
-                        record_t_backup = ME.recordTurbulence;
-                        ME.recordPressure = true;
-                        ME.recordTemperature = true;
-                        ME.recordTurbulence = true;
-                        crun.movement_option = 'C';
-                        ss_tolerance = sst1;
-                    else
-                        dynamic = false;
-                    end
+                    % % Only works when running from a Test Set!
+                    % if nargin > 1 && ...
+                    %         crun.movement_option == 'V' && ...
+                    %         crun.SS && ...
+                    %         ME.recordStatistics && ...
+                    %         ME.recordOnlyLastCycle
+                    %     dynamic = true;
+                    %     record_P_backup = ME.recordPressure;
+                    %     record_T_backup = ME.recordTemperature;
+                    %     record_t_backup = ME.recordTurbulence;
+                    %     ME.recordPressure = true;
+                    %     ME.recordTemperature = true;
+                    %     ME.recordTurbulence = true;
+                    %     crun.movement_option = 'C';
+                    %     ss_tolerance = sst1;
+                    % else
+                    %     dynamic = false;
+                    % end
                     
                     tic; % starts simulation timer
                     % 'crun' contains run options from test set
@@ -4549,21 +4550,21 @@ classdef Model < handle
                     end
                     
                     % 2nd run (final transient cycle) for 'dynamic' cases
-                    if dynamic
-                        % Reset Settings
-                        crun.movement_option = 'V';
-                        crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
-                        % Save and Reload Snapshot
-                        ME.Results.getSnapShot(ME,'Temp', true);
-                        ME.assignSnapShot(ME.SnapShots{end});
-                        ME.SnapShots(end) = [];
-                        ME.recordPressure = record_P_backup;
-                        ME.recordTemperature = record_T_backup;
-                        ME.recordTurbulence = record_t_backup;
-                        % Run
-                        [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
-                            islast, do_warmup, ss_tolerance, crun);
-                    end
+                    % if dynamic
+                    %     % Reset Settings
+                    %     crun.movement_option = 'V';
+                    %     crun.set_Load = mean(ME.Results.Data.Power)/mean(ME.Results.Data.dA);
+                    %     % Save and Reload Snapshot
+                    %     ME.Results.getSnapShot(ME,'Temp', true);
+                    %     ME.assignSnapShot(ME.SnapShots{end});
+                    %     ME.SnapShots(end) = [];
+                    %     ME.recordPressure = record_P_backup;
+                    %     ME.recordTemperature = record_T_backup;
+                    %     ME.recordTurbulence = record_t_backup;
+                    %     % Run
+                    %     [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                    %         islast, do_warmup, ss_tolerance, crun);
+                    % end
                     
                     runtime = toc; % reads simulation timer
                     fprintf(['Elapsed time: ' SecondsToString(runtime) 's\n']);

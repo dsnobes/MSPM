@@ -65,6 +65,9 @@ classdef Body < handle
 
         % Added by Matthias: Custom Heat Transfer Coefficient
         h_custom = NaN;
+
+        % Added by Matteo: Include in calculate volume
+        includeVol logical = true;
     end
 
     methods
@@ -253,6 +256,8 @@ classdef Body < handle
                     % Matthias: Added 'h_custom'
                 case 'Custom Heat Transfer Coefficient'
                     Item = this.h_custom;
+                case 'Include in Volume Calculation'
+                    Item = this.includeVol;
                 otherwise
                     fprintf(['XXX Body GET Inteface for ' PropertyName ' is not found XXX\n']);
             end
@@ -303,6 +308,8 @@ classdef Body < handle
                     % Matthias: Added 'h_custom'
                 case 'Custom Heat Transfer Coefficient'
                     this.h_custom = Item;
+                case 'Include in Volume Calculation'
+                    this.includeVol = Item;
                 otherwise
                     fprintf(['XXX Body SET Inteface for ' PropertyName ' is not found XXX\n']);
                     return;

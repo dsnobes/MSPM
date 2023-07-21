@@ -174,6 +174,15 @@ classdef ListObj < handle
                             set(this.Parent,this.Child,answers);
                         end
                     end
+                case 'TrueFalse'
+                    % Get the current state    
+                    currState = get(this.Parent, this.Child);
+                    % Get the correct index
+                    if currState
+                        set(this.Parent,this.Child,false)
+                    else
+                        set(this.Parent,this.Child,true)
+                    end
             end
         end
 
@@ -245,6 +254,11 @@ classdef ListObj < handle
                                         ListObj('Pickfunction',slvl,Item,'Axial Discretization Function','Function - Discretization'); ...
                                         % Matthias: Added to display and edit custom heat transfer coefficient
                                         ListObj('Editnum',slvl,Item,'Custom Heat Transfer Coefficient','W/m^2 K (Only for Solid Bodies or gas bodies with a matrix containing a source! ''NaN'' to disable.)')];
+
+                                        % If the material is a gas
+                                        if Item.matl.Phase == enumMaterial.Gas
+                                            objects = [objects; ListObj('TrueFalse',slvl,Item,'Include in Volume Calculation', {'Will this body be included in the', 'volume calculation?'})];
+                                        end
                                 case 'Connection'
                                     objects = [this; ...
                                         ListObj('Editnum',slvl,Item,'x','m'); ...
@@ -406,6 +420,12 @@ classdef ListObj < handle
                 case 'NamedList'
                     if isempty(Item); output = [starter Text '[empty]'];
                     else; output = [starter Text '[...]'];
+                    end
+                case 'TrueFalse'
+                    if get(this.Parent, this.Child)
+                        output = [starter Text ': [' 'True' ']'];
+                    else
+                        output = [starter Text ': [' 'False' ']'];
                     end
             end
         end
