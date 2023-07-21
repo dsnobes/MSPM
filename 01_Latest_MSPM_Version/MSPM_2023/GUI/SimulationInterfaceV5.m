@@ -2454,24 +2454,16 @@ for j = 1:length(h.Model.Groups)
             % Get the positions of the x and y bounds
             [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
             [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
-            
-            % Save the name
-            volumes(pos).name = iBody.customname;
-            % Calculate and save the volume
-            switch string(volumes(pos).name)
-                case  "Crank Case"
-                    volumes(pos).vol = 0;
-                case "Heater"
-                    porosity = iBody.Matrix.data.Porosity;
-                    volumes(pos).vol = pi*(x2^2-x1^2)*(y2(1)-y1(1)) * porosity;
-                case "Cooler"
-                    porosity = iBody.Matrix.data.Porosity;
-                    volumes(pos).vol = pi*(x2^2-x1^2)*(y2(1)-y1(1)) * porosity;
-                case "Regenerator"
-                    porosity = iBody.Matrix.data.Porosity;
-                    volumes(pos).vol = pi*(x2^2-x1^2)*(y2(1)-y1(1)) * porosity;
-                otherwise
-                    volumes(pos).vol = pi*(x2^2-x1^2)*(y2(1)-y1(1));
+
+
+            % If the body is included in th volume
+            if get(iBody, 'Include in Volume Calculation')
+                % If the body contains a matrix, use the porosity
+                if isempty(iBody.Matrix)
+                    volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1));
+                else
+                    volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1)) .* iBody.Matrix.data.Porosity;
+                end
             end
             pos = pos + 1;
             
@@ -2485,8 +2477,7 @@ if pos == 1
     return
 end
 % Go through all the volumes and add them
-vol_table = struct2table(volumes);
-total_vol = sum(vol_table.vol);
+total_vol = sum(volumes);
 total_liters = total_vol.*1000;
 disp(['The total volume (excl. HX and regenerator) is: ', num2str(total_liters), ' L'])
 end
