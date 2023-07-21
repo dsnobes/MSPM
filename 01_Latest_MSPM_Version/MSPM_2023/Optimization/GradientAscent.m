@@ -108,7 +108,7 @@ function [History] = GradientAscent(...
         end
     
         % Load the specificied model
-        if isempty(RunConditions.title)
+        if ~isfield(RunConditions, 'title') || isempty(RunConditions.title)
             Model.name = originalname;
             NewModel = [Model.name ' - Optimized'];
         else
