@@ -237,6 +237,20 @@ classdef PVoutput < handle
             figure(oldfigure);
             axes(oldaxes);
         end
+
+        function WTotal = getIndicatedWork(this)
+            % Calculate the indicated work
+            WTotal = 0;
+            for i = 1:length(this.Nodes)
+                pV = zeros(size(this.V,1)+1,1); pP = pV;
+                pV(1:end-1) = this.V(:,i); pV(end) = this.V(1,i);
+                pP(1:end-1) = this.P(:,i); pP(end) = this.P(1,i);
+                W = PowerFromPV(pP,pV);
+                WTotal = WTotal + W;
+            end
+        end
+
+
     end
 end
 

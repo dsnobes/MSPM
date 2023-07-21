@@ -576,7 +576,7 @@ classdef Simulation < handle
                 end
             end
             
-            [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure, SetSpeed);
+            [Plot_Powers, Plot_Speed, Indicated_Work, fig, ME, Results, n, cycle_count] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure, SetSpeed);
 
             if ME.Model.terminate
                 return
@@ -620,6 +620,7 @@ classdef Simulation < handle
                         'Flow_Loss',Results.Data.Flow_Loss,...
                         'Power',Results.Data.Power,...
                         'TotalPower',Plot_Powers,...
+                        'IndicatedWorkPerCycle', Indicated_Work,...
                         'TotalSpeed',Plot_Speed,...
                         'Gas_Nodes',length(ME.P)-1,...
                         'Solid_Nodes',length(ME.T)-length(ME.P)+1,...
@@ -2089,7 +2090,7 @@ classdef Simulation < handle
 
 end
 
-function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure, SetSpeed)
+function [Plot_Powers, Plot_Speed,Indicated_Work, fig, ME, Results, n, cycle_count] = Main_Simulation_loop(ME, simTime, n, Results, grab_Pressure, grab_Temperature, grab_Velocity, grab_PressureDrop, grab_Turbulence, grab_ConductionFlux, grab_Reynolds, previousTime, AdjustTime, sindn, ss_tolerance, options, ss_cycles, indf, Load_Function_is_Not_Given, engine_Pressure, SetSpeed)
     ME.curTime = 0;
     ME.CycledE = 0;
     cycle_count = 0;
@@ -2347,6 +2348,14 @@ function [Plot_Powers, Plot_Speed, fig, ME, Results, n, cycle_count] = Main_Simu
                         iPVoutput.updatePlot(figure_positions{pos_index});
                         pos_index = pos_index + 1;
                     end
+                end
+
+                % Get the indicated work for each PV loop
+                PV_plot_num = 1;
+                for iPVoutput = ME.Model.PVoutputs
+                    W_Ind = iPVoutput.getIndicatedWork();
+                    Indicated_Work(Plot_Number, PV_plot_num) = W_Ind;
+                    PV_plot_num = PV_plot_num + 1;
                 end
 
                 % Acquire an understanding of the solution plateauing
