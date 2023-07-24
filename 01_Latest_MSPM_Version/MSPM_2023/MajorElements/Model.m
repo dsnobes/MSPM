@@ -239,30 +239,6 @@ classdef Model < handle
             this.surroundings.resetDiscretization();
             this.change();
         end
-        function dispNodeIndexes(this, value)
-            % Prints to screen the index associated with a node its display
-            % ... position
-            % Save GUI axes
-            % value is bool, whether to show
-            guiAxes = gca;
-            if value
-                if isempty(this.NodeIDIndices)
-                    progressbar('Plotting Node IDs')
-                    progress_index = 0;
-                    for iNd = this.Nodes
-                        pnt = iNd.minCenterCoords;
-                        this.StaticGUIObjects(end+1) = text(pnt.x,pnt.y,num2str(iNd.index), 'Parent', guiAxes);
-                        this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
-                        progress_index = progress_index + 1;
-                        progressbar(progress_index/length(this.Nodes))
-                    end
-                    progressbar(1);
-                end
-            else
-                this.StaticGUIObjects = this.StaticGUIObjects(~this.NodeIDIndices);
-                this.NodeIDIndices = [];
-            end
-        end
         
         %% GET/SET Interface
         function Item = get(this,PropertyName)
@@ -5753,7 +5729,7 @@ classdef Model < handle
             end
             
             % Prepare for showing node centerpoints and outlines
-            if this.showNodes || this.showNodeBounds
+            if this.showNodes || this.showNodeBounds || this.showNodeIDs
                 if this.isDiscretized()
                     % Make array of Node Centers
                     % Count nodes, stored in Groups
@@ -5768,6 +5744,15 @@ classdef Model < handle
                         yData = xData;
                         xBoundsData = xData;
                         yBoundsData = xData;
+
+                        % For nodeIDs
+                        nodeNum(n).SN = {};
+                        nodeNum(n).SVGN = {};
+                        nodeNum(n).VVGN = {};
+                        nodeNum(n).SAGN = {};
+                        nodeNum(n).EN = {};
+                        pntIDs = xData;
+
                         
                         % Define colors for node circles and outlines
                         colors = struct(...
@@ -5795,26 +5780,36 @@ classdef Model < handle
                                     yData(j).SN = c1.y;
                                     xBoundsData(j).SN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    nodeNum(j).SN = num2str(nd.index);
+                            pntIDs(j).SN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.SVGN % Static Volume Gas Node
                                     xData(j).SVGN = c1.x;
                                     yData(j).SVGN = c1.y;
                                     xBoundsData(j).SVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    nodeNum(j).SVGN = num2str(nd.index);
+                            pntIDs(j).SVGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.VVGN % Variable Volume Gas Node
                                     xData(j).VVGN = c1.x;
                                     yData(j).VVGN = c1.y;
                                     xBoundsData(j).VVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).VVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    nodeNum(j).VVGN = num2str(nd.index);
+                            pntIDs(j).VVGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.SAGN % Shearing Annular Gas Node
                                     xData(j).SAGN = c1.x;
                                     yData(j).SAGN = c1.y;
                                     xBoundsData(j).SAGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SAGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    nodeNum(j).SAGN = num2str(nd.index);
+                            pntIDs(j).SAGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.EN %environment
                                     xData(j).EN = c1.x;
                                     yData(j).EN = c1.y;
                                     xBoundsData(j).EN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).EN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    nodeNum(j).EN = num2str(nd.index);
+                            pntIDs(j).EN = nd.minCenterCoords;
                                 end
                                 j = j + 1;
                             end
@@ -5911,6 +5906,7 @@ classdef Model < handle
                     % If x and y have size [1, nRectangles*(4+1)] and after every 4 values
                     % there is a 'NaN' before the next 4: Draws one line with breaks where
                     % there is 'NaN' --> Fast!
+
                     
                     % Plot solid nodes first
                     if any([xData.SN]) && this.showNodesSN
@@ -5990,7 +5986,38 @@ classdef Model < handle
             end
 
             % Show node IDs
-            this.dispNodeIndexes(this.showNodeIDs);
+            guiAxes = gca;
+            if this.showNodeIDs
+                if this.showNodesSN && ~isempty([nodeNum.SN])
+                    pnts = [pntIDs.SN];
+                    if isempty(this.StaticGUIObjects)
+                        this.StaticGUIObjects = text([pnts.x],[pnts.y],num2cell([nodeNum.SN]), 'Parent', guiAxes);
+                    else
+                        this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SN]), 'Parent', guiAxes)];
+                    end
+                    this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                end
+                if this.showNodesSVGN && ~isempty([nodeNum.SVGN]) 
+                    pnts = [pntIDs.SVGN];
+                    this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SVGN]), 'Parent', guiAxes)];
+                    this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                end
+                if this.showNodesVVGN && ~isempty([nodeNum.VVGN])
+                    pnts = [pntIDs.VVGN];
+                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.VVGN]), 'Parent', guiAxes)];
+                    this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                end
+                if this.showNodesSAGN && ~isempty([nodeNum.SAGN])
+                    pnts = [pntIDs.SAGN];
+                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SAGN]), 'Parent', guiAxes)];
+                    this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                end
+                if this.showNodesEN && ~isempty([nodeNum.EN])
+                    pnts = [pntIDs.EN];
+                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.EN]), 'Parent', guiAxes)];
+                    this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
+                end
+            end
 
         end
         function Animate(this,showOptions)

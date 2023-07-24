@@ -254,7 +254,7 @@ classdef Simulation < handle
 
     methods
         % Matthias: Added cycle_count and final_speed, final_power to outputs
-        function [Results, success, cycle_count, final_speed, final_power] = Run(ME, islast, do_warmup, ss_tolerance, options)
+        function [Results, success, cycle_count, final_speed, final_power] = Run(ME, islast, ~, ss_tolerance, options)
             % Matthias: Added message to identify current run
             disp("Running: '" + options.title + "'")
             success = true;
