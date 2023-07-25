@@ -20,7 +20,7 @@ classdef LinRotMechanism < handle
         %with old models as their mechanisms have the old text saved in them so the
         %'orientation' property will not be found if looking for the new one.
         %     OrientationText = 'Orientation: "u" starting at top position, "d" starting at bottom position (as modeled)'; %changed by Matthias
-        OrientationText = 'Orientation: "u" piston moves up first, "d" opposite';
+        OrientationText = 'Orientation: "u" aligned with positive y, "d" opposite';
         EfficiencyText = 'Mechanical Efficiency (0.##)';
         %     isPropertyEditable ...
         %       = {'Stroke (m)', 'Phase (rad)', 'Weight (kg)', 'Tilt from Hor. (rad)', 'Aspect Ratio', 'Custom Profile Fcn';
