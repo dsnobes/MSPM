@@ -15,7 +15,7 @@ classdef LinRotMechanism < handle
         StrokeText = 'Stroke (m)';
         PhaseText = 'Phase (rad)';
         PistonMassText = 'Piston Mass (kg)';
-        TiltAngleText = 'Tilt from Horizontal (rad)';
+        TiltAngleText = 'Tilt from Hor. (rad)';
         %Matthias: Wrote below 'OrientationText' to be more clear. Cannot use it
         %with old models as their mechanisms have the old text saved in them so the
         %'orientation' property will not be found if looking for the new one.
