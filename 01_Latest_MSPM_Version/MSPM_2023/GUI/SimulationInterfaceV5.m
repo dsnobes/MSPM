@@ -2303,7 +2303,6 @@ progressbar(...
     'Scaling',...
     'Connections',...
     'Bodies',...
-    'Sensors',...
     'Motion'...
     )
 
@@ -2329,13 +2328,13 @@ for j = 1:length(groupsToScale)
             convert_pos = convert_pos + 1;
         end
         
-        progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [], [])
+        progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [])
     end
     
     for k = 1:length(iGroup.Bodies)
         iBody = iGroup.Bodies(k);
         iBody.update();
-        progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [], [])
+        progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [])
     end
     
     % Scale the group positions
@@ -2346,14 +2345,7 @@ for j = 1:length(groupsToScale)
     % Update each group
     iGroup.update()
 end
-progressbar(3/4, [], 1, [])
-
-% Update all sensors
-for j = 1:length(h.Model.Sensors)
-    iSensor = h.Model.Sensors(j);
-    iSensor.update()
-    progressbar([],[],[], j./length(h.Model.Sensors), [])
-end
+progressbar(2/3, 1, 1, [])
 
 % Update the motion profiles associated with that group
 if a_scale ~= 1 && ~isempty(converters)
@@ -2376,11 +2368,20 @@ if a_scale ~= 1 && ~isempty(converters)
         progressbar([], [], i/length(h.Model.Converters))
     end
 end
-
-
-% Update the model
-h.Model.update()
 progressbar(1)
+
+
+
+% Discretize and update the model
+if ~h.Model.isDiscretized()
+    crun = struct('Model',h.Model.name,...
+        'title',[h.Model.name ' test: ' date],...
+        'rpm',h.Model.engineSpeed,...
+        'NodeFactor',h.Model.deRefinementFactorInput);
+    h.Model.discretize(crun);
+end
+% Update positions
+UpdateModel_Callback(1, 1, h)
 
 % Redraw the model
 cla;
