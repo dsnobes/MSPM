@@ -2118,10 +2118,8 @@ function [Plot_Powers, Plot_Speed,Indicated_Work, fig, ME, Results, n, cycle_cou
         Speed_Plot = subplot(3,1,3);
         plot_axes.speed = gca;
     else
-        Convergence_Plot = subplot(2,1,1);
+        Convergence_Plot = subplot(1,1,1);
         plot_axes.conver = gca;
-        Factor_Plot = subplot(2,1,2);
-        plot_axes.fact = gca;
     end
     %       Convergence_Plot = figure();
     %       Factor_Plot = figure();
@@ -2390,17 +2388,6 @@ function [Plot_Powers, Plot_Speed,Indicated_Work, fig, ME, Results, n, cycle_cou
                 %             end
                 %             figure(Factor_Plot);
                 % axes(Factor_Plot);
-                plot(1:Plot_Number,Plot_Learning_Rate(1:Plot_Number), 'Parent', plot_axes.fact);
-                xlabel(plot_axes.fact,'Cycle Number')
-                ylabel(plot_axes.fact,'Power Factor')
-                title(plot_axes.fact,"Power Factor")
-                if cycle_count > 1
-                    xlim(plot_axes.fact, [1, cycle_count])
-                end
-                ylim(plot_axes.fact, [-0.1, 1.1])
-                xticks(plot_axes.fact, [1:1:cycle_count])
-                yticks(plot_axes.fact, [0, 0.2, 0.4, 0.6, 0.8, 1])
-
 
                 % Speed plot
                 if ME.MoveCondition == 2
