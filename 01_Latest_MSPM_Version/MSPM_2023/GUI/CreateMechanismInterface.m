@@ -107,15 +107,18 @@ function CreateMechanismInterface_OpeningFcn(hObject, eventdata, handles, vararg
     handles.MODE = '';
 
     % Run the dropdown select callback to select the Ideal Sinusoid motion profile
-    Type = 'Ideal Sinusoid';
+    if length(varargin{1}.vars) < 2
+        handles.iType = 'Ideal Sinusoid';
+        [handles.iData, Instructions] = LinRotMechanism.GetPropertyTableSource(handles.iType);
+    else
+        [~, Instructions] = LinRotMechanism.GetPropertyTableSource(handles.iType);
+    end
 
-    [Data, Instructions] = LinRotMechanism.GetPropertyTableSource(Type);
     handles.DataEstablished = true;
-    
     set(handles.PropertiesTable,'Visible','on');
-    set(handles.PropertiesTable,'Data',Data);
-    handles.PropertiesTable.ColumnEditable = true(1,size(Data,2));
-    handles.PropertiesTable.ColumnFormat = cell(1,size(Data,2));
+    set(handles.PropertiesTable,'Data',handles.iData);
+    handles.PropertiesTable.ColumnEditable = true(1,size(handles.iData,2));
+    handles.PropertiesTable.ColumnFormat = cell(1,size(handles.iData,2));
     set(handles.Instructions,'String',Instructions);
     EstablishWidths(handles);
     guidata(hObject, handles);
@@ -185,7 +188,7 @@ function PropertiesTable_CellEditCallback(hObject, eventdata, handles)
     % handles    structure with handles and user data (see GUIDATA)
     if eventdata.Indices(1) == 1
         Data = get(hObject,'Data');
-        Data{eventdata.Indices(1),eventdata.Indices(1)} = eventdata.PreviousData;
+        Data{eventdata.Indices(1),eventdata.Indices(2)} = eventdata.PreviousData;
         set(hObject,'Data',Data);
         fprintf('XXX You cannot edit column headers, no matter how hard you try. XXX\n');
     end

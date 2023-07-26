@@ -331,6 +331,9 @@ classdef Simulation < handle
                         cycle_count = [];
                         final_speed = [];
                         final_power = [];
+
+                        % Set the simulation terminated to true
+                        ME.Model.terminate = true;
                         return;
                     end
                     if ~all(ismember(output{1}, '0123456789+-.eE')); invalid = true;
