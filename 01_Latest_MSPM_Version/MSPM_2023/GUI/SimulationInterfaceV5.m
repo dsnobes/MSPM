@@ -1551,6 +1551,7 @@ end
 % and reset the userform.
 [h] = load_sub(name, h);
 guidata(h.load,h);
+updateSelectionList(h);
 end
 
 %% Show Options
