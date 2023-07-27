@@ -2475,13 +2475,13 @@ end
 
 if pos == 1
     % no bodies, would have error below
-    disp(['The total volume (excl. "Crank Case") is: ', num2str(0), ' L'])
+    disp(['The total volume is: ', num2str(0), ' L'])
     return
 end
 % Go through all the volumes and add them
 total_vol = sum(volumes);
 total_liters = total_vol.*1000;
-disp(['The total volume (excl. HX and regenerator) is: ', num2str(total_liters), ' L'])
+disp(['The total volume is: ', num2str(total_liters), ' L'])
 end
 
 
