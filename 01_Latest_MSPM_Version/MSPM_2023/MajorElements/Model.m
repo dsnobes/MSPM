@@ -3739,6 +3739,7 @@ classdef Model < handle
                         TestSetStatistics(end).Final_Speed = final_speed;
                         TestSetStatistics(end).Final_Power = final_power;
                         TestSetStatistics(end).Charge_Pressure = ME.enginePressure;
+                        % TestSetStatistics(end).Engine_Vol = ME.GetVolume();
                         TestSetStatistics(end).GN = MeshCounts.GN;
                         TestSetStatistics(end).SN = MeshCounts.SN;
                         TestSetStatistics(end).EN = MeshCounts.EN;
@@ -6161,9 +6162,43 @@ classdef Model < handle
             % Get the average
             y = mean([lowerConn.x, upperConn.x]);
         end
-        
+
+        function vol = GetVolume(this)
+            pos = 1;
+            for j = 1:length(this.Groups)
+                iGroup = this.Groups(j);
+                for i = 1:length(iGroup.Bodies)
+                    iBody = iGroup.Bodies(i);
+                    if iBody.matl.Phase == enumMaterial.Gas
+                        % Get the positions of the x and y bounds
+                        [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
+                        [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
+
+                        % If the body is included in th volume
+                        if get(iBody, 'Include in Volume Calculation')
+                            % If the body contains a matrix, use the porosity
+                            if isempty(iBody.Matrix)
+                                volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1));
+                            else
+                                volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1)) .* iBody.Matrix.data.Porosity;
+                            end
+                        end
+                        pos = pos + 1;
+                        
+                    end
+                end
+            end
+
+            if pos == 1
+                % no bodies, would have error below
+                disp(['The total volume is: ', num2str(0), ' L'])
+                return
+            end
+            % Go through all the volumes and add them
+            vol = sum(volumes);
+
+        end
     end
-    
 end
 
 function [Closed_Edge] = TrimFaces(this, region, Closed_Edge)
