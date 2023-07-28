@@ -73,43 +73,43 @@ handles.ClickTolerance = 0.1;
 
 
 % Load/Create default save config
-if isfile('Config Files\parameters.mat')
-    load('Config Files\parameters.mat', 'parameters')
+if isfile('Config Files/parameters.mat')
+    load('Config Files/parameters.mat', 'parameters')
     
     
     % Check if the save locations are valid and set locations
     if isfolder(parameters.savelocation)
         handles.save_location = parameters.savelocation;
     else
-        disp("Model save location is invalid, reset to default location (Saved Files\)")
-        handles.save_location = [pwd, '\Saved Files\'];
+        disp("Model save location is invalid, reset to default location (Saved Files/)")
+        handles.save_location = [pwd, '/Saved Files/'];
     end
     
     if isfolder(parameters.runlocation)
         handles.run_location = parameters.runlocation;
     else
-        disp("Run save location is invalid, reset to default location (\Runs\)")
-        handles.run_location = [pwd, '\Runs\'];
+        disp("Run save location is invalid, reset to default location (/Runs/)")
+        handles.run_location = [pwd, '/Runs/'];
     end
     
 else
     disp("Parameters file not found!! Creating new file")
     % Set default locations
-    handles.save_location = [pwd, '\Saved Files\'];
-    handles.run_location = [pwd, '\Runs\'];
+    handles.save_location = [pwd, '/Saved Files/'];
+    handles.run_location = [pwd, '/Runs/'];
     
     % Create config file
     parameters.savelocation = handles.save_location;
     parameters.runlocation = handles.run_location;
     
     % Make the directory if it does not exist
-    if ~isfolder('Config Files\')
+    if ~isfolder('Config Files/')
         disp("Config Files folder not found!! Creating folder")
-        mkdir('Config Files\')
+        mkdir('Config Files/')
     end
     
     % Save new file
-    save('Config Files\parameters.mat','parameters');
+    save('Config Files/parameters.mat','parameters');
     
     % Add folder to path (if not already on path)
     addpath('Config Files');
