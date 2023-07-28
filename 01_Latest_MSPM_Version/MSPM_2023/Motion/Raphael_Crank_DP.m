@@ -13,9 +13,9 @@ function [ pos ] = Raphael_Crank_DP( Nang, Phase )
     % DP: phase pi/2, starts at mid stroke going down (modeled in BDC position)
     
     %% User Inputs
-    S = 0.075; % Stroke
+    S = 0.075*2; % Stroke
     R = S/2; %Crank radius
-    L = 0.13; % Connecting rod length
+    L = 0.13*2; % Connecting rod length
     
     %%
     % Phase = Phase + pi;
