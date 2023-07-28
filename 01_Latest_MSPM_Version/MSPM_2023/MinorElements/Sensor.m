@@ -76,9 +76,9 @@ classdef Sensor < handle
                 notdone = true;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Available variables
-                source = {'T','P','turb','Re','U'};
+                source = {'T','P','turb','Re'};
                 % Should be in the same order as source
-                shown_source = {'Temperature', 'Pressure','Turbulence', 'Reynolds Number', 'Velocity'};
+                shown_source = {'Temperature', 'Pressure','Turbulence', 'Reynolds Number'};
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 while notdone
                     index = listdlg('PromptString','What is the dependent variable?',...

@@ -3916,7 +3916,7 @@ classdef Model < handle
                             end
                             
                             % Calculate Face Locations and directions
-                            if isfield(ME.Results.Data,'U') && ME.showPressureDropAnimation
+                            if isfield(ME.Results.Data,'U') && ME.showVelocityAnimation
                                 if isfield(ME.Results.Data,'U')
                                     fpnts = cell(1,size(ME.Results.Data.U,1));
                                 end
