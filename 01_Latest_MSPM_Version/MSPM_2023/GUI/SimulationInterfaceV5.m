@@ -56,6 +56,7 @@ function SimulationInterfaceV5_OpeningFcn(hObject, ~, handles, varargin)
 % uiwait(handles.figure1);
 
 %% Choose default command line output for SimulationInterfaceV5
+hObject.WindowState = 'maximized';
 handles.output = hObject;
 
 %% Generate space for mouse events
