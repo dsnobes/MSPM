@@ -1,5 +1,5 @@
 function Model = load_Model(name)
-    newfile = [pwd '\Saved Files\' name];
+    newfile = [pwd '/Saved Files/' name];
     File = load(newfile,'Model');
     Model = File.Model;
     Model.AxisReference = gca;

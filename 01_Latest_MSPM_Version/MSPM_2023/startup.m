@@ -5,8 +5,8 @@ function startup()
     %}
 
     % Load in the paramaters file
-if isfile('Config Files\parameters.mat')
-    load('Config Files\parameters.mat', 'parameters')
+if isfile('Config Files/parameters.mat')
+    load('Config Files/parameters.mat', 'parameters')
     
     
     % Check if the save locations are valid and add location to path

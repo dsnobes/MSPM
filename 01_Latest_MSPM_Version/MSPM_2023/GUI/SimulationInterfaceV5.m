@@ -73,43 +73,43 @@ handles.ClickTolerance = 0.1;
 
 
 % Load/Create default save config
-if isfile('Config Files\parameters.mat')
-    load('Config Files\parameters.mat', 'parameters')
+if isfile('Config Files/parameters.mat')
+    load('Config Files/parameters.mat', 'parameters')
     
     
     % Check if the save locations are valid and set locations
     if isfolder(parameters.savelocation)
         handles.save_location = parameters.savelocation;
     else
-        disp("Model save location is invalid, reset to default location (Saved Files\)")
-        handles.save_location = [pwd, '\Saved Files\'];
+        disp("Model save location is invalid, reset to default location (Saved Files/)")
+        handles.save_location = [pwd, '/Saved Files/'];
     end
     
     if isfolder(parameters.runlocation)
         handles.run_location = parameters.runlocation;
     else
-        disp("Run save location is invalid, reset to default location (\Runs\)")
-        handles.run_location = [pwd, '\Runs\'];
+        disp("Run save location is invalid, reset to default location (/Runs/)")
+        handles.run_location = [pwd, '/Runs/'];
     end
     
 else
     disp("Parameters file not found!! Creating new file")
     % Set default locations
-    handles.save_location = [pwd, '\Saved Files\'];
-    handles.run_location = [pwd, '\Runs\'];
+    handles.save_location = [pwd, '/Saved Files/'];
+    handles.run_location = [pwd, '/Runs/'];
     
     % Create config file
     parameters.savelocation = handles.save_location;
     parameters.runlocation = handles.run_location;
     
     % Make the directory if it does not exist
-    if ~isfolder('Config Files\')
+    if ~isfolder('Config Files/')
         disp("Config Files folder not found!! Creating folder")
-        mkdir('Config Files\')
+        mkdir('Config Files/')
     end
     
     % Save new file
-    save('Config Files\parameters.mat','parameters');
+    save('Config Files/parameters.mat','parameters');
     
     % Add folder to path (if not already on path)
     addpath('Config Files');
@@ -661,7 +661,7 @@ if h.IndexC == 1
 elseif (h.IndexC == 2)
     if ~(obj.Orient == h.SelectCon(1).Orient && ...
             obj.Group == h.SelectCon(1).Group)
-        msgbox('The two connections must have the same orientation.');
+        uiwait(msgbox('The two connections must have the same orientation.'));
         return
     end
     
@@ -754,14 +754,14 @@ elseif (h.IndexC == 2)
                         h.SelectCon(2), ...
                         Mech);
                 otherwise
-                    msgbox(['Selected relation type' ...
-                        ' is not implemented']);
+                    uiwait(msgbox(['Selected relation type' ...
+                        ' is not implemented']));
                     h.IndexC = 1;
                     error("No option selected!");
             end
             if ~success
-                msgbox(['Relationship was not ' ...
-                    'added successfully']);
+                uiwait(msgbox(['Relationship was not ' ...
+                    'added successfully']));
             end
             h.IndexC = 1;
         end
@@ -1551,6 +1551,7 @@ end
 % and reset the userform.
 [h] = load_sub(name, h);
 guidata(h.load,h);
+updateSelectionList(h);
 end
 
 %% Show Options
@@ -2303,7 +2304,6 @@ progressbar(...
     'Scaling',...
     'Connections',...
     'Bodies',...
-    'Sensors',...
     'Motion'...
     )
 
@@ -2329,13 +2329,13 @@ for j = 1:length(groupsToScale)
             convert_pos = convert_pos + 1;
         end
         
-        progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [], [])
+        progressbar([], (j.*i)./(length(groupsToScale).*length(iGroup.Connections)), [], [])
     end
     
     for k = 1:length(iGroup.Bodies)
         iBody = iGroup.Bodies(k);
         iBody.update();
-        progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [], [])
+        progressbar([], [], (j.*i)./(length(groupsToScale).*length(iGroup.Bodies)), [])
     end
     
     % Scale the group positions
@@ -2346,14 +2346,7 @@ for j = 1:length(groupsToScale)
     % Update each group
     iGroup.update()
 end
-progressbar(3/4, [], 1, [])
-
-% Update all sensors
-for j = 1:length(h.Model.Sensors)
-    iSensor = h.Model.Sensors(j);
-    iSensor.update()
-    progressbar([],[],[], j./length(h.Model.Sensors), [])
-end
+progressbar(2/3, 1, 1, [])
 
 % Update the motion profiles associated with that group
 if a_scale ~= 1 && ~isempty(converters)
@@ -2376,11 +2369,20 @@ if a_scale ~= 1 && ~isempty(converters)
         progressbar([], [], i/length(h.Model.Converters))
     end
 end
-
-
-% Update the model
-h.Model.update()
 progressbar(1)
+
+
+
+% Discretize and update the model
+if ~h.Model.isDiscretized()
+    crun = struct('Model',h.Model.name,...
+        'title',[h.Model.name ' test: ' date],...
+        'rpm',h.Model.engineSpeed,...
+        'NodeFactor',h.Model.deRefinementFactorInput);
+    h.Model.discretize(crun);
+end
+% Update positions
+UpdateModel_Callback(1, 1, h)
 
 % Redraw the model
 cla;
@@ -2473,13 +2475,13 @@ end
 
 if pos == 1
     % no bodies, would have error below
-    disp(['The total volume (excl. "Crank Case") is: ', num2str(0), ' L'])
+    disp(['The total volume is: ', num2str(0), ' L'])
     return
 end
 % Go through all the volumes and add them
 total_vol = sum(volumes);
 total_liters = total_vol.*1000;
-disp(['The total volume (excl. HX and regenerator) is: ', num2str(total_liters), ' L'])
+disp(['The total volume is: ', num2str(total_liters), ' L'])
 end
 
 

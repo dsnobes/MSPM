@@ -188,7 +188,7 @@ function PropertiesTable_CellEditCallback(hObject, eventdata, handles)
     % handles    structure with handles and user data (see GUIDATA)
     if eventdata.Indices(1) == 1
         Data = get(hObject,'Data');
-        Data{eventdata.Indices(1),eventdata.Indices(1)} = eventdata.PreviousData;
+        Data{eventdata.Indices(1),eventdata.Indices(2)} = eventdata.PreviousData;
         set(hObject,'Data',Data);
         fprintf('XXX You cannot edit column headers, no matter how hard you try. XXX\n');
     end

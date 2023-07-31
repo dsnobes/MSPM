@@ -38,6 +38,7 @@ classdef Model < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         AnimationSpeed_rads = pi;
         MaxFourierNumber = 0.25;
+        dualPlot = true;
     end
     
     properties (Dependent)
@@ -3357,7 +3358,7 @@ classdef Model < handle
             Sim.ExergyLossStatic = 0;
             
             this.Simulations = Sim;
-                        
+            
             Sim.Fc_K12(isnan(Sim.Fc_K12)) = 1;
             Sim.Fc_K21(isnan(Sim.Fc_K21)) = 1;
             Sim.Dynamic(isnan(Sim.Dynamic)) = 0;
@@ -3369,11 +3370,11 @@ classdef Model < handle
         function [success] = Run(ME, runs)
             success = false;
             backup_path = ME.outputPath;
-
+            
             % Set stop simulation to false
             ME.stopSimulation = false;
             ME.terminate = false;
-
+            
             if nargin > 1
                 %if running test set, record all outputs
                 tests = length(runs);
@@ -3665,16 +3666,16 @@ classdef Model < handle
                         % 'RunConditions' structure
                         % Matthias: Added cycle_count and final_speed output
                         try
-                        [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
+                            [ME.Results, success, cycle_count, final_speed, final_power] = ME.Simulations(1).Run(...
                                 islast, do_warmup, ss_tolerance, crun);
                         catch err
                             % running was canceled or failed
-
+                            
                             % Remove any simulation results
                             ME.CurrentSim(:) = [];
                             ME.Results(:) = [];
                             ME.resetDiscretization()
-                        
+                            
                             % Close all figures but the main window
                             all_figs = findobj(groot, 'type', 'figure');
                             for i = 1:length(all_figs)
@@ -3682,19 +3683,19 @@ classdef Model < handle
                                     close(all_figs(i))
                                 end
                             end
-
+                            
                             if ME.terminate
                                 disp("Simulation Terminated!!!")
                                 msgbox("Simulation Terminated!!!", "Simulation Status", 'warn')
                             else
                                 disp("Simulation Error!!!")
                                 msgbox('Simulation Error!!!', "Simulation Status", "error");
-                                throw(err)
-                            
+                                rethrow(err)
+                                
                             end
                             return;
                         end
-
+                        
                         if isempty(ME.Results)
                             ME.CurrentSim(:) = [];
                             ME.Results(:) = [];
@@ -3739,6 +3740,7 @@ classdef Model < handle
                         TestSetStatistics(end).Final_Speed = final_speed;
                         TestSetStatistics(end).Final_Power = final_power;
                         TestSetStatistics(end).Charge_Pressure = ME.enginePressure;
+                        % TestSetStatistics(end).Engine_Vol = ME.GetVolume();
                         TestSetStatistics(end).GN = MeshCounts.GN;
                         TestSetStatistics(end).SN = MeshCounts.SN;
                         TestSetStatistics(end).EN = MeshCounts.EN;
@@ -3914,7 +3916,7 @@ classdef Model < handle
                             end
                             
                             % Calculate Face Locations and directions
-                            if isfield(ME.Results.Data,'U') && ME.showPressureDropAnimation
+                            if isfield(ME.Results.Data,'U') && ME.showVelocityAnimation
                                 if isfield(ME.Results.Data,'U')
                                     fpnts = cell(1,size(ME.Results.Data.U,1));
                                 end
@@ -4220,11 +4222,11 @@ classdef Model < handle
         function [snapshot] = RunHeadless(ME, runs)
             success = false;
             backup_path = ME.outputPath;
-
+            
             % Set stop simulation to false
             ME.stopSimulation = false;
             ME.terminate = false;
-
+            
             % Always record all outputs
             
             tests = length(runs);
@@ -4521,10 +4523,10 @@ classdef Model < handle
                                 end
                             end
                             msgbox("Simulation Terminated!!!", "Simulation Status")
-                        
+                            
                             return
                         end
-
+                        
                         ME.CurrentSim(:) = [];
                         ME.Results(:) = [];
                         ME.resetDiscretization();
@@ -5090,15 +5092,15 @@ classdef Model < handle
         function saveME(Model)
             % Surpress the recursion limit warning
             warning('off', 'MATLAB:loadsave:saveRecursionLimit')
-
+            
             % Reset the discritization
             Model.resetDiscretization();
-
+            
             % Save then clear the model save/run location
             load('parameters.mat', 'parameters')
             Model.save_location = '';
             Model.run_location = '';
-
+            
             Model.Faces(:) = [];
             Model.Nodes(:) = [];
             Model.Simulations(:) = [];
@@ -5138,7 +5140,7 @@ classdef Model < handle
                 iBridge.GUIObjects(:) = [];
                 iBridge.Faces(:) = [];
             end
-
+            
             save([parameters.savelocation, Model.name '.mat'],'Model');
             Model.AxisReference = backupAxis;
             fprintf('Model Saved.\n');
@@ -5744,7 +5746,7 @@ classdef Model < handle
                         yData = xData;
                         xBoundsData = xData;
                         yBoundsData = xData;
-
+                        
                         % For nodeIDs
                         nodeNum(n).SN = {};
                         nodeNum(n).SVGN = {};
@@ -5752,7 +5754,7 @@ classdef Model < handle
                         nodeNum(n).SAGN = {};
                         nodeNum(n).EN = {};
                         pntIDs = xData;
-
+                        
                         
                         % Define colors for node circles and outlines
                         colors = struct(...
@@ -5781,35 +5783,35 @@ classdef Model < handle
                                     xBoundsData(j).SN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                     nodeNum(j).SN = num2str(nd.index);
-                            pntIDs(j).SN = nd.minCenterCoords;
+                                    pntIDs(j).SN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.SVGN % Static Volume Gas Node
                                     xData(j).SVGN = c1.x;
                                     yData(j).SVGN = c1.y;
                                     xBoundsData(j).SVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                     nodeNum(j).SVGN = num2str(nd.index);
-                            pntIDs(j).SVGN = nd.minCenterCoords;
+                                    pntIDs(j).SVGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.VVGN % Variable Volume Gas Node
                                     xData(j).VVGN = c1.x;
                                     yData(j).VVGN = c1.y;
                                     xBoundsData(j).VVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).VVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                     nodeNum(j).VVGN = num2str(nd.index);
-                            pntIDs(j).VVGN = nd.minCenterCoords;
+                                    pntIDs(j).VVGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.SAGN % Shearing Annular Gas Node
                                     xData(j).SAGN = c1.x;
                                     yData(j).SAGN = c1.y;
                                     xBoundsData(j).SAGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).SAGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                     nodeNum(j).SAGN = num2str(nd.index);
-                            pntIDs(j).SAGN = nd.minCenterCoords;
+                                    pntIDs(j).SAGN = nd.minCenterCoords;
                                 elseif nd.Type == enumNType.EN %environment
                                     xData(j).EN = c1.x;
                                     yData(j).EN = c1.y;
                                     xBoundsData(j).EN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
                                     yBoundsData(j).EN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
                                     nodeNum(j).EN = num2str(nd.index);
-                            pntIDs(j).EN = nd.minCenterCoords;
+                                    pntIDs(j).EN = nd.minCenterCoords;
                                 end
                                 j = j + 1;
                             end
@@ -5839,6 +5841,13 @@ classdef Model < handle
                                 'MarkerSize',sizes.SN,...
                                 'MarkerEdgeColor',colors.SN);
                         end
+
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = ...
+                                plot(-[xData.SN],[yData.SN],'o',...
+                                'MarkerSize',sizes.SN,...
+                                'MarkerEdgeColor',colors.SN);
+                        end
                     end
                     % Plot rest
                     if any([xData.SVGN]) && this.showNodesSVGN
@@ -5846,24 +5855,48 @@ classdef Model < handle
                             plot([xData.SVGN],[yData.SVGN],'o',...
                             'MarkerSize',sizes.SVGN,...
                             'MarkerEdgeColor',colors.SVGN);
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = ...
+                            plot(-[xData.SVGN],[yData.SVGN],'o',...
+                            'MarkerSize',sizes.SVGN,...
+                            'MarkerEdgeColor',colors.SVGN);
+                        end
                     end
                     if any([xData.VVGN]) && this.showNodesVVGN
                         this.StaticGUIObjects(end+1) = ...
                             plot([xData.VVGN],[yData.VVGN],'o',...
                             'MarkerSize',sizes.VVGN,...
                             'MarkerEdgeColor',colors.VVGN);
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = ...
+                            plot(-[xData.VVGN],[yData.VVGN],'o',...
+                            'MarkerSize',sizes.VVGN,...
+                            'MarkerEdgeColor',colors.VVGN);
+                        end
                     end
                     if any([xData.SAGN]) && this.showNodesSAGN
                         this.StaticGUIObjects(end+1) = ...
                             plot([xData.SAGN],[yData.SAGN],'o',...
                             'MarkerSize',sizes.SAGN,...
                             'MarkerEdgeColor',colors.SAGN);
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = ...
+                            plot(-[xData.SAGN],[yData.SAGN],'o',...
+                            'MarkerSize',sizes.SAGN,...
+                            'MarkerEdgeColor',colors.SAGN);
+                        end
                     end
                     if any([xData.EN]) && this.showNodesEN
                         this.StaticGUIObjects(end+1) = ...
                             plot([xData.EN],[yData.EN],'o',...
                             'MarkerSize',sizes.EN,...
                             'MarkerEdgeColor',colors.EN);
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = ...
+                            plot(-[xData.EN],[yData.EN],'o',...
+                            'MarkerSize',sizes.EN,...
+                            'MarkerEdgeColor',colors.EN);
+                        end
                     end
                 end
                 
@@ -5906,7 +5939,7 @@ classdef Model < handle
                     % If x and y have size [1, nRectangles*(4+1)] and after every 4 values
                     % there is a 'NaN' before the next 4: Draws one line with breaks where
                     % there is 'NaN' --> Fast!
-
+                    
                     
                     % Plot solid nodes first
                     if any([xData.SN]) && this.showNodesSN
@@ -5915,9 +5948,20 @@ classdef Model < handle
                         if isempty(this.StaticGUIObjects)
                             this.StaticGUIObjects = line(Xs,Ys,...
                                 'Color',colors.SN, 'LineWidth',0.5);
+                            
+                            if this.dualPlot
+                                this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                                    'Color',colors.SN, 'LineWidth',0.5);
+                            end
+                            
                         else
                             this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                                 'Color',colors.SN, 'LineWidth',0.5);
+
+                            if this.dualPlot
+                                this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                                    'Color',colors.SN, 'LineWidth',0.5);
+                            end
                         end
                     end
                     % Plot rest
@@ -5926,24 +5970,40 @@ classdef Model < handle
                         Ys = reshape([yBoundsData.SVGN],[],1);
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.SVGN, 'LineWidth',0.5, 'LineStyle','--');
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            'Color',colors.SVGN, 'LineWidth',0.5, 'LineStyle','--');
+                        end
                     end
                     if any([xData.VVGN]) && this.showNodesVVGN
                         Xs = reshape([xBoundsData.VVGN],[],1);
                         Ys = reshape([yBoundsData.VVGN],[],1);
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.VVGN, 'LineWidth',0.5, 'LineStyle','--');
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            'Color',colors.VVGN, 'LineWidth',0.5, 'LineStyle','--');
+                        end
                     end
                     if any([xData.SAGN]) && this.showNodesSAGN
                         Xs = reshape([xBoundsData.SAGN],[],1);
                         Ys = reshape([yBoundsData.SAGN],[],1);
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.SAGN, 'LineWidth',0.5, 'LineStyle','--');
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            'Color',colors.SAGN, 'LineWidth',0.5, 'LineStyle','--');
+                        end
                     end
                     if any([xData.EN]) && this.showNodesEN
                         Xs = reshape([xBoundsData.EN],[],1);
                         Ys = reshape([yBoundsData.EN],[],1);
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.EN, 'LineWidth',0.5, 'LineStyle','--');
+                        if this.dualPlot
+                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            'Color',colors.EN, 'LineWidth',0.5, 'LineStyle','--');
+                        end
                     end
                 end
                 
@@ -5984,7 +6044,7 @@ classdef Model < handle
             if this.showBodyGhosts
                 this.bringGhostToFront();
             end
-
+            
             % Show node IDs
             guiAxes = gca;
             if this.showNodeIDs
@@ -5997,28 +6057,28 @@ classdef Model < handle
                     end
                     this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
                 end
-                if this.showNodesSVGN && ~isempty([nodeNum.SVGN]) 
+                if this.showNodesSVGN && ~isempty([nodeNum.SVGN])
                     pnts = [pntIDs.SVGN];
                     this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SVGN]), 'Parent', guiAxes)];
                     this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
                 end
                 if this.showNodesVVGN && ~isempty([nodeNum.VVGN])
                     pnts = [pntIDs.VVGN];
-                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.VVGN]), 'Parent', guiAxes)];
+                    this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.VVGN]), 'Parent', guiAxes)];
                     this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
                 end
                 if this.showNodesSAGN && ~isempty([nodeNum.SAGN])
                     pnts = [pntIDs.SAGN];
-                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SAGN]), 'Parent', guiAxes)];
+                    this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.SAGN]), 'Parent', guiAxes)];
                     this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
                 end
                 if this.showNodesEN && ~isempty([nodeNum.EN])
                     pnts = [pntIDs.EN];
-                   this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.EN]), 'Parent', guiAxes)];
+                    this.StaticGUIObjects = [this.StaticGUIObjects; text([pnts.x],[pnts.y],num2cell([nodeNum.EN]), 'Parent', guiAxes)];
                     this.NodeIDIndices = [this.NodeIDIndices length(this.StaticGUIObjects)];
                 end
             end
-
+            
         end
         function Animate(this,showOptions)
             if this.isChanged; this.update(); end
@@ -6133,13 +6193,13 @@ classdef Model < handle
                 end
                 % Wait
                 pause(10*max([0 nexttime-cputime]));
-
+                
                 if ~this.isAnimating
                     break
                 end
-
-
-
+                
+                
+                
             end
             
             % Reset Screen to previous settings
@@ -6147,23 +6207,57 @@ classdef Model < handle
             set(ReferenceAxis,'YLimMode',mode);
             set(ReferenceAxis,'ZLimMode',mode);
         end
-
+        
         function [x, y] = HorizontalBorderPos(this, bod)
             % Get the nearest border to the right of the body
-
-            % Find the leftmost connection 
+            
+            % Find the leftmost connection
             x = max([bod.Group.Connections([bod.Group.Connections.Orient] == enumOrient.Vertical).x]) + 0.02;
             
             % For the y coord, get the average of the top and the bottom
             lowerConn = bod.get('Bottom Connection');
             upperConn = bod.get('Top Connection');
-
+            
             % Get the average
             y = mean([lowerConn.x, upperConn.x]);
         end
         
+        function vol = GetVolume(this)
+            pos = 1;
+            for j = 1:length(this.Groups)
+                iGroup = this.Groups(j);
+                for i = 1:length(iGroup.Bodies)
+                    iBody = iGroup.Bodies(i);
+                    if iBody.matl.Phase == enumMaterial.Gas
+                        % Get the positions of the x and y bounds
+                        [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
+                        [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
+                        
+                        % If the body is included in th volume
+                        if get(iBody, 'Include in Volume Calculation')
+                            % If the body contains a matrix, use the porosity
+                            if isempty(iBody.Matrix)
+                                volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1));
+                            else
+                                volumes(pos) = pi*(x2^2-x1^2)*(y2(1)-y1(1)) .* iBody.Matrix.data.Porosity;
+                            end
+                        end
+                        pos = pos + 1;
+                        
+                    end
+                end
+            end
+            
+            if pos == 1
+                % no bodies, would have error below
+                disp(['The total volume is: ', num2str(0), ' L'])
+                return
+            end
+            % Go through all the volumes and add them
+            vol = sum(volumes);
+            
+        end
     end
-    
 end
 
 function [Closed_Edge] = TrimFaces(this, region, Closed_Edge)
