@@ -661,7 +661,7 @@ if h.IndexC == 1
 elseif (h.IndexC == 2)
     if ~(obj.Orient == h.SelectCon(1).Orient && ...
             obj.Group == h.SelectCon(1).Group)
-        msgbox('The two connections must have the same orientation.');
+        uiwait(msgbox('The two connections must have the same orientation.'));
         return
     end
     
@@ -754,14 +754,14 @@ elseif (h.IndexC == 2)
                         h.SelectCon(2), ...
                         Mech);
                 otherwise
-                    msgbox(['Selected relation type' ...
-                        ' is not implemented']);
+                    uiwait(msgbox(['Selected relation type' ...
+                        ' is not implemented']));
                     h.IndexC = 1;
                     error("No option selected!");
             end
             if ~success
-                msgbox(['Relationship was not ' ...
-                    'added successfully']);
+                uiwait(msgbox(['Relationship was not ' ...
+                    'added successfully']));
             end
             h.IndexC = 1;
         end
