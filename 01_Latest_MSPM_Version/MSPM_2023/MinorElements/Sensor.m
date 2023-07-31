@@ -79,13 +79,23 @@ classdef Sensor < handle
                 source = {'T','P','turb','Re'};
                 % Should be in the same order as source
                 shown_source = {'Temperature', 'Pressure','Turbulence', 'Reynolds Number'};
+                body_shown_source = {'Temperature'};
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 while notdone
-                    index = listdlg('PromptString','What is the dependent variable?',...
-                        'SelectionMode','single',...
-                        'ListString',shown_source);
-                    if index ~= 0
-                        notdone = false;
+                    if Body.matl.Phase == enumMaterial.Gas
+                        index = listdlg('PromptString','What is the dependent variable?',...
+                            'SelectionMode','single',...
+                            'ListString',shown_source);
+                        if index ~= 0
+                            notdone = false;
+                        end
+                    else
+                        index = listdlg('PromptString','What is the dependent variable?',...
+                            'SelectionMode','single',...
+                            'ListString',body_shown_source);
+                        if index ~= 0
+                            notdone = false;
+                        end
                     end
                 end
                 this.DataType = source{index};
