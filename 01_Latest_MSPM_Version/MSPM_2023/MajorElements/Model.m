@@ -573,6 +573,7 @@ classdef Model < handle
                 backup_ODN = this.Mesher.oscillation_depth_N;
                 backup_MXT = this.Mesher.maximum_thickness;
                 backup_HEFD = this.Mesher.HeatExchangerFinDivisions;
+                backup_growth = this.Mesher.maximum_growth;
                 backup_gas_entrance = this.Mesher.Gas_Entrance_Exit_N;
                 backup_gas_maximum_size = this.Mesher.Gas_Maximum_Size;
                 backup_gas_minimum_size = this.Mesher.Gas_Minimum_Size;
@@ -681,6 +682,7 @@ classdef Model < handle
                             this.Mesher.oscillation_depth_N = backup_ODN;
                             this.Mesher.maximum_thickness = backup_MXT;
                             this.Mesher.HeatExchangerFinDivisions = backup_HEFD;
+                            this.Mesher.maximum_growth = backup_growth;
                             this.Mesher.Gas_Entrance_Exit_N = backup_gas_entrance;
                             this.Mesher.Gas_Maximum_Size = backup_gas_maximum_size;
                             this.Mesher.Gas_Minimum_Size = backup_gas_minimum_size;
@@ -706,6 +708,7 @@ classdef Model < handle
                 this.Mesher.oscillation_depth_N = backup_ODN;
                 this.Mesher.maximum_thickness = backup_MXT;
                 this.Mesher.HeatExchangerFinDivisions = backup_HEFD;
+                this.Mesher.maximum_growth = backup_growth;
                 this.Mesher.Gas_Entrance_Exit_N = backup_gas_entrance;
                 this.Mesher.Gas_Maximum_Size = backup_gas_maximum_size;
                 this.Mesher.Gas_Minimum_Size = backup_gas_minimum_size;
