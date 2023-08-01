@@ -530,7 +530,7 @@ classdef Connection < handle
             color = [0.5 0.5 0.5];
             if isempty(this.Group)
                 if isempty(this.Bodies)
-                    fprinf(['XXX Connection '
+                    fprintf(['XXX Connection '
                         this.name ' does not know what its group is XXX\n']);
                     return;
                 else
@@ -543,7 +543,7 @@ classdef Connection < handle
                         end
                     end
                     if ~found
-                        fprinf(['XXX Connection '
+                        fprintf(['XXX Connection '
                             this.name ' does not know what its group is XXX\n']);
                         return;
                     end
@@ -698,68 +698,68 @@ classdef Connection < handle
 end
 
 % Helper functions - UNUSED
-function face = appendDynamicFaceVert(face,k,T1,s,e,Area)
-    % Face.
-    %     .isDynamic - DONE
-    %     .Node1 - DONE
-    %     .Node2 - DONE
-    %     .A                  - Mix/Gas Append
-    %     .dh - Static
-    %     .Type - DONE
-    %     .value              - Solid/Mix/Gas Append
-    %     .K                  - Gas Append
-    %     .ActiveTimes        - Always Append
-    if s < e
-        switch face.Type
-            case enumFType.Solid
-                % Combine resistances and store as a conductance
-                face.value = [face.value Area(n,s,e)/(n1.value+n2.value)];
-            case enumFType.Mix
-                % Store only the resistance as a conductance
-                if T1 == enumFType.Solid
-                    face.A = [face.A Area(n,s,e)];
-                    face.value = [face.value (face.A(end)/(n1.value))];
-                else
-                    face.A = [face.A Area(n,s,e)];
-                    face.value = [face.value (face.A(end)/(n2.value))];
-                end
-            case enumFType.Gas
-                % Record the combined distance stored in Ri
-                face.A = [face.A Area(n,s,e)];
-                face.value = [face.value n1.value + n2.value];
-        end
-        face.ActiveTimes = [face.ActiveTimes k];
-    end
-end
+% function face = appendDynamicFaceVert(face,k,T1,s,e,Area)
+%     % Face.
+%     %     .isDynamic - DONE
+%     %     .Node1 - DONE
+%     %     .Node2 - DONE
+%     %     .A                  - Mix/Gas Append
+%     %     .dh - Static
+%     %     .Type - DONE
+%     %     .value              - Solid/Mix/Gas Append
+%     %     .K                  - Gas Append
+%     %     .ActiveTimes        - Always Append
+%     if s < e
+%         switch face.Type
+%             case enumFType.Solid
+%                 % Combine resistances and store as a conductance
+%                 face.value = [face.value Area(n,s,e)/(n1.value+n2.value)];
+%             case enumFType.Mix
+%                 % Store only the resistance as a conductance
+%                 if T1 == enumFType.Solid
+%                     face.A = [face.A Area(n,s,e)];
+%                     face.value = [face.value (face.A(end)/(n1.value))];
+%                 else
+%                     face.A = [face.A Area(n,s,e)];
+%                     face.value = [face.value (face.A(end)/(n2.value))];
+%                 end
+%             case enumFType.Gas
+%                 % Record the combined distance stored in Ri
+%                 face.A = [face.A Area(n,s,e)];
+%                 face.value = [face.value n1.value + n2.value];
+%         end
+%         face.ActiveTimes = [face.ActiveTimes k];
+%     end
+% end
 
-function face = genStaticFace(n1,n2,Area)
-    face.Node1 = n1.node;
-    face.Node2 = n2.node;
-    face.isDynamic = false;
-    face.K = 0;
-    face.ActiveTimes = [];
-    face.Type = getFaceType(n1.Type,n2.Type);
-    switch face.Type
-        case enumFType.Solid
-            % Combine resistances and store as a conductance
-            face.value = ...
-                (Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]))...
-                /(n1.value + n2.value));
-        case enumFType.Mix
-            % Store only the resistance as a conductance
-            if n1.Type == enumFType.Solid
-                face.dh = n2.dh;
-                face.A = Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]));
-                face.value = (face.A/(n1.value));
-            else
-                face.dh = n1.dh;
-                face.A = Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]));
-                face.value = (face.A/(n2.value));
-            end
-        case enumFType.Gas
-            % Record the combined distance stored in value
-            face.value = n1.value + n2.value;
-    end
-end
+% function face = genStaticFace(n1,n2,Area)
+%     face.Node1 = n1.node;
+%     face.Node2 = n2.node;
+%     face.isDynamic = false;
+%     face.K = 0;
+%     face.ActiveTimes = [];
+%     face.Type = getFaceType(n1.Type,n2.Type);
+%     switch face.Type
+%         case enumFType.Solid
+%             % Combine resistances and store as a conductance
+%             face.value = ...
+%                 (Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]))...
+%                 /(n1.value + n2.value));
+%         case enumFType.Mix
+%             % Store only the resistance as a conductance
+%             if n1.Type == enumFType.Solid
+%                 face.dh = n2.dh;
+%                 face.A = Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]));
+%                 face.value = (face.A/(n1.value));
+%             else
+%                 face.dh = n1.dh;
+%                 face.A = Area(n,max([n1.Start n2.Start]),min([n1.End n2.End]));
+%                 face.value = (face.A/(n2.value));
+%             end
+%         case enumFType.Gas
+%             % Record the combined distance stored in value
+%             face.value = n1.value + n2.value;
+%     end
+% end
 
 

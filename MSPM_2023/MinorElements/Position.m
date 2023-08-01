@@ -32,7 +32,7 @@ classdef Position < handle
             newPosition.Model = base.Model;
         end
         function name = get.name(this)
-            name = sprintf('x: %f.0 y: %f.0 Rot: %f.00',this.x,this.y,this.Rot);
+            name = sprintf('x: %f y: %f Rot: %f',this.x,this.y,this.Rot);
         end
         function Item = get(this,PropertyName)
             switch PropertyName

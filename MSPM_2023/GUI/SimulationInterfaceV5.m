@@ -2083,7 +2083,7 @@ end
 function RecordSnapShot_Callback(~, ~, handles)
 if ~isempty(handles.Model.Result)
     name = getProperName( 'SnapShot' );
-    handles.Model.Result.getSnapShot(this,handles.Model,name)
+    handles.Model.Result.getSnapShot(handles.Model,name, true)
 end
 end
 

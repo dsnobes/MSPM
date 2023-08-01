@@ -2222,7 +2222,7 @@ function GenNodeContact(Connection,Perc,NodeToReference,NodeToFind)
             if ~isempty(ncontact.data) && isfield(ncontact.data,'Perc')
                 ncontact.data.Perc = ncontact.data.Perc.*(1-Perc);
             else
-                ncontact.data.Perc = this.data.Porostiy;
+                ncontact.data.Perc = this.data.Porosity;
             end
             found = true;
             break;

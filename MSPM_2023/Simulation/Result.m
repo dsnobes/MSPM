@@ -602,7 +602,7 @@ classdef Result < handle
             end
             this.Fig = figure();
             this.Axes = gca;
-            this.GraphicsObjects(length(XData,1)) = patch();
+            this.GraphicsObjects(length(this.XDATA,1)) = patch();
             this.Cmap = colormap();
             differences = abs(this.Data.t - t);
             [value1, index1] = min(differences);
@@ -613,11 +613,11 @@ classdef Result < handle
             scalar = abs(value1/(value1-value2))*this.Data.(property)(index2,:) + abs(value2/(value1-value2))*this.Data.(property)(index1,:);
             ulimit = max(scalar);
             llimit = min(scalar);
-            mapper = linspace(llimit,ulimit,size(cmap,1));
+            mapper = linspace(llimit,ulimit,size(this.Cmap,1));
 
             %% LOOP
             for i = 1:length(this.XDATA,1)
-                rgb = interp1(mapper,cmap,scalar(i));
+                rgb = interp1(mapper,this.Cmap,scalar(i));
                 this.GraphicsObjects(i) = fill(this.XDATA(i,:),this.YDATA(i,:),rgb);
             end
         end

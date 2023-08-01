@@ -611,8 +611,8 @@ classdef LinRotMechanism < handle
                         this.Data.G5(:,i) = temp_5;
 
                         %%%%%%%%%%%%Stuck on following line. What is 'Inc'? %%%%%%%%%%%%%%%%%%%%%%%
-                        this.Data.E5(:,i) = orient*(-this.CTilt(i) + this.STilt(i)*this.Data.T2(Inc,i));
-                        this.Data.E6(:,i) = orient*(-this.STilt(i) - this.CTilt(i)*this.Data.T2(Inc,i));
+                        this.Data.E5(:,i) = orient*(-this.CTilt(i) + this.STilt(i)*this.Data.T2(:,i));
+                        this.Data.E6(:,i) = orient*(-this.STilt(i) - this.CTilt(i)*this.Data.T2(:,i));
 
                         this.Data.AM(:,i) = -(Im1 - d1*S1.*this.Data.A2(:,i) + d1*C1.*this.Data.A4(:,i));
                         this.Data.BM(:,i) = -(-d1*S1.*this.Data.B2(:,i) + d1*C1.*this.Data.B4(:,i));
@@ -1058,7 +1058,7 @@ end
 function ReplaceInTable(LinRotMech,PropertyValue,Item,row)
     for col = 1:size(LinRotMech.originalInput,2)
         if strcmp(LinRotMech.originalInput{1,col},Item)
-            LinRotMech.originalInput{row,rol} = PropertyValue;
+            LinRotMech.originalInput{row,col} = PropertyValue;
             return;
         end
     end

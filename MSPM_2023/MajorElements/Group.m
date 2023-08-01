@@ -199,7 +199,7 @@ classdef Group < handle
                     for j = i+1:length(this.Connections)
                         if ~keep(j)
                             jCon = this.Connections(j);
-                            if iCOn.isFunctionallyEqualTo(jCon)
+                            if iCon.isFunctionallyEqualTo(jCon)
                                 for jBody = jCon.Bodies
                                     % Replace all references of j with i
                                     for k = 1:length(jBody.Connections)
@@ -487,7 +487,7 @@ classdef Group < handle
             end
         end
         function Valid = get.isValid(this)
-            if ischanged
+            if this.isChanged
                 this.update();
             end
             Valid = this.isStateValid;
