@@ -1,4 +1,4 @@
 
 *.asv
 **/parameters.mat
-**/Runs/
+**/Runs/*
