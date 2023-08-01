@@ -120,7 +120,7 @@ classdef MechanicalSystem < handle
             Match = interp1(this.LastCycle(:).Theta,...
                 this.LastCycle(:).Omega,...
                 this.ThisCycle(:).Theta);
-            RMS = rssq(Match - this.ThisCycle.Omega)/sqrt(length(Match));
+            RMS = sqrt(sum((Match - this.ThisCycle.Omega).^2))/sqrt(length(Match));
         end
         function Converged = get.isConverged(this)
             Converged = this.compareCycles() < this.SteadyStateRMS;
