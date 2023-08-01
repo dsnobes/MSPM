@@ -678,10 +678,10 @@ elseif (h.IndexC == 2)
         'Zero x Based Scale', ...
         'Smallest x Based Scale', ...
         'Width Set'};
-    if obj.Orient == enumOrient.Horizontal
-        names{end+1} = 'Defines Stroke Length';
-        names{end+1} = 'Defines Piston Length';
-    end
+    % if obj.Orient == enumOrient.Horizontal
+    %     names{end+1} = 'Defines Stroke Length';
+    %     names{end+1} = 'Defines Piston Length';
+    % end
     for RMan = obj.Group.RelationManagers
         if RMan.Orient == obj.Orient; break; end
     end
