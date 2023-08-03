@@ -114,7 +114,16 @@ else
     
     % Add folder to path (if not already on path)
     addpath('Config Files');
-    
+end
+
+% Create the runs and saved files folders if they do not already exist
+if ~isfolder(parameters.savelocation)
+    disp("Creating 'Saved Files' Folder")
+    mkdir(parameters.savelocation)
+end
+if ~isfolder(parameters.runlocation)
+    disp("Creating 'Runs' Folder")
+    mkdir(parameters.runlocation)
 end
 
 % Delete the loaded/saved variable
