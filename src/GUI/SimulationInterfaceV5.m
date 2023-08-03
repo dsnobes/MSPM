@@ -76,6 +76,7 @@ handles.ClickTolerance = 0.1;
 % Load/Create default save config
 if isfile('Config Files/parameters.mat')
     load('Config Files/parameters.mat', 'parameters')
+    isInvalid = false;
     
     
     % Check if the save locations are valid and set locations
@@ -84,6 +85,7 @@ if isfile('Config Files/parameters.mat')
     else
         disp("Model save location is invalid, reset to default location (Saved Files/)")
         handles.save_location = [pwd, '/Saved Files/'];
+        isInvalid = true;
     end
     
     if isfolder(parameters.runlocation)
@@ -91,6 +93,17 @@ if isfile('Config Files/parameters.mat')
     else
         disp("Run save location is invalid, reset to default location (/Runs/)")
         handles.run_location = [pwd, '/Runs/'];
+        isInvalid = true;
+    end
+
+    % Save the locations to the file if invalid
+    if isInvalid
+        disp("Saving new locations to parameters file")
+        parameters.savelocation = handles.save_location;
+        parameters.runlocation = handles.run_location;
+
+        % Save new file
+        save('Config Files/parameters.mat','parameters');
     end
     
 else
