@@ -1246,11 +1246,10 @@ if ~isempty(handles.Model.Converters)
             toKeep = true(length(names),1);
             toKeep(indx) = false;
             handles.Model.Converters(~toKeep) = [];
+            handles.Model.RefFrames(~toKeep) = [];
         end
     end
 end
-
-
 
 end
 
@@ -2250,7 +2249,6 @@ end
 
 function UpdateModel_Callback(~, ~, h)
 % Function to update the model ignoring the ischanged flag
-% Go through all the connections in the group and scale appropriately
 for j = 1:length(h.Model.Groups)
     iGroup = h.Model.Groups(j);
     for k = 1:length(iGroup.Bodies)
