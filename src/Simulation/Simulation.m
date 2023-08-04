@@ -2354,9 +2354,14 @@ function [Plot_Powers, Plot_Speed,Indicated_Work, fig, ME, Results, n, cycle_cou
 
                 % Get the indicated work for each PV loop
                 PV_plot_num = 1;
-                for iPVoutput = ME.Model.PVoutputs
-                    W_Ind = iPVoutput.getIndicatedWork();
-                    Indicated_Work(Plot_Number, PV_plot_num) = W_Ind;
+                if ~isempty(ME.Model.PVoutputs)
+                    for iPVoutput = ME.Model.PVoutputs
+                        W_Ind = iPVoutput.getIndicatedWork();
+                        Indicated_Work(Plot_Number, PV_plot_num) = W_Ind;
+                        PV_plot_num = PV_plot_num + 1;
+                    end
+                else
+                    Indicated_Work(Plot_Number, PV_plot_num) = 0;
                     PV_plot_num = PV_plot_num + 1;
                 end
 
