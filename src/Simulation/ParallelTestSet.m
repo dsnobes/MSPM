@@ -9,10 +9,7 @@ function ParallelTestSet(sel, h)
     % Prep the Test Set file
     func = str2func(sel(1:end-2)); % cut off '.m' file ending
     Test_Set = func();
-
-    % Create parallel processing pool
-    parpool("Processes", [4,16]);
-    
+  
     % Start a progress for preprocessing
     progressbar('Preprocessing for Parallel Execution')
 
@@ -30,7 +27,15 @@ function ParallelTestSet(sel, h)
         progressbar(i/length(Test_Set));
     end
 
-    
+    % Check if there is a parallel pool already running
+    % If not, create one
+    p = gcp('nocreate');
+    if isempty(p)
+        % Create parallel processing pool
+        parpool("Processes");
+    else
+        disp("Parallel Pool already running!! Using currently running pool")
+    end
 
     % Parfor loop progress bar
     D = parallel.pool.DataQueue;
