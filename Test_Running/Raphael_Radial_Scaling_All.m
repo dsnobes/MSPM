@@ -17,9 +17,6 @@ model = {
 pressures = [300 435 570] .*1000; % [Pa]
 speeds = [1 2 4 8 16 32 64 128 256 512]; % [rpm]
 simTime = 1200; %(s) Simulation time.
-minCycles = 5; % minimum number of engine cycles to complete before turning to steady state.
-SS = true; % Steady state toggle.
-movement_option = 'C';
 max_dt = 0.1; %(s) Maximum time step.
 NodeFactor = 1;
 
@@ -30,9 +27,6 @@ RunConditions_temp = struct(... %Default values
     'Model', model{1},...
     'title', '',...
     'simTime', simTime,... [s]
-    'minCycles', minCycles,...
-    'SS', SS,...
-    'movement_option', movement_option,...
     'rpm', 60,... [rpm]
     'max_dt', max_dt,... [s]
     'EnginePressure',101325*10,...
