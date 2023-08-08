@@ -1,6 +1,6 @@
 # MSPM (Modular Single-Phase Model)
 
-![MSPM GUI Screenshot](\src\GUI\MSPM GUI Screenshot.png)
+![MSPM GUI Screenshot](\src\GUI\MSPM-GUI-Screenshot.png)
 
 ## Overview
 
