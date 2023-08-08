@@ -1,6 +1,6 @@
 # MSPM (Modular Single-Phase Model)
 
-![MSPM GUI Screenshot](https://cdn.discordapp.com/attachments/950094526607949845/1136332829358313592/image.png)
+![MSPM GUI Screenshot](\src\GUI\MSPM GUI Screenshot.png)
 
 ## Overview
 
