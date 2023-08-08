@@ -1163,6 +1163,9 @@ classdef Matrix < handle
                                     ys(end) = pnd(end).ymax(1);
                                     xs = [pnd(1).xmin pnd(2).xmax];
                                 end
+                            else
+                                disp("XXX Discretization Error!!! XXX")
+                                return
                             end
                             % below checked by Matthias until next bar of percent symbols %%%%%%%%%%%%%
                             % Declare Nodes
