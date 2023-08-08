@@ -138,7 +138,7 @@ classdef ListObj < handle
                     else
                         Item = func2str(temp);
                     end
-                    files = dir(this.Info);
+                    files = dir(strcat('src/',this.Info));
                     names = {files.name};
                     names = names{3:end}; % Remove the first couple
                     if ~iscell(names)
