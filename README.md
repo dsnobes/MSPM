@@ -34,7 +34,7 @@ A range of functionality is built into MSPM to facilitate modelling and simulati
 
 ## Installation
 
-MSPM is written in MATLAB and has been tested to work in MATLAB version 2023a, therefore a major requirement for the installation of MSPM is to have MATLAB installed. Once MATLAB has been installed, download MSPM. This can be done by git cloning the repository or downloading the release ZIP file and unpacking it. Place the MSPM folder in a location of your choice. At this point the installation is complete and everything should work as expected. Simply open the MSPM folder in MATLAB and run the Run.m file to start up MSPM. Alternatively, double-click the MSPM.bat file in the MSPM folder to launch MSPM.
+MSPM is written in MATLAB and has been tested to work in MATLAB version 2023a, therefore a major requirement for the installation of MSPM is to have MATLAB installed. Once MATLAB has been installed, download MSPM. This can be done by git cloning the repository or downloading the release ZIP file and unpacking it. Place the MSPM folder in a location of your choice. At this point the installation is complete and everything should work as expected. Simply open the MSPM folder in MATLAB and run the [Run.m](/Run.m) file to start up MSPM. Alternatively, double-click the [MSPM.bat](/MSPM.bat) file in the MSPM folder to launch MSPM.
 
 ### MATLAB Toolboxes Required
 
