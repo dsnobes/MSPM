@@ -86,7 +86,7 @@ function [History] = GradientAscent(...
             mod_pressure = ~isempty(RunConditions.PressureBounds);
             if length(RunConditions.PressureBounds) == 1
                 options.MinPressure = 101325;
-                options.MaxPressure = RunConditions.PressureBounds(2);
+                options.MaxPressure = RunConditions.PressureBounds(1);
             elseif mod_pressure
                 options.MinPressure = RunConditions.PressureBounds(1);
                 options.MaxPressure = RunConditions.PressureBounds(2);
@@ -97,8 +97,8 @@ function [History] = GradientAscent(...
         if isfield(RunConditions,'SpeedBounds')
             mod_speed = ~isempty(RunConditions.SpeedBounds);
             if length(RunConditions.SpeedBounds) == 1
-                options.MinSpeed = 0.2;
-                options.MaxSpeed = RunConditions.SpeedBounds(2);
+                options.MinSpeed = 0;
+                options.MaxSpeed = RunConditions.SpeedBounds(1);
             elseif mod_speed
                 options.MinSpeed = RunConditions.SpeedBounds(1);
                 options.MaxSpeed = RunConditions.SpeedBounds(2);
