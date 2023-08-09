@@ -5749,6 +5749,15 @@ classdef Model < handle
                         yData = xData;
                         xBoundsData = xData;
                         yBoundsData = xData;
+
+                        dualxData(n).SN = [];
+                        dualxData(n).SVGN = [];
+                        dualxData(n).VVGN = [];
+                        dualxData(n).SAGN = [];
+                        dualxData(n).EN = [];
+                        dualyData = dualxData;
+                        dualxBoundsData = dualxData;
+                        dualyBoundsData = dualxData;
                         
                         % For nodeIDs
                         nodeNum(n).SN = {};
@@ -5779,42 +5788,193 @@ classdef Model < handle
                         j = 1;
                         for nd = this.Nodes
                             if isVis(nd.index)
+                                % Get the center of the node
                                 c1 = nodeCenter(nd.index);
+
+                                % Get the group rotation
+                                rot = nd.Body.Group.Position.Rot - pi./2;
+                                cos_rot = cos(rot);
+                                sin_rot = sin(rot);
+
+                                % Get the node data
                                 if nd.Type == enumNType.SN % Solid node
+                                    % Main
                                     xData(j).SN = c1.x;
                                     yData(j).SN = c1.y;
-                                    xBoundsData(j).SN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
-                                    yBoundsData(j).SN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    x_to_reflect = ((nodeBoundsX(:,nd.index) .* cos_rot) - (nodeBoundsY(:,nd.index) .* sin_rot)) + nd.Body.Group.Position.x;
+                                    y_to_reflect = ((nodeBoundsX(:,nd.index) .* sin_rot) + (nodeBoundsY(:,nd.index) .* cos_rot)) + nd.Body.Group.Position.y;
+                                    xBoundsData(j).SN = x_to_reflect;
+                                    yBoundsData(j).SN = y_to_reflect;
                                     nodeNum(j).SN = num2str(nd.index);
                                     pntIDs(j).SN = nd.minCenterCoords;
+
+                                    % Dual plot
+                                    if this.dualPlot
+                                        % Calculate the center line of the group (Ax + By + C = 0)
+                                        [A, B, C] = LineFromPointAndRotation(nd.Body.Group.Position.x, nd.Body.Group.Position.y, rot);
+                                        
+                                        % Reflect the center points
+                                        distance = (A * c1.x + B * c1.y + C) / sqrt(A^2 + B^2);
+                                        dualxData(j).SN = c1.x - 2 * distance * A;
+                                        dualyData(j).SN = c1.y - 2 * distance * B;
+
+                                        % Initialize arrays to store reflected bounds
+                                        reflected_x_coords = zeros(size(x_to_reflect));
+                                        reflected_y_coords = zeros(size(y_to_reflect));
+
+                                        % Reflect the bounds
+                                        for i = 1:length(x_to_reflect)
+                                            distance = (A * x_to_reflect(i) + B * y_to_reflect(i) + C) / sqrt(A^2 + B^2);
+                                            reflected_x_coords(i) = x_to_reflect(i) - 2 * distance * A;
+                                            reflected_y_coords(i) = y_to_reflect(i) - 2 * distance * B;
+                                        end
+
+                                        % Store reflected points
+                                        dualxBoundsData(j).SN = reflected_x_coords;
+                                        dualyBoundsData(j).SN = reflected_y_coords;
+                                    end
+
                                 elseif nd.Type == enumNType.SVGN % Static Volume Gas Node
                                     xData(j).SVGN = c1.x;
                                     yData(j).SVGN = c1.y;
-                                    xBoundsData(j).SVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
-                                    yBoundsData(j).SVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    x_to_reflect = ((nodeBoundsX(:,nd.index) .* cos_rot) - (nodeBoundsY(:,nd.index) .* sin_rot)) + nd.Body.Group.Position.x;
+                                    y_to_reflect = ((nodeBoundsX(:,nd.index) .* sin_rot) + (nodeBoundsY(:,nd.index) .* cos_rot)) + nd.Body.Group.Position.y;
+                                    xBoundsData(j).SVGN = x_to_reflect;
+                                    yBoundsData(j).SVGN =y_to_reflect;
                                     nodeNum(j).SVGN = num2str(nd.index);
                                     pntIDs(j).SVGN = nd.minCenterCoords;
+
+                                    % Dual plot
+                                    if this.dualPlot
+                                        % Calculate the center line of the group (Ax + By + C = 0)
+                                        [A, B, C] = LineFromPointAndRotation(nd.Body.Group.Position.x, nd.Body.Group.Position.y, rot);
+                                        
+                                        % Reflect the center points
+                                        distance = (A * c1.x + B * c1.y + C) / sqrt(A^2 + B^2);
+                                        dualxData(j).SVGN = c1.x - 2 * distance * A;
+                                        dualyData(j).SVGN = c1.y - 2 * distance * B;
+
+                                        % Initialize arrays to store reflected bounds
+                                        reflected_x_coords = zeros(size(x_to_reflect));
+                                        reflected_y_coords = zeros(size(y_to_reflect));
+
+                                        % Reflect the bounds
+                                        for i = 1:length(x_to_reflect)
+                                            distance = (A * x_to_reflect(i) + B * y_to_reflect(i) + C) / sqrt(A^2 + B^2);
+                                            reflected_x_coords(i) = x_to_reflect(i) - 2 * distance * A;
+                                            reflected_y_coords(i) = y_to_reflect(i) - 2 * distance * B;
+                                        end
+
+                                        % Store reflected points
+                                        dualxBoundsData(j).SVGN = reflected_x_coords;
+                                        dualyBoundsData(j).SVGN = reflected_y_coords;
+                                    end
+
                                 elseif nd.Type == enumNType.VVGN % Variable Volume Gas Node
                                     xData(j).VVGN = c1.x;
                                     yData(j).VVGN = c1.y;
-                                    xBoundsData(j).VVGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
-                                    yBoundsData(j).VVGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    x_to_reflect = ((nodeBoundsX(:,nd.index) .* cos_rot) - (nodeBoundsY(:,nd.index) .* sin_rot)) + nd.Body.Group.Position.x;
+                                    y_to_reflect = ((nodeBoundsX(:,nd.index) .* sin_rot) + (nodeBoundsY(:,nd.index) .* cos_rot)) + nd.Body.Group.Position.y;
+                                    xBoundsData(j).VVGN = x_to_reflect;
+                                    yBoundsData(j).VVGN =y_to_reflect;
                                     nodeNum(j).VVGN = num2str(nd.index);
                                     pntIDs(j).VVGN = nd.minCenterCoords;
+
+                                    % Dual plot
+                                    if this.dualPlot
+                                        % Calculate the center line of the group (Ax + By + C = 0)
+                                        [A, B, C] = LineFromPointAndRotation(nd.Body.Group.Position.x, nd.Body.Group.Position.y, rot);
+                                        
+                                        % Reflect the center points
+                                        distance = (A * c1.x + B * c1.y + C) / sqrt(A^2 + B^2);
+                                        dualxData(j).VVGN = c1.x - 2 * distance * A;
+                                        dualyData(j).VVGN = c1.y - 2 * distance * B;
+
+                                        % Initialize arrays to store reflected bounds
+                                        reflected_x_coords = zeros(size(x_to_reflect));
+                                        reflected_y_coords = zeros(size(y_to_reflect));
+
+                                        % Reflect the bounds
+                                        for i = 1:length(x_to_reflect)
+                                            distance = (A * x_to_reflect(i) + B * y_to_reflect(i) + C) / sqrt(A^2 + B^2);
+                                            reflected_x_coords(i) = x_to_reflect(i) - 2 * distance * A;
+                                            reflected_y_coords(i) = y_to_reflect(i) - 2 * distance * B;
+                                        end
+
+                                        % Store reflected points
+                                        dualxBoundsData(j).VVGN = reflected_x_coords;
+                                        dualyBoundsData(j).VVGN = reflected_y_coords;
+                                    end
                                 elseif nd.Type == enumNType.SAGN % Shearing Annular Gas Node
                                     xData(j).SAGN = c1.x;
                                     yData(j).SAGN = c1.y;
-                                    xBoundsData(j).SAGN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
-                                    yBoundsData(j).SAGN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    x_to_reflect = ((nodeBoundsX(:,nd.index) .* cos_rot) - (nodeBoundsY(:,nd.index) .* sin_rot)) + nd.Body.Group.Position.x;
+                                    y_to_reflect = ((nodeBoundsX(:,nd.index) .* sin_rot) + (nodeBoundsY(:,nd.index) .* cos_rot)) + nd.Body.Group.Position.y;
+                                    xBoundsData(j).SAGN = x_to_reflect;
+                                    yBoundsData(j).SAGN =y_to_reflect;
                                     nodeNum(j).SAGN = num2str(nd.index);
                                     pntIDs(j).SAGN = nd.minCenterCoords;
+
+                                    % Dual plot
+                                    if this.dualPlot
+                                        % Calculate the center line of the group (Ax + By + C = 0)
+                                        [A, B, C] = LineFromPointAndRotation(nd.Body.Group.Position.x, nd.Body.Group.Position.y, rot);
+                                        
+                                        % Reflect the center points
+                                        distance = (A * c1.x + B * c1.y + C) / sqrt(A^2 + B^2);
+                                        dualxData(j).SAGN = c1.x - 2 * distance * A;
+                                        dualyData(j).SAGN = c1.y - 2 * distance * B;
+
+                                        % Initialize arrays to store reflected bounds
+                                        reflected_x_coords = zeros(size(x_to_reflect));
+                                        reflected_y_coords = zeros(size(y_to_reflect));
+
+                                        % Reflect the bounds
+                                        for i = 1:length(x_to_reflect)
+                                            distance = (A * x_to_reflect(i) + B * y_to_reflect(i) + C) / sqrt(A^2 + B^2);
+                                            reflected_x_coords(i) = x_to_reflect(i) - 2 * distance * A;
+                                            reflected_y_coords(i) = y_to_reflect(i) - 2 * distance * B;
+                                        end
+
+                                        % Store reflected points
+                                        dualxBoundsData(j).SAGN = reflected_x_coords;
+                                        dualyBoundsData(j).SAGN = reflected_y_coords;
+                                    end
                                 elseif nd.Type == enumNType.EN %environment
                                     xData(j).EN = c1.x;
                                     yData(j).EN = c1.y;
-                                    xBoundsData(j).EN = nodeBoundsX(:,nd.index) + nd.Body.Group.Position.x;
-                                    yBoundsData(j).EN = nodeBoundsY(:,nd.index) + nd.Body.Group.Position.y;
+                                    x_to_reflect = ((nodeBoundsX(:,nd.index) .* cos_rot) - (nodeBoundsY(:,nd.index) .* sin_rot)) + nd.Body.Group.Position.x;
+                                    y_to_reflect = ((nodeBoundsX(:,nd.index) .* sin_rot) + (nodeBoundsY(:,nd.index) .* cos_rot)) + nd.Body.Group.Position.y;
+                                    xBoundsData(j).EN = x_to_reflect;
+                                    yBoundsData(j).EN =y_to_reflect;
                                     nodeNum(j).EN = num2str(nd.index);
                                     pntIDs(j).EN = nd.minCenterCoords;
+
+                                    % Dual plot
+                                    if this.dualPlot
+                                        % Calculate the center line of the group (Ax + By + C = 0)
+                                        [A, B, C] = LineFromPointAndRotation(nd.Body.Group.Position.x, nd.Body.Group.Position.y, rot);
+                                        
+                                        % Reflect the center points
+                                        distance = (A * c1.x + B * c1.y + C) / sqrt(A^2 + B^2);
+                                        dualxData(j).EN = c1.x - 2 * distance * A;
+                                        dualyData(j).EN = c1.y - 2 * distance * B;
+
+                                        % Initialize arrays to store reflected bounds
+                                        reflected_x_coords = zeros(size(x_to_reflect));
+                                        reflected_y_coords = zeros(size(y_to_reflect));
+
+                                        % Reflect the bounds
+                                        for i = 1:length(x_to_reflect)
+                                            distance = (A * x_to_reflect(i) + B * y_to_reflect(i) + C) / sqrt(A^2 + B^2);
+                                            reflected_x_coords(i) = x_to_reflect(i) - 2 * distance * A;
+                                            reflected_y_coords(i) = y_to_reflect(i) - 2 * distance * B;
+                                        end
+
+                                        % Store reflected points
+                                        dualxBoundsData(j).EN = reflected_x_coords;
+                                        dualyBoundsData(j).EN = reflected_y_coords;
+                                    end
                                 end
                                 j = j + 1;
                             end
@@ -5847,7 +6007,7 @@ classdef Model < handle
 
                         if this.dualPlot
                             this.StaticGUIObjects(end+1) = ...
-                                plot(-[xData.SN],[yData.SN],'o',...
+                                plot([dualxData.SN],[dualyData.SN],'o',...
                                 'MarkerSize',sizes.SN,...
                                 'MarkerEdgeColor',colors.SN);
                         end
@@ -5860,7 +6020,7 @@ classdef Model < handle
                             'MarkerEdgeColor',colors.SVGN);
                         if this.dualPlot
                             this.StaticGUIObjects(end+1) = ...
-                            plot(-[xData.SVGN],[yData.SVGN],'o',...
+                            plot([dualxData.SVGN],[dualyData.SVGN],'o',...
                             'MarkerSize',sizes.SVGN,...
                             'MarkerEdgeColor',colors.SVGN);
                         end
@@ -5872,7 +6032,7 @@ classdef Model < handle
                             'MarkerEdgeColor',colors.VVGN);
                         if this.dualPlot
                             this.StaticGUIObjects(end+1) = ...
-                            plot(-[xData.VVGN],[yData.VVGN],'o',...
+                            plot([dualxData.VVGN],[dualyData.VVGN],'o',...
                             'MarkerSize',sizes.VVGN,...
                             'MarkerEdgeColor',colors.VVGN);
                         end
@@ -5884,7 +6044,7 @@ classdef Model < handle
                             'MarkerEdgeColor',colors.SAGN);
                         if this.dualPlot
                             this.StaticGUIObjects(end+1) = ...
-                            plot(-[xData.SAGN],[yData.SAGN],'o',...
+                            plot([dualxData.SAGN],[dualyData.SAGN],'o',...
                             'MarkerSize',sizes.SAGN,...
                             'MarkerEdgeColor',colors.SAGN);
                         end
@@ -5896,7 +6056,7 @@ classdef Model < handle
                             'MarkerEdgeColor',colors.EN);
                         if this.dualPlot
                             this.StaticGUIObjects(end+1) = ...
-                            plot(-[xData.EN],[yData.EN],'o',...
+                            plot([dualxData.EN],[dualyData.EN],'o',...
                             'MarkerSize',sizes.EN,...
                             'MarkerEdgeColor',colors.EN);
                         end
@@ -5952,20 +6112,18 @@ classdef Model < handle
                             this.StaticGUIObjects = line(Xs,Ys,...
                                 'Color',colors.SN, 'LineWidth',0.5);
                             
-                            if this.dualPlot
-                                this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
-                                    'Color',colors.SN, 'LineWidth',0.5);
-                            end
-                            
                         else
                             this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                                 'Color',colors.SN, 'LineWidth',0.5);
-
-                            if this.dualPlot
-                                this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
-                                    'Color',colors.SN, 'LineWidth',0.5);
-                            end
                         end
+
+                        if this.dualPlot
+                            dualYs = reshape([dualyBoundsData.SN],[],1);
+                            dualXs = reshape([dualxBoundsData.SN],[],1);
+                            this.StaticGUIObjects(end+1) = line(dualXs,dualYs,...
+                                'Color',colors.SN, 'LineWidth',0.5);
+                        end
+
                     end
                     % Plot rest
                     if any([xData.SVGN]) && this.showNodesSVGN
@@ -5974,7 +6132,9 @@ classdef Model < handle
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.SVGN, 'LineWidth',0.5, 'LineStyle','--');
                         if this.dualPlot
-                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            dualYs = reshape([dualyBoundsData.SVGN],[],1);
+                            dualXs = reshape([dualxBoundsData.SVGN],[],1);
+                            this.StaticGUIObjects(end+1) = line(dualXs,dualYs,...
                             'Color',colors.SVGN, 'LineWidth',0.5, 'LineStyle','--');
                         end
                     end
@@ -5984,7 +6144,9 @@ classdef Model < handle
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.VVGN, 'LineWidth',0.5, 'LineStyle','--');
                         if this.dualPlot
-                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            dualYs = reshape([dualyBoundsData.VVGN],[],1);
+                            dualXs = reshape([dualxBoundsData.VVGN],[],1);
+                            this.StaticGUIObjects(end+1) = line(dualXs,dualYs,...
                             'Color',colors.VVGN, 'LineWidth',0.5, 'LineStyle','--');
                         end
                     end
@@ -5994,7 +6156,9 @@ classdef Model < handle
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.SAGN, 'LineWidth',0.5, 'LineStyle','--');
                         if this.dualPlot
-                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            dualYs = reshape([dualyBoundsData.SAGN],[],1);
+                            dualXs = reshape([dualxBoundsData.SAGN],[],1);
+                            this.StaticGUIObjects(end+1) = line(dualXs,dualYs,...
                             'Color',colors.SAGN, 'LineWidth',0.5, 'LineStyle','--');
                         end
                     end
@@ -6004,7 +6168,9 @@ classdef Model < handle
                         this.StaticGUIObjects(end+1) = line(Xs,Ys,...
                             'Color',colors.EN, 'LineWidth',0.5, 'LineStyle','--');
                         if this.dualPlot
-                            this.StaticGUIObjects(end+1) = line(-Xs,Ys,...
+                            dualYs = reshape([dualyBoundsData.EN],[],1);
+                            dualXs = reshape([dualxBoundsData.EN],[],1);
+                            this.StaticGUIObjects(end+1) = line(dualXs,dualYs,...
                             'Color',colors.EN, 'LineWidth',0.5, 'LineStyle','--');
                         end
                     end
