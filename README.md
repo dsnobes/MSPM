@@ -38,7 +38,7 @@ MSPM is written in MATLAB and has been tested to work in MATLAB version 2023a, t
 
 ### MATLAB Toolboxes Required
 
-No MATLAB toolboxes are required for the core functionality of MSPM. However, running parallel test sets will only work if the **Parallel Computing Toolbox** is installed. This is the only optional toolbox that MSPM uses, and is only needed for running parallel test sets. Single-threaded test sets can be run with or without this toolbox.
+No MATLAB toolboxes are required for the core functionality of MSPM. However, running parallel test sets will only work if the **[Parallel Computing Toolbox](https://www.mathworks.com/products/parallel-computing.html)** is installed. This is the only optional toolbox that MSPM uses, and is only needed for running parallel test sets. Single-threaded test sets can be run with or without this toolbox.
 
 ## Sample Models
 
