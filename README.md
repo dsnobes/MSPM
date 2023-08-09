@@ -43,3 +43,7 @@ No MATLAB toolboxes are required for the core functionality of MSPM. However, ru
 ## Sample Models
 
 There are 3 sample models provided in the **[Sample Models](/Sample_Models)** folder. These models are fully functional, feel free to use them to assist in learning how to use MSPM.
+
+## Full Documentation
+
+Full documentation can be found **[here](/docs)** in /docs in the repository.
