@@ -669,10 +669,10 @@ runs if the user clicks the insert relation button in the GUI
 % Find, within a radius of confidence, the nearest connection
 C = C(1,1:2);
 % Find the nearest connection
-[~, object] = h.Model.FindNearestConnecton(C,h.ClickTolerance);
+[obj, ~] = h.Model.FindNearestConnecton(C,h.ClickTolerance);
 
 % Select object
-obj = object{1};
+% obj = object{1};
 
 % Create the relation
 if h.IndexC == 1

@@ -5201,37 +5201,13 @@ classdef Model < handle
             end
             
             %% Body
-            mindist = Tolerance;
-            Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
-                [TheGroup.Position.x; TheGroup.Position.y];
-            for iBody = TheGroup.Bodies
-                % Establish Rectangle of iBody
-                [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
-                [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
-                
-                R.Width = x2-x1;
-                R.Height = y2-y1;
-                R.Cx = (x1+x2)/2;
-                R.Cy = (y1+y2)/2;
-                dist = Dist2Rect(Pntmod(1),Pntmod(2),R.Cx,R.Cy,R.Width,R.Height);
-                if dist < mindist
-                    mindist = dist;
-                    TheBody = iBody;
-                else
-                    R.Cx = -R.Cx;
-                    dist = Dist2Rect(...
-                        Pntmod(1),Pntmod(2),R.Cx,R.Cy,R.Width,R.Height);
-                    if dist < mindist
-                        mindist = dist;
-                        TheBody = iBody;
-                    end
-                end
-            end
+            [TheBody, mindist] = findNearestBody(this,Pnt,Tolerance);
             if mindist < Tolerance
                 objects{index} = TheBody;
                 names{index} = TheBody.name;
                 index = index + 1;
                 
+                % Sensors
                 for iSensor = TheBody.Sensors
                     objects{index} = iSensor;
                     names{index} = iSensor.name;
@@ -5241,30 +5217,7 @@ classdef Model < handle
             end
             
             %% Connection
-            mindist = Tolerance;
-            Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
-                [TheGroup.Position.x; TheGroup.Position.y];
-            for iConnection = TheGroup.Connections
-                % Find nearest Connection
-                switch iConnection.Orient
-                    case enumOrient.Vertical
-                        % Two lines to test
-                        if abs(Pntmod(1) - iConnection.x) < mindist
-                            mindist = abs(Pntmod(1) - iConnection.x);
-                            TheConnection = iConnection;
-                        end
-                        if abs(Pntmod(1) + iConnection.x) < mindist
-                            mindist = abs(Pntmod(1) + iConnection.x);
-                            TheConnection = iConnection;
-                        end
-                    case enumOrient.Horizontal
-                        % One line to test
-                        if abs(Pntmod(2) - iConnection.x) < mindist
-                            mindist = abs(Pntmod(2)-iConnection.x);
-                            TheConnection = iConnection;
-                        end
-                end
-            end
+            [TheConnection, mindist] = FindNearestConnecton(this,Pnt,Tolerance);
             if mindist < Tolerance
                 objects{index} = TheConnection;
                 names{index} = TheConnection.name;
@@ -5272,55 +5225,62 @@ classdef Model < handle
             end
         end
         
-        function [names, objects] = FindNearestConnecton(this,Pnt,Tolerance)
-            % Function finds the nearest connection to a click
-            objects = cell(0);
-            names = cell(0);
-            
-            Tolerance = Tolerance^2;
-            index = 1;
-            %% Group
+        function [TheConnection, mindist] = FindNearestConnecton(this,Pnt,Tolerance)
+            % Function will find the nearest connection to where you clicked within the active group
+            mindist = Tolerance;
+            % Select active group
             if isempty(this.ActiveGroup)
-                obj = this.findNearestGroup(Pnt,Tolerance);
-                if ~isempty(obj)
-                    objects{index} = obj;
-                    names{index} = obj.name;
-                    index = index + 1;
-                end
+                obj = this.findNearestGroup(Pnt,Tolerance.^2);
                 TheGroup = obj;
             else
                 TheGroup = this.ActiveGroup;
             end
-            
-            %% Connection
-            mindist = Tolerance;
-            Pntmod = (RotMatrix(pi/2 - TheGroup.Position.Rot)*Pnt') - ...
-                [TheGroup.Position.x; TheGroup.Position.y];
-            for iConnection = TheGroup.Connections
-                % Find nearest Connection
-                switch iConnection.Orient
+
+            % Get group rotation and equation of the center line
+            rot = TheGroup.Position.Rot;
+            [Ag, Bg, Cg] = LineFromPointAndRotation(TheGroup.Position.x, TheGroup.Position.y, rot);
+                                    
+            for iConn = TheGroup.Connections
+                % Get the group origin ready to shift
+                point = [TheGroup.Position.x, TheGroup.Position.y];
+                shift_distance = iConn.x;
+
+                % Calculate the shifted point
+                switch iConn.Orient
                     case enumOrient.Vertical
-                        % Two lines to test
-                        if abs(Pntmod(1) - iConnection.x) < mindist
-                            mindist = abs(Pntmod(1) - iConnection.x);
-                            TheConnection = iConnection;
-                        end
-                        if abs(Pntmod(1) + iConnection.x) < mindist
-                            mindist = abs(Pntmod(1) + iConnection.x);
-                            TheConnection = iConnection;
-                        end
+                        % For vertical connections also need to check the opposite side    
+                        orig_adjusted_point = shiftAlongLine(point, Ag, Bg, Cg, shift_distance, 0);
+
+                        % Reflect the point
+                        distance = (Ag * orig_adjusted_point(1) + Bg * orig_adjusted_point(2) + Cg) / sqrt(Ag^2 + Bg^2);
+                        refl_adjusted_point = [orig_adjusted_point(1) - 2 * distance * Ag, orig_adjusted_point(2) - 2 * distance * Bg];
+
                     case enumOrient.Horizontal
-                        % One line to test
-                        if abs(Pntmod(2) - iConnection.x) < mindist
-                            mindist = abs(Pntmod(2)-iConnection.x);
-                            TheConnection = iConnection;
-                        end
+                        adjusted_point = shiftAlongLine(point, Ag, Bg, Cg, 0, shift_distance);
                 end
-            end
-            if mindist < Tolerance
-                objects{index} = TheConnection;
-                names{index} = TheConnection.name;
-                index = index + 1;
+                
+                % For every connection, calculate a line rotated to the correct point
+                switch iConn.Orient
+                    case enumOrient.Vertical
+                        % Check both and pick minumum
+                        [A, B, C] = LineFromPointAndRotation(orig_adjusted_point(1), orig_adjusted_point(2), rot);
+                        orig_dist = abs((A * Pnt(1) + B * Pnt(2) + C) / sqrt(A^2 + B^2));
+
+                        [A, B, C] = LineFromPointAndRotation(refl_adjusted_point(1), refl_adjusted_point(2), rot);
+                        refl_dist = abs((A * Pnt(1) + B * Pnt(2) + C) / sqrt(A^2 + B^2));
+
+                        dist = min(orig_dist, refl_dist);
+
+                    case enumOrient.Horizontal
+                        % Only one line to consider    
+                        [A, B, C] = LineFromPointAndRotation(adjusted_point(1), adjusted_point(2), rot + pi/2);
+                        dist = abs((A * Pnt(1) + B * Pnt(2) + C) / sqrt(A^2 + B^2));
+                end
+
+                if dist < mindist
+                    mindist = dist;
+                    TheConnection = iConn;
+                end
             end
         end
         
@@ -5347,33 +5307,48 @@ classdef Model < handle
                 TheGroup = this.Groups(1);
             end
         end
+
         function [TheBody, mindist] = findNearestBody(this,Pnt,Tolerance)
             mindist = Tolerance;
             TheBody = Body.empty;
             for iGroup = this.Groups
-                Pntmod = (RotMatrix(pi/2 - iGroup.Position.Rot)*Pnt') - ...
-                    [iGroup.Position.x; iGroup.Position.y];
+                % Calculate parameters for group rotation and reflection
+                rot = iGroup.Position.Rot;
+                cos_rot = cos(rot-pi/2);
+                sin_rot = sin(rot-pi/2);
+                % Calculate the center line of the group (Ax + By + C = 0)
+                [A, B, C] = LineFromPointAndRotation(iGroup.Position.x, iGroup.Position.y, rot);
+                                        
                 for iBody = iGroup.Bodies
-                    % Establish Rectangle of iBody
+                    % Get the limits of the body
                     [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
                     [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
+
+                    % Convert to the coordinates of the corner
+                    x_coords = [x1, x2, x2, x1];
+                    y_coords = [y1, y1, y2, y2];
+
+                    % Rotate all coordinates to align with the group axis
+                    rot_x_coords = ((x_coords .* cos_rot) - (y_coords .* sin_rot)) + iGroup.Position.x;
+                    rot_y_coords = ((x_coords .* sin_rot) + (y_coords .* cos_rot)) + iGroup.Position.y;
                     
-                    R.Width = x2-x1;
-                    R.Height = y2-y1;
-                    R.Cx = (x1+x2)/2;
-                    R.Cy = (y1+y2)/2;
-                    dist = Dist2Rect(Pntmod(1),Pntmod(2),R.Cx,R.Cy,R.Width,R.Height);
+                    % Reflect the rotated points in the group axis
+                    for i = 1:length(rot_x_coords)
+                        distance = (A * rot_x_coords(i) + B * rot_y_coords(i) + C) / sqrt(A^2 + B^2);
+                        refl_x_coords(i) = rot_x_coords(i) - 2 * distance * A;
+                        refl_y_coords(i) = rot_y_coords(i) - 2 * distance * B;
+                    end
+
+                    % Calculate the minimum distances to both polygons
+                    rot_dist = abs(minDistanceToPolygon(Pnt', [rot_x_coords; rot_y_coords]));
+                    refl_dist = abs(minDistanceToPolygon(Pnt', [refl_x_coords; refl_y_coords]));
+
+                    % Use the minimum distance
+                    dist = min(rot_dist, refl_dist);
+                    
                     if dist < mindist
                         mindist = dist;
                         TheBody = iBody;
-                    else
-                        R.Cx = -R.Cx;
-                        dist = Dist2Rect(...
-                            Pntmod(1),Pntmod(2),R.Cx,R.Cy,R.Width,R.Height);
-                        if dist < mindist
-                            mindist = dist;
-                            TheBody = iBody;
-                        end
                     end
                 end
             end
@@ -5792,9 +5767,9 @@ classdef Model < handle
                                 c1 = nodeCenter(nd.index);
 
                                 % Get the group rotation
-                                rot = nd.Body.Group.Position.Rot - pi./2;
-                                cos_rot = cos(rot);
-                                sin_rot = sin(rot);
+                                rot = nd.Body.Group.Position.Rot;
+                                cos_rot = cos(rot-pi/2);
+                                sin_rot = sin(rot-pi/2);
 
                                 % Get the node data
                                 if nd.Type == enumNType.SN % Solid node
