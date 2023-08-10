@@ -7,8 +7,8 @@ function [RunConditions] = Optimization_Test()
 % allow quick comparison plots to be made.
 
 %% Input Parameters
-pressure = [500000]; % [Pa]
-speed = [64]; % [rpm]
+pressure = 500000; % [Pa]
+speed = 20; % [rpm]
 simTime = 100; %(s) Simulation time.
 minCycles = 4; % minimum number of engine cycles to complete before turning to steady state.
 max_dt = 0.1; %(s) Maximum time step.
