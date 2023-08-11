@@ -539,13 +539,13 @@ classdef Body < handle
                 end
             else
                 this.s_lb_Hor = arrConH(1).x;
-                if arrConH(1).isStationary
+                if arrConH(1).get('isStationary')
                     this.d_lb_Hor = this.s_lb_Hor;
                 else
                     this.d_lb_Hor = this.s_lb_Hor + arrConH(1).RefFrame.Positions;
                 end
                 this.s_ub_Hor = arrConH(2).x;
-                if arrConH(2).isStationary
+                if arrConH(2).get('isStationary')
                     this.d_ub_Hor = this.s_ub_Hor;
                 else
                     this.d_ub_Hor = this.s_ub_Hor + arrConH(2).RefFrame.Positions;
