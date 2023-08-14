@@ -9,7 +9,7 @@ function [RunConditions] = Experiment_Model_Running()
     %% Input Parameters
     % Name of experimental data files.
     model = {
-        'Raphael New HX - No Disp Heater - Air',...
+        'Raphael New HX - Fixed HX',...
         }; % Name of MSPM model geometry.
     
     
