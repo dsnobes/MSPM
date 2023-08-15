@@ -5281,6 +5281,12 @@ classdef Model < handle
                     mindist = dist;
                     TheConnection = iConn;
                 end
+
+                % If no connection was found, return NaN
+                if ~exist('TheConnection')
+                    TheConnection = NaN;
+                end
+
             end
         end
         
@@ -5324,9 +5330,9 @@ classdef Model < handle
                     [~,~,x1,x2] = iBody.limits(enumOrient.Vertical);
                     [~,~,y1,y2] = iBody.limits(enumOrient.Horizontal);
 
-                    % Convert to the coordinates of the corner
-                    x_coords = [x1, x2, x2, x1];
-                    y_coords = [y1, y1, y2, y2];
+                    % Convert to the coordinates of the corners
+                    x_coords = [x1 x2 x2 x1];
+                    y_coords = [y1 y1 y2 y2];
 
                     % Rotate all coordinates to align with the group axis
                     rot_x_coords = ((x_coords .* cos_rot) - (y_coords .* sin_rot)) + iGroup.Position.x;
@@ -5340,8 +5346,8 @@ classdef Model < handle
                     end
 
                     % Calculate the minimum distances to both polygons
-                    rot_dist = abs(minDistanceToPolygon(Pnt', [rot_x_coords; rot_y_coords]));
-                    refl_dist = abs(minDistanceToPolygon(Pnt', [refl_x_coords; refl_y_coords]));
+                    rot_dist = abs(minDistanceToPolygon(Pnt', rot_x_coords, rot_y_coords));
+                    refl_dist = abs(minDistanceToPolygon(Pnt', refl_x_coords, refl_y_coords));
 
                     % Use the minimum distance
                     dist = min(rot_dist, refl_dist);
