@@ -634,6 +634,11 @@ classdef Simulation < handle
                         'CR',Results.Data.CR,...
                         'VMin',sum(ME.VolMin(:)),...
                         'VMax',sum(ME.VolMax(:)));
+
+                    if nargin > 4 && options.isManual == false
+                        statistics.Source_Temperature = options.SourceTemp;
+                        statistics.Sink_Temperature = options.SinkTemp;
+                    end
                 end
                 if ME.Model.recordStatistics
                     if nargin > 4
