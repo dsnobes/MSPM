@@ -102,7 +102,7 @@ classdef RelationManager < handle
                 group1(end+1) = group2(i);
             end
             if ~isempty(group1)
-                for i = group1
+                for i = group1(:).'
                     if this.Grid_modes{i} == new_relation.mode
                         if allready
                             this.merge_rows(i,previous);
