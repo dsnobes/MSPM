@@ -8,7 +8,9 @@ classdef Material < handle
             'Carbon Steel';
             'Forged Carbon Steel (Medium Carbon Steel)';
             '304 Stainless Steel';
+            'X6CrNiMoTi17-12-2 Stainless Steel'
             '6061 Aluminum';
+            '5083 Aluminum'
             'Pure Copper';
             'Plastic, ABS';
             'Plastic, Acrylic';
@@ -90,7 +92,7 @@ classdef Material < handle
             end
             index = listdlg('ListString',this.Source,...
                 'SelectionMode','single',...
-                'InitialValue',index);
+                'InitialValue',index, 'ListSize',[250 400]);
             if ~isempty(index); this.Configure(this.Source{index}); end
         end
 
@@ -103,7 +105,7 @@ classdef Material < handle
             end
             index = listdlg('ListString',this.Gasses,...
                 'SelectionMode','single',...
-                'InitialValue',index);
+                'InitialValue',index, 'ListSize',[250 400]);
 
             matl = this.Gasses{index};
         end
@@ -137,12 +139,24 @@ classdef Material < handle
                     this.ThermalConductivity = 14.4; % W/(m*K)
                     this.dT_du = 1/500; % J/(kg*K)
                     this.Density = 8000; % kg/(m^3)
+                case 'X6CrNiMoTi17-12-2 Stainless Steel' % X6CrNiMoTi17-12-2 Stainless Steel Alloy
+                    this.Color = [0.510 0.526 0.537]*0.9;% [130 134 137];
+                    this.Phase = enumMaterial.Solid;
+                    this.ThermalConductivity = 15; % W/(m*K)
+                    this.dT_du = 1/500; % J/(kg*K)
+                    this.Density = 8000; % kg/(m^3)
                 case '6061 Aluminum' % 6061 Aluminum
                     this.Color = [0.628 0.628 0.628];% [160 160 160];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 176.5; % 151-202 W/(m*K)
                     this.dT_du = 1/897; % J/(kg*K)
                     this.Density = 2700; % kg/(m^3)
+                case '5083 Aluminum' % 6061 Aluminum
+                    this.Color = [0.628 0.628 0.628]*0.9;% [160 160 160];
+                    this.Phase = enumMaterial.Solid;
+                    this.ThermalConductivity = 121; % W/(m*K)
+                    this.dT_du = 1/900; % J/(kg*K)
+                    this.Density = 2650; % kg/(m^3)
                 case 'Pure Copper' % Pure Copper
                     this.Color = [0.628 0.416 0.259];% [160 106 66];
                     this.Phase = enumMaterial.Solid;
