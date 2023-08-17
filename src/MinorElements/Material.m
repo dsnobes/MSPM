@@ -8,7 +8,7 @@ classdef Material < handle
             'Carbon Steel';
             'Forged Carbon Steel (Medium Carbon Steel)';
             '304 Stainless Steel';
-            'X6CrNiMoTi17-12-2'
+            'X6CrNiMoTi17-12-2 Stainless Steel'
             '6061 Aluminum';
             '5083 Aluminum'
             'Pure Copper';
@@ -139,7 +139,7 @@ classdef Material < handle
                     this.ThermalConductivity = 14.4; % W/(m*K)
                     this.dT_du = 1/500; % J/(kg*K)
                     this.Density = 8000; % kg/(m^3)
-                case 'X6CrNiMoTi17-12-2' % X6CrNiMoTi17-12-2 Stainless Steel Alloy
+                case 'X6CrNiMoTi17-12-2 Stainless Steel' % X6CrNiMoTi17-12-2 Stainless Steel Alloy
                     this.Color = [0.510 0.526 0.537]*0.9;% [130 134 137];
                     this.Phase = enumMaterial.Solid;
                     this.ThermalConductivity = 15; % W/(m*K)
