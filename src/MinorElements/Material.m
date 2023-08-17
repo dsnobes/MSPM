@@ -92,7 +92,7 @@ classdef Material < handle
             end
             index = listdlg('ListString',this.Source,...
                 'SelectionMode','single',...
-                'InitialValue',index);
+                'InitialValue',index, 'ListSize',[250 400]);
             if ~isempty(index); this.Configure(this.Source{index}); end
         end
 
@@ -105,7 +105,7 @@ classdef Material < handle
             end
             index = listdlg('ListString',this.Gasses,...
                 'SelectionMode','single',...
-                'InitialValue',index);
+                'InitialValue',index, 'ListSize',[250 400]);
 
             matl = this.Gasses{index};
         end
