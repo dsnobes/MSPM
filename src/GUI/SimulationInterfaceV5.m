@@ -317,6 +317,7 @@ if h.IndexC == 4
         %                     handles.Model.clearHighLighting();
         %                 else
         h.Model.ActiveGroup.addBody(newBody);
+        h.Model.clearHighLighting();
         %                 end
     else
         fprintf('XXX You must select a material, creation cancelled XXX\n');
