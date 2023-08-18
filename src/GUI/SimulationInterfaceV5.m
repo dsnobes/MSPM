@@ -294,7 +294,9 @@ end
 
 %% Iterate or finish up
 if h.IndexC == 4
-    % Define the body
+    % Highlight first
+    h.Model.HighLight(h.SelectCon(1:h.IndexC));
+    % Define the body   
     matl = [];
     show_Model(h);
     while isempty(matl)
