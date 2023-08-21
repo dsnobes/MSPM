@@ -14,7 +14,7 @@ function [RunConditions] = Experiment_Model_Running()
     
     
     % Load in extract file
-    extract_file = "X:\03_COOP_and_Summer_Students\2023\Matteo Falsetti\Experiment Data Extract\14-Aug-2023_Extract.mat";
+    extract_file = "X:\03_COOP_and_Summer_Students\2023\Matteo Falsetti\Experiment Data Extract\21-Aug-2023_Extract.mat";
     load(extract_file, "extract_table");
 
     
