@@ -17,7 +17,7 @@ engine_pressure = 300000; % The pressure of the engine in Pa
 node_factor = 1; % The node derefinement factor (see documentation for more details)
 
 %% Set study conditions (if you want them to be optimized, if not, remove them from the RunConditions struct below)
-pressure_bounds = [100, 1000] .* 1000; % The minimum and maximum pressure bounds for optimization in Pa;
+pressure_bounds = [100, 10000] .* 1000; % The minimum and maximum pressure bounds for optimization in Pa;
 engine_speed_bounds = [1, 1000]; % The minimum and maximum speed bounds for optimization in RPM;
 
 
