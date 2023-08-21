@@ -46,7 +46,7 @@ regenerator_porosity = 0.50; % The porosity for custom regenerators
 % DO NOT PUT ANY ARRAYS INTO THIS TEMPLATE
 RunConditions_template = struct(...
     'Model','Example',...
-    'Title', result_titles,...
+    'title', result_titles,...
     'simTime', simulation_time,...
     'rpm', 1,...
     'max_dt', max_timestep,...
@@ -91,11 +91,11 @@ for i = 1:length(model_names)
 
             % Set the varying parameters
             RunConditions(n).Model = model_names{i};
-            RunConditions(n).rpm = speeds(speed);
-            RunConditions(n).EnginePressure = pressures(pressure);
+            RunConditions(n).rpm = engine_speed(speed);
+            RunConditions(n).EnginePressure = engine_pressure(pressure);
 
             % Set the custom title
-            RunConditions(n).title = convertStringsToChars(strcat(model_names{i}, "_RPM-", num2str(speeds(speed)), "_P-", num2str(pressures(pressure))));
+            RunConditions(n).title = convertStringsToChars(strcat(model_names{i}, "_RPM-", num2str(engine_speed(speed)), "_P-", num2str(engine_pressure(pressure))));
             n = n+1;
         end
     end
