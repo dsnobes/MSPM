@@ -3419,6 +3419,14 @@ classdef Model < handle
                     crun = runs(Nt);
                     %                     TestSetStatistics(Nt).Name = crun.title; % Matthias
                 end
+                
+                % Save the run location for running single threaded test sets
+                if Nt == 1
+                    backup_run_location = ME.run_location;
+                else
+                    ME.run_location = backup_run_location;
+                end
+
                 % If it has a steady state end condition and only the last cycle is
                 % ... important then use the Multi-Grid Formulation.
                 crun.SS = true;
