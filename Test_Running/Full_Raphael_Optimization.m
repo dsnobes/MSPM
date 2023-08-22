@@ -9,11 +9,11 @@ function [RunConditions] = Full_Raphael_Optimization() % Function name must matc
 %% Set run conditions
 % Every element should be a single value
 simulation_time = 1200; % The time the engine will run for in seconds (this is model time, not the simulation time)
-engine_speed = 30; % The engine speed in RPM
+engine_speed = 27; % The engine speed in RPM
 max_timestep = 0.1; % The maximum timestep between iterations of the simulation in seconds
 source_temperature = 150 + 273.15; % The temperature of the source in the model (includes constant temperature bodies and any sources in matrices)
 sink_temperature = 5 + 273.15; % The temperature of the sink in the model (includes constant temperature bodies and any sources in matrices)
-engine_pressure = 250000; % The pressure of the engine in Pa
+engine_pressure = 225000; % The pressure of the engine in Pa
 node_factor = 1; % The node derefinement factor (see documentation for more details)
 
 %% Set study conditions (if you want them to be optimized, if not, remove them from the RunConditions struct below)
@@ -30,7 +30,9 @@ RunConditions= struct(...
     'SourceTemp', source_temperature,...
     'SinkTemp', sink_temperature,...
     'EnginePressure', engine_pressure,...
-    'NodeFactor', node_factor);
+    'NodeFactor', node_factor,...
+    'PressureBounds', pressure_bounds,...
+    'SpeedBounds', engine_speed_bounds);
 
 end
 
