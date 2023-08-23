@@ -1661,11 +1661,11 @@ if (value ~= h.Model.showFacesMatrixTransition)
     h.Model.showFacesMatrixTransition = value;
     changed = true;
 end
-value = h.checkboxFacesEnvironment.Value;
-if (value ~= h.Model.showFacesEnvironment)
-    h.Model.showFacesEnvironment = value;
-    changed = true;
-end
+% value = h.checkboxFacesEnvironment.Value;
+% if (value ~= h.Model.showFacesEnvironment)
+%     h.Model.showFacesEnvironment = value;
+%     changed = true;
+% end
 
 if changed
     show_Model(h);
