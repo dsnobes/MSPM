@@ -4271,6 +4271,7 @@ classdef Model < handle
             
             % If it has a steady state end condition and only the last cycle is
             % ... important then use the Multi-Grid Formulation.
+            crun.SS = true;
             useTrials = nargin > 1 && crun.SS == true && ME.recordOnlyLastCycle;
             ntrials = 1;
             
