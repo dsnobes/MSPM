@@ -4,7 +4,7 @@
     the correct set up for creating the RunConditions struct. This file is only a
     template, the parameters will likely not run.
 %}
-function [RunConditions] = Test_File_Tutorial_5() % Function name must match filename
+function [RunConditions] = Tutorial_5_test() % Function name must match filename
 
 %% Set run conditions
 % It is possible to have every element of the following parameters be an array to have multiple values
@@ -12,12 +12,12 @@ model_names = {
     'Sample Alpha - Tutorial 5'
     };  % Model names
 result_titles = '';  % Custom titles: Set as '' to use the model name as the title (ensure there are no name overlaps as the results will be overwritten)
-simulation_time = 1; % The time the engine will run for in seconds (this is model time, not the simulation time)
-engine_speed = [240 480]; % The engine speed in RPM
+simulation_time = 10; % The time the engine will run for in seconds (this is model time, not the simulation time)
+engine_speed = [60 120]; % The engine speed in RPM
 max_timestep = 0.1; % The maximum timestep between iterations of the simulation in seconds
 source_temperature = 150 + 273.15; % The temperature of the source in the model (includes constant temperature bodies and any sources in matrices)
 sink_temperature = 5 + 273.15; % The temperature of the sink in the model (includes constant temperature bodies and any sources in matrices)
-engine_pressure = [400 500] .* 1000; % The pressure of the engine in Pa
+engine_pressure = [1000 1200] .* 1000; % The pressure of the engine in Pa
 node_factor = 1; % The node derefinement factor (see documentation for more details)
 
 %% Create run conditions template/defaults
