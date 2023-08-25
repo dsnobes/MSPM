@@ -9,9 +9,9 @@ function [RunConditions] = Test_File_Template() % Function name must match filen
 %% Set run conditions
 % It is possible to have every element of the following parameters be an array to have multiple values
 model_names = {
-    'Example Alpha'
-    'Example Beta'
-    'Example Gamma'
+    'Sample Alpha'
+    'Sample Beta'
+    'Sample Gamma'
     };  % Model names
 result_titles = '';  % Custom titles: Set as '' to use the model name as the title (ensure there are no name overlaps as the results will be overwritten)
 simulation_time = 1200; % The time the engine will run for in seconds (this is model time, not the simulation time)
