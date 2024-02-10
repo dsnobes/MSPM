@@ -47,3 +47,4 @@ There are 3 sample models provided in the **[Sample Models](/Sample_Models)** fo
 ## Full Documentation
 
 Full documentation can be found **[here](/docs)** in /docs in the repository.
+The website for MSPM can be found at [https://sites.ualberta.ca/~dnobes/MSPM/](https://sites.ualberta.ca/~dnobes/MSPM/)
